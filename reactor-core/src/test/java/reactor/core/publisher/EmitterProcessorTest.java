@@ -25,8 +25,8 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.LockSupport;
 
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.reactivestreams.Processor;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
@@ -395,7 +395,7 @@ public class EmitterProcessorTest {
 	}
 
 	@Test
-	@Ignore
+	@Disabled
 	public void test() {
 		Scheduler asyncGroup = Schedulers.single();
 		FluxProcessor<String, String> emitter = EmitterProcessor.create();
@@ -434,7 +434,7 @@ public class EmitterProcessorTest {
 	}
 
 	@Test
-	@Ignore
+	@Disabled
 	public void testPerformance() {
 		FluxProcessor<String, String> emitter = EmitterProcessor.create();
 
@@ -623,7 +623,7 @@ public class EmitterProcessorTest {
 	}
 
 	@Test
-	@Ignore
+	@Disabled
 	public void testRacing() throws Exception {
 		int N_THREADS = 3;
 		int N_ITEMS = 8;

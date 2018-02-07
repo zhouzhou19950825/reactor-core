@@ -47,8 +47,9 @@ import java.util.logging.Level;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 import org.reactivestreams.Processor;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscription;
@@ -73,7 +74,9 @@ import reactor.util.function.Tuple2;
 import reactor.util.function.Tuples;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertTimeout;
 
+@Tag("scenarios")
 public class FluxTests extends AbstractReactorTest {
 
 	static final Logger LOG = Loggers.getLogger(FluxTests.class);
@@ -896,7 +899,7 @@ public class FluxTests extends AbstractReactorTest {
 	}
 
 	@Test
-	@Ignore
+	@Disabled
 	public void testDiamond() throws InterruptedException, IOException {
 		Flux<Point> points = Flux.<Double, Random>generate(Random::new, (r, sub) -> {
 			sub.next(r.nextDouble());
@@ -1208,7 +1211,7 @@ public class FluxTests extends AbstractReactorTest {
 	 * @throws TimeoutException     - on failure. <p> by @masterav10 : https://github.com/reactor/reactor/issues/469
 	 */
 	@Test
-	@Ignore
+	@Disabled
 	public void endLessTimer() throws InterruptedException, TimeoutException {
 		int tasks = 50;
 		long delayMS = 50; // XXX: Fails when less than 100
@@ -1304,43 +1307,45 @@ public class FluxTests extends AbstractReactorTest {
 		}
 	}
 
-	@Test(timeout = TIMEOUT)
+	@Test
 	public void multiplexUsingProcessors() throws Exception {
-		final Flux<Integer> forkStream = Flux.just(1, 2, 3)
-		                                     .log("begin-computation");
-		final Flux<Integer> forkStream2 = Flux.just(1, 2, 3)
-		                                      .log("begin-persistence");
+		assertTimeout(Duration.ofMillis(TIMEOUT), () -> {
+			final Flux<Integer> forkStream = Flux.just(1, 2, 3)
+			                                     .log("begin-computation");
+			final Flux<Integer> forkStream2 = Flux.just(1, 2, 3)
+			                                      .log("begin-persistence");
 
-		final TopicProcessor<Integer> computationEmitterProcessor = TopicProcessor.<Integer>builder()
-				.name("computation")
-				.bufferSize(BACKLOG)
-				.build();
-		final Flux<String> computationStream = computationEmitterProcessor
-				.map(i -> Integer.toString(i));
+			final TopicProcessor<Integer> computationEmitterProcessor = TopicProcessor.<Integer>builder()
+					.name("computation")
+					.bufferSize(BACKLOG)
+					.build();
+			final Flux<String> computationStream = computationEmitterProcessor
+					.map(i -> Integer.toString(i));
 
-		final TopicProcessor<Integer> persistenceEmitterProcessor = TopicProcessor.<Integer>builder()
-				.name("persistence")
-				.bufferSize(BACKLOG)
-				.build();
-		final Flux<String> persistenceStream = persistenceEmitterProcessor
-				.map(i -> "done " + i);
+			final TopicProcessor<Integer> persistenceEmitterProcessor = TopicProcessor.<Integer>builder()
+					.name("persistence")
+					.bufferSize(BACKLOG)
+					.build();
+			final Flux<String> persistenceStream = persistenceEmitterProcessor
+					.map(i -> "done " + i);
 
-		forkStream.subscribe(computationEmitterProcessor);
-		forkStream2.subscribe(persistenceEmitterProcessor);
+			forkStream.subscribe(computationEmitterProcessor);
+			forkStream2.subscribe(persistenceEmitterProcessor);
 
-		final Semaphore doneSemaphore = new Semaphore(0);
+			final Semaphore doneSemaphore = new Semaphore(0);
 
-		final Flux<List<String>> joinStream =
-				Flux.zip(computationStream.log("log1"), persistenceStream.log("log2"), (a, b) -> Arrays.asList(a,b));
+			final Flux<List<String>> joinStream =
+					Flux.zip(computationStream.log("log1"), persistenceStream.log("log2"), (a, b) -> Arrays.asList(a,b));
 
-		// Method chaining doesn't compile.
-		joinStream.log("log-final")
-		          .subscribe(list -> println("Joined: ", list), t -> println("Join failed: ", t.getMessage()), () -> {
-			          println("Join complete.");
-			          doneSemaphore.release();
-		          });
+			// Method chaining doesn't compile.
+			joinStream.log("log-final")
+			          .subscribe(list -> println("Joined: ", list), t -> println("Join failed: ", t.getMessage()), () -> {
+				          println("Join complete.");
+				          doneSemaphore.release();
+			          });
 
-		doneSemaphore.acquire();
+			doneSemaphore.acquire();
+		});
 	}
 
 	/**
@@ -1357,71 +1362,73 @@ public class FluxTests extends AbstractReactorTest {
 	 * </pre>
      * @throws Exception for convenience
 	 */
-	@Test(timeout=TIMEOUT)
+	@Test
 	public void multiplexUsingDispatchersAndSplit() throws Exception {
-		final EmitterProcessor<Integer> forkEmitterProcessor = EmitterProcessor.create();
+		assertTimeout(Duration.ofMillis(TIMEOUT), () -> {
+			final EmitterProcessor<Integer> forkEmitterProcessor = EmitterProcessor.create();
 
-		final EmitterProcessor<Integer> computationEmitterProcessor = EmitterProcessor.create(false);
+			final EmitterProcessor<Integer> computationEmitterProcessor = EmitterProcessor.create(false);
 
-		Scheduler computation = Schedulers.newSingle("computation");
-		Scheduler persistence = Schedulers.newSingle("persistence");
-		Scheduler forkJoin = Schedulers.newParallel("forkJoin", 2);
+			Scheduler computation = Schedulers.newSingle("computation");
+			Scheduler persistence = Schedulers.newSingle("persistence");
+			Scheduler forkJoin = Schedulers.newParallel("forkJoin", 2);
 
-		final Flux<List<String>> computationStream =
-				computationEmitterProcessor.publishOn(computation)
-				                           .map(i -> {
-					                           final List<String> list = new ArrayList<>(i);
-					                           for (int j = 0; j < i; j++) {
-						                           list.add("i" + j);
-					                           }
-					                           return list;
-				                           })
-				                           .doOnNext(ls -> println("Computed: ", ls))
-				                           .log("computation");
+			final Flux<List<String>> computationStream =
+					computationEmitterProcessor.publishOn(computation)
+					                           .map(i -> {
+						                           final List<String> list = new ArrayList<>(i);
+						                           for (int j = 0; j < i; j++) {
+							                           list.add("i" + j);
+						                           }
+						                           return list;
+					                           })
+					                           .doOnNext(ls -> println("Computed: ", ls))
+					                           .log("computation");
 
-		final EmitterProcessor<Integer> persistenceEmitterProcessor = EmitterProcessor.create(false);
+			final EmitterProcessor<Integer> persistenceEmitterProcessor = EmitterProcessor.create(false);
 
-		final Flux<List<String>> persistenceStream =
-				persistenceEmitterProcessor.publishOn(persistence)
-				                           .doOnNext(i -> println("Persisted: ", i))
-				                           .map(i -> Collections.singletonList("done" + i))
-				                           .log("persistence");
+			final Flux<List<String>> persistenceStream =
+					persistenceEmitterProcessor.publishOn(persistence)
+					                           .doOnNext(i -> println("Persisted: ", i))
+					                           .map(i -> Collections.singletonList("done" + i))
+					                           .log("persistence");
 
-		Flux<Integer> forkStream = forkEmitterProcessor.publishOn(forkJoin)
-		                                               .log("fork");
+			Flux<Integer> forkStream = forkEmitterProcessor.publishOn(forkJoin)
+			                                               .log("fork");
 
-		forkStream.subscribe(computationEmitterProcessor);
-		forkStream.subscribe(persistenceEmitterProcessor);
+			forkStream.subscribe(computationEmitterProcessor);
+			forkStream.subscribe(persistenceEmitterProcessor);
 
-		final Flux<List<String>> joinStream = Flux.zip(computationStream, persistenceStream, (a, b) -> Arrays.asList(a, b))
-		                                          .publishOn(forkJoin)
-		                                          .map(listOfLists -> {
-			                                          listOfLists.get(0)
-			                                                     .addAll(listOfLists.get(1));
-			                                          return listOfLists.get(0);
-		                                          })
-		                                          .log("join");
+			final Flux<List<String>> joinStream = Flux.zip(computationStream, persistenceStream, (a, b) -> Arrays.asList(a, b))
+			                                          .publishOn(forkJoin)
+			                                          .map(listOfLists -> {
+				                                          listOfLists.get(0)
+				                                                     .addAll(listOfLists.get(1));
+				                                          return listOfLists.get(0);
+			                                          })
+			                                          .log("join");
 
-		final Semaphore doneSemaphore = new Semaphore(0);
+			final Semaphore doneSemaphore = new Semaphore(0);
 
-		final MonoProcessor<List<String>> listPromise = joinStream.flatMap(Flux::fromIterable)
-		                                                          .log("resultStream")
-		                                                          .collectList()
-		                                                          .doOnTerminate(doneSemaphore::release)
-		                                                          .toProcessor();
-		listPromise.subscribe();
+			final MonoProcessor<List<String>> listPromise = joinStream.flatMap(Flux::fromIterable)
+			                                                          .log("resultStream")
+			                                                          .collectList()
+			                                                          .doOnTerminate(doneSemaphore::release)
+			                                                          .toProcessor();
+			listPromise.subscribe();
 
-		forkEmitterProcessor.onNext(1);
-		forkEmitterProcessor.onNext(2);
-		forkEmitterProcessor.onNext(3);
-		forkEmitterProcessor.onComplete();
+			forkEmitterProcessor.onNext(1);
+			forkEmitterProcessor.onNext(2);
+			forkEmitterProcessor.onNext(3);
+			forkEmitterProcessor.onComplete();
 
-		List<String> res = listPromise.block(Duration.ofSeconds(5));
-		assertThat(res).containsExactly("i0", "done1", "i0", "i1", "done2", "i0", "i1", "i2", "done3");
+			List<String> res = listPromise.block(Duration.ofSeconds(5));
+			assertThat(res).containsExactly("i0", "done1", "i0", "i1", "done2", "i0", "i1", "i2", "done3");
 
-		forkJoin.dispose();
-		persistence.dispose();
-		computation.dispose();
+			forkJoin.dispose();
+			persistence.dispose();
+			computation.dispose();
+		});
 	}
 
 	@Test
@@ -1457,7 +1464,7 @@ public class FluxTests extends AbstractReactorTest {
 	}
 
 	@Test
-	@Ignore
+	@Disabled
 	public void splitBugEventuallyHappens() throws Exception {
 		int successCount = 0;
 		try {

@@ -28,8 +28,8 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.logging.Level;
 
-import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscription;
 import reactor.core.CoreSubscriber;
@@ -49,7 +49,7 @@ import static org.assertj.core.api.Assertions.*;
  */
 public class HooksTest {
 
-	@After
+	@AfterEach
 	public void resetAllHooks() {
 		Hooks.resetOnOperatorError();
 		Hooks.resetOnNextDropped();

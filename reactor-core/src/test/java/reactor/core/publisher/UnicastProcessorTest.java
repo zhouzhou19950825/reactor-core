@@ -23,7 +23,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.function.Consumer;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import reactor.core.Disposable;
 import reactor.test.StepVerifier;
 import reactor.test.subscriber.AssertSubscriber;

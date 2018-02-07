@@ -20,14 +20,16 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Tag;
 import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
 
 /**
  * @author Stephane Maldini
  */
+@Tag("scenarios")
 public abstract class AbstractReactorTest {
 
 	protected static Scheduler      asyncGroup;
@@ -35,13 +37,13 @@ public abstract class AbstractReactorTest {
 
 	protected final Map<Thread, AtomicLong> counters = new ConcurrentHashMap<>();
 
-	@BeforeClass
+	@BeforeAll
 	public static void loadEnv() {
 		ioGroup = Schedulers.newElastic("work");
 		asyncGroup = Schedulers.newParallel("parallel", 4);
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void closeEnv() {
 		ioGroup.dispose();
 		asyncGroup.dispose();

@@ -22,7 +22,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.reactivestreams.Subscription;
 import reactor.core.Disposable;
 import reactor.core.Exceptions;
@@ -184,10 +184,10 @@ public class BaseSubscriberTest {
 				throw new IllegalArgumentException("boom");
 			}
 
-			@Override
-			protected void hookOnError(Throwable throwable) {
-				error.set(throwable);
-			}
+					@Override
+					protected void hookOnError(Throwable throwable) {
+						error.set(throwable);
+					}
 
 			@Override
 			protected void hookFinally(SignalType type) {
@@ -210,10 +210,10 @@ public class BaseSubscriberTest {
 				requestUnbounded();
 			}
 
-			@Override
-			protected void hookOnNext(String value) {
-				//NO-OP
-			}
+					@Override
+					protected void hookOnNext(String value) {
+						//NO-OP
+					}
 
 			@Override
 			protected void hookOnComplete() {

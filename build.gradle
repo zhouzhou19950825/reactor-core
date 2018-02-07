@@ -26,6 +26,7 @@ buildscript {
 			'io.spring.gradle:spring-io-plugin:0.0.4.RELEASE',
 			'com.github.jengelman.gradle.plugins:shadow:1.2.0',
 			'org.asciidoctor:asciidoctorj-pdf:1.5.0-alpha.11',
+			'org.junit.platform:junit-platform-gradle-plugin:1.0.3',
 			"org.jetbrains.kotlin:kotlin-gradle-plugin:${kotlinVersion}"
   }
 }
@@ -219,6 +220,7 @@ if (project.hasProperty('platformVersion')) {
 project('reactor-core') {
   apply plugin: 'idea' //needed to avoid IDEA seeing the jmh folder as source
   apply plugin: 'me.champeau.gradle.jmh'
+  apply plugin: 'org.junit.platform.gradle.plugin'
 
   configurations {
 	compileOnly.extendsFrom jsr166backport
@@ -244,7 +246,9 @@ project('reactor-core') {
 	//Optional JDK 9 Converter
 	jsr166backport "io.projectreactor:jsr166:1.0.0.RELEASE"
 
-	testCompile 'junit:junit:4.12'
+	testCompile 'org.junit.jupiter:junit-jupiter-api:5.0.3'
+	testCompile 'org.junit.jupiter:junit-jupiter-params:5.0.3'
+	testRuntime 'org.junit.jupiter:junit-jupiter-engine:5.0.3'
 
 	testRuntime "ch.qos.logback:logback-classic:$logbackVersion"
 	// Testing
@@ -417,6 +421,8 @@ project('reactor-core') {
 project('reactor-test') {
   description = 'Reactor Test support'
 
+  apply plugin: 'org.junit.platform.gradle.plugin'
+
   configurations {
 	baseline
   }
@@ -424,7 +430,10 @@ project('reactor-test') {
   dependencies {
 	compile project(":reactor-core")
 
-	testCompile 'junit:junit:4.12'
+	testCompile 'org.junit.jupiter:junit-jupiter-api:5.0.3'
+	testCompile 'org.junit.jupiter:junit-jupiter-params:5.0.3'
+	testRuntime 'org.junit.jupiter:junit-jupiter-engine:5.0.3'
+
 
 	testRuntime "ch.qos.logback:logback-classic:$logbackVersion"
 

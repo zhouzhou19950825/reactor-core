@@ -19,28 +19,33 @@ package reactor.core.publisher;
 import java.time.Duration;
 import java.util.Arrays;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import reactor.test.StepVerifier;
 import reactor.test.subscriber.AssertSubscriber;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTimeout;
 
 public class MonoFirstTest {
 
-	@Test(timeout = 5000)
+	@Test
 	public void allEmpty() {
-		assertThat(Mono.first(Mono.empty(),
-				Mono.delay(Duration.ofMillis(250))
-				    .ignoreElement())
-		               .block())
-				.isNull();
+		assertTimeout(Duration.ofSeconds(5), () -> {
+			assertThat(Mono.first(Mono.empty(),
+					Mono.delay(Duration.ofMillis(250))
+					    .ignoreElement())
+			               .block())
+					.isNull();
+		});
 	}
 
-	@Test(timeout = 5000)
+	@Test
 	public void someEmpty() {
-		assertThat(Mono.first(Mono.empty(), Mono.delay(Duration.ofMillis(250)))
-		               .block())
-				.isNull();
+		assertTimeout(Duration.ofSeconds(5), () -> {
+			assertThat(Mono.first(Mono.empty(), Mono.delay(Duration.ofMillis(250)))
+			               .block())
+					.isNull();
+		});
 	}
 
 	@Test//(timeout = 5000)
@@ -67,21 +72,25 @@ public class MonoFirstTest {
 		 .assertComplete();
 	}
 
-	@Test(timeout = 5000)
+	@Test
 	public void allEmptyIterable() {
-		assertThat(Mono.first(Arrays.asList(Mono.empty(),
-				Mono.delay(Duration.ofMillis(250))
-				    .ignoreElement()))
-		               .block())
-				.isNull();
+		assertTimeout(Duration.ofSeconds(5), () -> {
+			assertThat(Mono.first(Arrays.asList(Mono.empty(),
+					Mono.delay(Duration.ofMillis(250))
+					    .ignoreElement()))
+			               .block())
+					.isNull();
+		});
 	}
 
-	@Test(timeout = 5000)
+	@Test
 	public void someEmptyIterable() {
-		assertThat(Mono.first(Arrays.asList(Mono.empty(),
-				Mono.delay(Duration.ofMillis(250))))
-		               .block())
-				.isNull();
+		assertTimeout(Duration.ofSeconds(5), () -> {
+			assertThat(Mono.first(Arrays.asList(Mono.empty(),
+					Mono.delay(Duration.ofMillis(250))))
+			               .block())
+					.isNull();
+		});
 	}
 
 	@Test//(timeout = 5000)

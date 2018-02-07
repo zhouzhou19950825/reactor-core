@@ -24,7 +24,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.Condition;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
@@ -41,6 +41,7 @@ import reactor.util.concurrent.WaitStrategy;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.junit.jupiter.api.Assertions.assertTimeout;
 
 /**
  * @author Stephane Maldini
@@ -303,56 +304,60 @@ public class TopicProcessorTest {
 	}
 
 	//see https://github.com/reactor/reactor-core/issues/445
-	@Test(timeout = 5_000)
+	@Test
 	public void testBufferSize1Shared() throws Exception {
-		TopicProcessor<String> broadcast = TopicProcessor.<String>builder()
-				.name("share-name")
-				.bufferSize(1)
-				.autoCancel(true)
-				.share(true)
-				.build();
+		assertTimeout(Duration.ofSeconds(5), () -> {
+			TopicProcessor<String> broadcast = TopicProcessor.<String>builder()
+					.name("share-name")
+					.bufferSize(1)
+					.autoCancel(true)
+					.share(true)
+					.build();
 
-		int simultaneousSubscribers = 3000;
-		CountDownLatch latch = new CountDownLatch(simultaneousSubscribers);
-		Scheduler scheduler = Schedulers.single();
+			int simultaneousSubscribers = 3000;
+			CountDownLatch latch = new CountDownLatch(simultaneousSubscribers);
+			Scheduler scheduler = Schedulers.single();
 
-		FluxSink<String> sink = broadcast.sink();
-		Flux<String> flux = broadcast.filter(Objects::nonNull)
-		                             .publishOn(scheduler)
-		                             .cache(1);
+			FluxSink<String> sink = broadcast.sink();
+			Flux<String> flux = broadcast.filter(Objects::nonNull)
+			                             .publishOn(scheduler)
+			                             .cache(1);
 
-		for (int i = 0; i < simultaneousSubscribers; i++) {
-			flux.subscribe(s -> latch.countDown());
-		}
-		sink.next("data");
+			for (int i = 0; i < simultaneousSubscribers; i++) {
+				flux.subscribe(s -> latch.countDown());
+			}
+			sink.next("data");
 
-		assertThat(latch.await(4, TimeUnit.SECONDS))
-				.overridingErrorMessage("Data not received")
-				.isTrue();
+			assertThat(latch.await(4, TimeUnit.SECONDS))
+					.overridingErrorMessage("Data not received")
+					.isTrue();
+		});
 	}
 
 	//see https://github.com/reactor/reactor-core/issues/445
-	@Test(timeout = 5_000)
+	@Test
 	public void testBufferSize1Created() throws Exception {
-		TopicProcessor<String> broadcast = TopicProcessor.<String>builder().name("share-name").bufferSize(1).autoCancel(true).build();
+		assertTimeout(Duration.ofSeconds(5), () -> {
+			TopicProcessor<String> broadcast = TopicProcessor.<String>builder().name("share-name").bufferSize(1).autoCancel(true).build();
 
-		int simultaneousSubscribers = 3000;
-		CountDownLatch latch = new CountDownLatch(simultaneousSubscribers);
-		Scheduler scheduler = Schedulers.single();
+			int simultaneousSubscribers = 3000;
+			CountDownLatch latch = new CountDownLatch(simultaneousSubscribers);
+			Scheduler scheduler = Schedulers.single();
 
-		FluxSink<String> sink = broadcast.sink();
-		Flux<String> flux = broadcast.filter(Objects::nonNull)
-		                             .publishOn(scheduler)
-		                             .cache(1);
+			FluxSink<String> sink = broadcast.sink();
+			Flux<String> flux = broadcast.filter(Objects::nonNull)
+			                             .publishOn(scheduler)
+			                             .cache(1);
 
-		for (int i = 0; i < simultaneousSubscribers; i++) {
-			flux.subscribe(s -> latch.countDown());
-		}
-		sink.next("data");
+			for (int i = 0; i < simultaneousSubscribers; i++) {
+				flux.subscribe(s -> latch.countDown());
+			}
+			sink.next("data");
 
-		assertThat(latch.await(4, TimeUnit.SECONDS))
-				.overridingErrorMessage("Data not received")
-				.isTrue();
+			assertThat(latch.await(4, TimeUnit.SECONDS))
+					.overridingErrorMessage("Data not received")
+					.isTrue();
+		});
 	}
 
 

@@ -17,9 +17,9 @@ package reactor.core.publisher;
 
 import java.time.Duration;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.reactivestreams.Subscription;
 import reactor.core.Disposable;
 import reactor.core.Exceptions;
@@ -634,12 +634,12 @@ public class ReplayProcessorTest {
 		assertThat(test.scan(Scannable.Attr.CAPACITY)).isEqualTo(Integer.MAX_VALUE);
 	}
 
-	@Before
+	@BeforeEach
 	public void virtualTime(){
     	VirtualTimeScheduler.getOrSet();
 	}
 
-	@After
+	@AfterEach
 	public void teardownVirtualTime(){
 		VirtualTimeScheduler.reset();
 	}

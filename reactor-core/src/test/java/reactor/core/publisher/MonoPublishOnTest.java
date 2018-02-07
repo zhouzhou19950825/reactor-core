@@ -24,8 +24,8 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.ThreadPoolExecutor.AbortPolicy;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.reactivestreams.Subscription;
 import reactor.core.CoreSubscriber;
 import reactor.core.Exceptions;
@@ -261,7 +261,7 @@ public class MonoPublishOnTest {
 	}
 
 	@Test
-	@Ignore
+	@Disabled
 	//FIXME the behavior is not failing fast anymore, find original issue and re-evaluate
 	public void rejectedExecutionSubscribeExecutorScheduler() {
 		CountDownLatch latch = new CountDownLatch(1);
@@ -301,7 +301,7 @@ public class MonoPublishOnTest {
 	}
 
 	@Test
-	@Ignore
+	@Disabled
 	//FIXME the behavior is not failing fast anymore, find original issue and re-evaluate
 	public void rejectedExecutionSubscribeExecutorServiceScheduler() {
 		CountDownLatch latch = new CountDownLatch(1);

@@ -19,7 +19,7 @@ package reactor.core.publisher;
 import java.lang.ref.WeakReference;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.reactivestreams.Subscriber;
 import reactor.test.subscriber.AssertSubscriber;
 

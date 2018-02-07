@@ -24,7 +24,7 @@ import java.util.function.Function;
 
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.ThrowableAssertAlternative;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.test.DefaultStepVerifierBuilder.DefaultContextExpectations;
 import reactor.test.StepVerifier.ContextExpectations;

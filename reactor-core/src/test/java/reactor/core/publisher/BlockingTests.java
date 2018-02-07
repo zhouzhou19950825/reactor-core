@@ -22,9 +22,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import reactor.core.Exceptions;
 import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
@@ -36,12 +36,12 @@ public class BlockingTests {
 
 	static Scheduler scheduler;
 
-	@BeforeClass
+	@BeforeAll
 	public static void before() {
 		scheduler = Schedulers.fromExecutorService(Executors.newSingleThreadExecutor());
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void after() {
 		scheduler.dispose();
 	}
@@ -152,7 +152,7 @@ public class BlockingTests {
 				"/Users/smaldini/work/reactor-core/src/main/java/reactor/core/publisher");
 
 		String template =
-				"package reactor.core.publisher;\n\nimport org.junit.Test;\n\npublic " + "class {name} { @Test public" + " void normal(){} }";
+				"package reactor.core.publisher;\n\nimport org.junit.jupiter.api.Test;\n\npublic " + "class {name} { @Test public" + " void normal(){} }";
 
 		Flux.fromStream(Files.list(sourcePath))
 		    .map(Path::toFile)

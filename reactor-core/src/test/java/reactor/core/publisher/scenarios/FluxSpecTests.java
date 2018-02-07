@@ -31,7 +31,8 @@ import java.util.concurrent.atomic.LongAdder;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.EmitterProcessor;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxProcessor;
@@ -45,7 +46,9 @@ import reactor.test.subscriber.AssertSubscriber;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.junit.jupiter.api.Assertions.assertTimeout;
 
+@Tag("scenarios")
 public class FluxSpecTests {
 
 	@Test
@@ -1088,29 +1091,31 @@ public class FluxSpecTests {
 		            .verifyComplete();
 	}
 
-	@Test(timeout = 10000)
+	@Test
 	public void collectFromMultipleThread1() throws Exception {
-		EmitterProcessor<Integer> head = EmitterProcessor.create();
-		AtomicInteger sum = new AtomicInteger();
+		assertTimeout(Duration.ofSeconds(10), () -> {
+			EmitterProcessor<Integer> head = EmitterProcessor.create();
+			AtomicInteger sum = new AtomicInteger();
 
-		int length = 1000;
-		int batchSize = 333;
-		int latchCount = length / batchSize;
-		CountDownLatch latch = new CountDownLatch(latchCount);
+			int length = 1000;
+			int batchSize = 333;
+			int latchCount = length / batchSize;
+			CountDownLatch latch = new CountDownLatch(latchCount);
 
-		head
-				.publishOn(Schedulers.parallel())
-				.parallel(3)
-				.runOn(Schedulers.parallel())
-				.collect(ArrayList::new, List::add)
-				.subscribe(ints -> {
-					sum.addAndGet(ints.size());
-					latch.countDown();
-				});
+			head
+					.publishOn(Schedulers.parallel())
+					.parallel(3)
+					.runOn(Schedulers.parallel())
+					.collect(ArrayList::new, List::add)
+					.subscribe(ints -> {
+						sum.addAndGet(ints.size());
+						latch.countDown();
+					});
 
-		Flux.range(1, 1000).subscribe(head);
-		latch.await();
-		assertThat(sum.get()).isEqualTo(length);
+			Flux.range(1, 1000).subscribe(head);
+			latch.await();
+			assertThat(sum.get()).isEqualTo(length);
+		});
 	}
 
 	static class Reduction implements BiFunction<Integer, Integer, Integer> {

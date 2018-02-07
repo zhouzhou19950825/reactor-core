@@ -16,9 +16,9 @@
 
 package reactor.util.function
 
-import org.assertj.core.api.Assertions.assertThat
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
+import org.assertj.core.api.Assertions.assertThat
 
 object O1; object O2; object O3; object O4
 object O5; object O6; object O7; object O8

@@ -18,8 +18,8 @@ package reactor.test.scheduler;
 
 import java.util.function.Supplier;
 
-import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
@@ -121,7 +121,7 @@ public class VirtualTimeSchedulerTests {
 		return potentialCached;
 	}
 
-	@After
+	@AfterEach
 	public void cleanup() {
 		VirtualTimeScheduler.reset();
 	}

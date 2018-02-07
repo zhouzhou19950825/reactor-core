@@ -23,11 +23,10 @@ import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TestName;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscription;
 import reactor.core.Disposable;
@@ -43,9 +42,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class RejectedExecutionTest {
 
-	@Rule
-	public TestName testName = new TestName();
-
 	private BoundedScheduler scheduler;
 
 	private ConcurrentLinkedQueue<Long> onNexts = new ConcurrentLinkedQueue<>();
@@ -56,7 +52,7 @@ public class RejectedExecutionTest {
 	private ConcurrentLinkedQueue<Long> onOperatorErrorData = new ConcurrentLinkedQueue<>();
 	private ConcurrentLinkedQueue<Throwable> onSchedulerHandleError = new ConcurrentLinkedQueue<>();
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		scheduler = new BoundedScheduler(Schedulers.newSingle("bounded-single"));
 		Hooks.onNextDropped(o -> onNextDropped.add(o));
@@ -73,7 +69,7 @@ public class RejectedExecutionTest {
 		Schedulers.onHandleError((thread, t) -> onSchedulerHandleError.add(t));
 	}
 
-	@After
+	@AfterEach
 	public void tearDown() {
 		scheduler.dispose();
 		Hooks.resetOnNextDropped();
@@ -112,24 +108,24 @@ public class RejectedExecutionTest {
 	 *
 	 */
 	@Test
-	public void publishOn() throws Exception {
+	public void publishOn(TestInfo testInfo) throws Exception {
 		Flux<Long> flux = Flux.interval(Duration.ofMillis(2)).take(255)
 		                      .publishOn(scheduler)
 		                      .doOnNext(i -> onNext(i))
 		                      .doOnError(e -> onError(e));
 
-		verifyRejectedExecutionConsistency(flux, 5);
+		verifyRejectedExecutionConsistency(flux, 5, testInfo);
 	}
 
 	@Test
-	public void publishOnFilter() throws Exception {
+	public void publishOnFilter(TestInfo testInfo) throws Exception {
 		Flux<Long> flux = Flux.interval(Duration.ofMillis(2)).take(255)
 		                      .publishOn(scheduler)
 		                      .filter(t -> true)
 		                      .doOnNext(i -> onNext(i))
 		                      .doOnError(e -> onError(e));
 
-		verifyRejectedExecutionConsistency(flux, 5);
+		verifyRejectedExecutionConsistency(flux, 5, testInfo);
 	}
 
 	/**
@@ -157,14 +153,14 @@ public class RejectedExecutionTest {
 	 *			at java.lang.Thread.run(Thread.java:745) [na:1.8.0_77]
 	 */
 	@Test
-	public void parallelRunOn() throws Exception {
+	public void parallelRunOn(TestInfo testInfo) throws Exception {
 		ParallelFlux<Long> flux = Flux.interval(Duration.ofMillis(2)).take(255)
 				.parallel(1)
 				.runOn(scheduler)
 				.doOnNext(i -> onNext(i))
 				.doOnError(e -> onError(e));
 
-		verifyRejectedExecutionConsistency(flux, 5);
+		verifyRejectedExecutionConsistency(flux, 5, testInfo);
 	}
 
 	/**
@@ -273,7 +269,7 @@ public class RejectedExecutionTest {
 	}
 
 	@Test
-	public void subscribeOnJust() throws Exception {
+	public void subscribeOnJust(TestInfo testInfo) throws Exception {
 		scheduler.tasksRemaining.set(0); //1 subscribe
 		Flux<Long> flux = Flux.just(1L)
 		                      .subscribeOn(scheduler)
@@ -295,12 +291,12 @@ public class RejectedExecutionTest {
 						"Data dropped from onOperatorError should always be >= 1");
 
 		if (!onOperatorErrorData.isEmpty()) {
-			System.out.println(testName.getMethodName() + " legitimately has data dropped from onOperatorError: " + onOperatorErrorData);
+			System.out.println(testInfo.getDisplayName() + " legitimately has data dropped from onOperatorError: " + onOperatorErrorData);
 		}
 	}
 
 
-	private void verifyRejectedExecutionConsistency(Publisher<Long> flux, int elementCount) {
+	private void verifyRejectedExecutionConsistency(Publisher<Long> flux, int elementCount, TestInfo testInfo) {
 		scheduler.tasksRemaining.set(elementCount + 1);
 		StepVerifier verifier = StepVerifier.create(flux, 0)
 					.expectSubscription()
@@ -329,7 +325,7 @@ public class RejectedExecutionTest {
 						"Data dropped from onOperatorError should always be >= elementCount");
 
 		if (!onOperatorErrorData.isEmpty()) {
-			System.out.println(testName.getMethodName() + " legitimately has data dropped from onOperatorError: " + onOperatorErrorData);
+			System.out.println(testInfo.getDisplayName() + " legitimately has data dropped from onOperatorError: " + onOperatorErrorData);
 		}
 
 	}

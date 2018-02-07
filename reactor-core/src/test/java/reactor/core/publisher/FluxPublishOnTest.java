@@ -35,10 +35,10 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscription;
@@ -59,6 +59,7 @@ import reactor.util.function.Tuple2;
 
 import static java.util.concurrent.Executors.newCachedThreadPool;
 import static org.assertj.core.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertTimeout;
 import static reactor.core.scheduler.Schedulers.fromExecutor;
 import static reactor.core.scheduler.Schedulers.fromExecutorService;
 
@@ -165,12 +166,12 @@ public class FluxPublishOnTest extends FluxOperatorTest<String, String> {
 
 	public static ExecutorService exec;
 
-	@BeforeClass
+	@BeforeAll
 	public static void before() {
 		exec = Executors.newSingleThreadExecutor();
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void after() {
 		exec.shutdownNow();
 	}
@@ -936,58 +937,60 @@ public class FluxPublishOnTest extends FluxOperatorTest<String, String> {
 		          .containsExactly(10L, 2L, 2L, 2L, 2L, 2L, 2L, 2L);
 	}
 
-	@Test(timeout = 5000)
+	@Test
 	public void rejectedExecutionExceptionOnDataSignalExecutor()
 			throws InterruptedException {
-		final AtomicReference<Throwable> throwableInOnOperatorError =
-				new AtomicReference<>();
-		final AtomicReference<Object> dataInOnOperatorError = new AtomicReference<>();
+		assertTimeout(Duration.ofSeconds(5), () -> {
+			final AtomicReference<Throwable> throwableInOnOperatorError =
+					new AtomicReference<>();
+			final AtomicReference<Object> dataInOnOperatorError = new AtomicReference<>();
 
-		try {
+			try {
 
-			CountDownLatch hookLatch = new CountDownLatch(1);
+				CountDownLatch hookLatch = new CountDownLatch(1);
 
-			Hooks.onOperatorError((t, d) -> {
-				throwableInOnOperatorError.set(t);
-				dataInOnOperatorError.set(d);
-				hookLatch.countDown();
-				return t;
-			});
+				Hooks.onOperatorError((t, d) -> {
+					throwableInOnOperatorError.set(t);
+					dataInOnOperatorError.set(d);
+					hookLatch.countDown();
+					return t;
+				});
 
-			ExecutorService executor = newCachedThreadPool();
-			CountDownLatch latch = new CountDownLatch(1);
+				ExecutorService executor = newCachedThreadPool();
+				CountDownLatch latch = new CountDownLatch(1);
 
-			AssertSubscriber<Integer> assertSubscriber = new AssertSubscriber<>();
-			Flux.range(0, 5)
-			    .publishOn(fromExecutorService(executor))
-			    .doOnNext(s -> {
-				    try {
-					    latch.await();
-				    }
-				    catch (InterruptedException e) {
-				    }
-			    })
-			    .publishOn(fromExecutor(executor))
-			    .subscribe(assertSubscriber);
+				AssertSubscriber<Integer> assertSubscriber = new AssertSubscriber<>();
+				Flux.range(0, 5)
+				    .publishOn(fromExecutorService(executor))
+				    .doOnNext(s -> {
+					    try {
+						    latch.await();
+					    }
+					    catch (InterruptedException e) {
+					    }
+				    })
+				    .publishOn(fromExecutor(executor))
+				    .subscribe(assertSubscriber);
 
-			executor.shutdownNow();
+				executor.shutdownNow();
 
-			assertSubscriber.assertNoValues()
-			                .assertNoError()
-			                .assertNotComplete();
+				assertSubscriber.assertNoValues()
+				                .assertNoError()
+				                .assertNotComplete();
 
-			hookLatch.await();
+				hookLatch.await();
 
-			assertThat(throwableInOnOperatorError.get()).isInstanceOf(RejectedExecutionException.class);
-			assertThat(dataInOnOperatorError.get()).isEqualTo(0);
-		}
-		finally {
-			Hooks.resetOnOperatorError();
-		}
+				assertThat(throwableInOnOperatorError.get()).isInstanceOf(RejectedExecutionException.class);
+				assertThat(dataInOnOperatorError.get()).isEqualTo(0);
+			}
+			finally {
+				Hooks.resetOnOperatorError();
+			}
+		});
 	}
 
 	@Test
-	@Ignore //Fix or deprecate fromExecutor, this test might randomly hang on CI
+	@Disabled //Fix or deprecate fromExecutor, this test might randomly hang on CI
 	public void rejectedExecutionExceptionOnErrorSignalExecutor()
 			throws InterruptedException {
 
@@ -1041,40 +1044,43 @@ public class FluxPublishOnTest extends FluxOperatorTest<String, String> {
 		}
 	}
 
-	@Test(timeout = 5000)
-	@Ignore
+	@Test
+	@Disabled
 	public void rejectedExecutionExceptionOnDataSignalExecutorService()
 			throws InterruptedException {
-		CountDownLatch hookLatch = new CountDownLatch(1);
+		assertTimeout(Duration.ofSeconds(5), () -> {
 
-		Hooks.onOperatorError((t, d) -> {
-			assertThat(t).isInstanceOf(RejectedExecutionException.class);
-			assertThat(d).isNotNull();
-			hookLatch.countDown();
-			return t;
+			CountDownLatch hookLatch = new CountDownLatch(1);
+
+			Hooks.onOperatorError((t, d) -> {
+				assertThat(t).isInstanceOf(RejectedExecutionException.class);
+				assertThat(d).isNotNull();
+				hookLatch.countDown();
+				return t;
+			});
+
+			try {
+				ExecutorService executor = newCachedThreadPool();
+				StepVerifier.create(Flux.range(0, 5)
+				                        .log()
+				                        .publishOn(Schedulers.elastic())
+				                        .doOnRequest(n -> executor.shutdownNow())
+				                        .publishOn(fromExecutorService(executor))
+				                        .doOnNext(this::infiniteBlock))
+				            .then(() -> {
+					            try {
+						            hookLatch.await();
+					            }
+					            catch (InterruptedException e) {
+					            }
+				            })
+				            .thenCancel()
+				            .verify();
+			}
+			finally {
+				Hooks.resetOnOperatorError();
+			}
 		});
-
-		try {
-			ExecutorService executor = newCachedThreadPool();
-			StepVerifier.create(Flux.range(0, 5)
-			                        .log()
-			                        .publishOn(Schedulers.elastic())
-			                        .doOnRequest(n -> executor.shutdownNow())
-			                        .publishOn(fromExecutorService(executor))
-			                        .doOnNext(this::infiniteBlock))
-			            .then(() -> {
-				            try {
-					            hookLatch.await();
-				            }
-				            catch (InterruptedException e) {
-				            }
-			            })
-			            .thenCancel()
-			            .verify();
-		}
-		finally {
-			Hooks.resetOnOperatorError();
-		}
 	}
 
 	void infiniteBlock(Integer t) {
@@ -1085,57 +1091,59 @@ public class FluxPublishOnTest extends FluxOperatorTest<String, String> {
 		}
 	}
 
-	@Test(timeout = 5000)
+	@Test
 	public void rejectedExecutionExceptionOnErrorSignalExecutorService()
 			throws InterruptedException {
-		Exception exception = new IllegalStateException();
+		assertTimeout(Duration.ofSeconds(5), () -> {
+			Exception exception = new IllegalStateException();
 
-		final AtomicReference<Throwable> throwableInOnOperatorError =
-				new AtomicReference<>();
-		final AtomicReference<Object> dataInOnOperatorError = new AtomicReference<>();
+			final AtomicReference<Throwable> throwableInOnOperatorError =
+					new AtomicReference<>();
+			final AtomicReference<Object> dataInOnOperatorError = new AtomicReference<>();
 
-		try {
+			try {
 
-			CountDownLatch hookLatch = new CountDownLatch(2);
+				CountDownLatch hookLatch = new CountDownLatch(2);
 
-			Hooks.onOperatorError((t, d) -> {
-				throwableInOnOperatorError.set(t);
-				dataInOnOperatorError.set(d);
-				hookLatch.countDown();
-				return t;
-			});
+				Hooks.onOperatorError((t, d) -> {
+					throwableInOnOperatorError.set(t);
+					dataInOnOperatorError.set(d);
+					hookLatch.countDown();
+					return t;
+				});
 
-			ExecutorService executor = newCachedThreadPool();
-			CountDownLatch latch = new CountDownLatch(1);
+				ExecutorService executor = newCachedThreadPool();
+				CountDownLatch latch = new CountDownLatch(1);
 
-			AssertSubscriber<Integer> assertSubscriber = new AssertSubscriber<>();
-			Flux.range(0, 5)
-			    .publishOn(fromExecutorService(executor))
-			    .doOnNext(s -> {
-				    try {
-					    latch.await();
-				    }
-				    catch (InterruptedException e) {
-					    throw Exceptions.propagate(exception);
-				    }
-			    })
-			    .publishOn(fromExecutorService(executor))
-			    .subscribe(assertSubscriber);
+				AssertSubscriber<Integer> assertSubscriber = new AssertSubscriber<>();
+				Flux.range(0, 5)
+				    .publishOn(fromExecutorService(executor))
+				    .doOnNext(s -> {
+					    try {
+						    latch.await();
+					    }
+					    catch (InterruptedException e) {
+						    throw Exceptions.propagate(exception);
+					    }
+				    })
+				    .publishOn(fromExecutorService(executor))
+				    .subscribe(assertSubscriber);
 
-			executor.shutdownNow();
+				executor.shutdownNow();
 
-			assertSubscriber.assertNoValues()
-			                .assertNoError()
-			                .assertNotComplete();
+				assertSubscriber.assertNoValues()
+				                .assertNoError()
+				                .assertNotComplete();
 
-			hookLatch.await();
+				hookLatch.await();
 
-			assertThat(throwableInOnOperatorError.get()).isInstanceOf(RejectedExecutionException.class);
-			assertThat(throwableInOnOperatorError.get().getSuppressed()[0]).isSameAs(exception);
-		}
-		finally {
-			Hooks.resetOnOperatorError();
-		}
+				assertThat(throwableInOnOperatorError.get()).isInstanceOf(RejectedExecutionException.class);
+				assertThat(throwableInOnOperatorError.get().getSuppressed()[0]).isSameAs(exception);
+			}
+			finally {
+				Hooks.resetOnOperatorError();
+			}
+		});
 	}
 
 	/**

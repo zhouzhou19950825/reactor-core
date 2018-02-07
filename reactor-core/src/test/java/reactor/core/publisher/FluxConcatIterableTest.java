@@ -18,7 +18,7 @@ package reactor.core.publisher;
 
 import java.util.Arrays;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
 import reactor.test.subscriber.AssertSubscriber;
 

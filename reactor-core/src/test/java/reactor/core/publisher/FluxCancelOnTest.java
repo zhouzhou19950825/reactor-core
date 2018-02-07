@@ -19,7 +19,7 @@ import java.time.Duration;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.reactivestreams.Subscription;
 import reactor.core.CoreSubscriber;
 import reactor.core.Scannable;
@@ -27,29 +27,32 @@ import reactor.core.scheduler.Schedulers;
 import reactor.test.subscriber.AssertSubscriber;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTimeout;
 
 public class FluxCancelOnTest {
 
-	@Test(timeout = 3000L)
+	@Test
 	public void cancelOnDedicatedScheduler() throws Exception {
-		CountDownLatch latch = new CountDownLatch(1);
-		AtomicReference<Thread> threadHash = new AtomicReference<>(Thread.currentThread());
+		assertTimeout(Duration.ofSeconds(3), () -> {
+			CountDownLatch latch = new CountDownLatch(1);
+			AtomicReference<Thread> threadHash = new AtomicReference<>(Thread.currentThread());
 
-		Schedulers.single().schedule(() -> threadHash.set(Thread.currentThread()));
+			Schedulers.single().schedule(() -> threadHash.set(Thread.currentThread()));
 
-		Flux.create(sink -> {
-			sink.onDispose(() -> {
-				if (threadHash.compareAndSet(Thread.currentThread(), null)) {
-					latch.countDown();
-				}
-			});
-		})
-		    .cancelOn(Schedulers.single())
-		    .subscribeWith(AssertSubscriber.create())
-		    .cancel();
+			Flux.create(sink -> {
+				sink.onDispose(() -> {
+					if (threadHash.compareAndSet(Thread.currentThread(), null)) {
+						latch.countDown();
+					}
+				});
+			})
+			    .cancelOn(Schedulers.single())
+			    .subscribeWith(AssertSubscriber.create())
+			    .cancel();
 
-		latch.await();
-		assertThat(threadHash.get()).isNull();
+			latch.await();
+			assertThat(threadHash.get()).isNull();
+		});
 	}
 
 	@Test

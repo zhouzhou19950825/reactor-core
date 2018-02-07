@@ -19,8 +19,8 @@ import java.io.IOException;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import reactor.test.RaceTestUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -124,7 +124,7 @@ public class ExceptionsTest {
 	static final AtomicReferenceFieldUpdater<ExceptionsTest, Throwable> ADD_THROWABLE =
 			AtomicReferenceFieldUpdater.newUpdater(ExceptionsTest.class, Throwable.class, "addThrowable");
 
-	@Before
+	@BeforeEach
 	public void resetAddThrowable() {
 		addThrowable = null;
 	}

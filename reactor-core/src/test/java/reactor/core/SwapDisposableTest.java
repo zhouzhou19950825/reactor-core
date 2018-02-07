@@ -21,11 +21,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertTimeout;
 import static org.mockito.Mockito.*;
 
 /**
@@ -35,7 +36,7 @@ public class SwapDisposableTest {
 
 	private Disposables.SwapDisposable sequentialDisposable;
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		sequentialDisposable = new Disposables.SwapDisposable();
 	}
@@ -123,43 +124,45 @@ public class SwapDisposableTest {
 		verify(underlying).dispose();
 	}
 
-	@Test(timeout = 1000)
+	@Test
 	public void settingUnderlyingWhenUnsubscribedCausesImmediateUnsubscriptionConcurrently()
 			throws InterruptedException {
-		final Disposable firstSet = mock(Disposable.class);
-		sequentialDisposable.update(firstSet);
+		assertTimeout(Duration.ofSeconds(1), () -> {
+			final Disposable firstSet = mock(Disposable.class);
+			sequentialDisposable.update(firstSet);
 
-		final CountDownLatch start = new CountDownLatch(1);
+			final CountDownLatch start = new CountDownLatch(1);
 
-		final int count = 10;
-		final CountDownLatch end = new CountDownLatch(count);
+			final int count = 10;
+			final CountDownLatch end = new CountDownLatch(count);
 
-		final List<Thread> threads = new ArrayList<>();
-		for (int i = 0; i < count; i++) {
-			final Thread t = new Thread(() -> {
-				try {
-					start.await();
-					sequentialDisposable.dispose();
-				} catch (InterruptedException e) {
-					fail(e.getMessage());
-				} finally {
-					end.countDown();
-				}
-			});
-			t.start();
-			threads.add(t);
-		}
+			final List<Thread> threads = new ArrayList<>();
+			for (int i = 0; i < count; i++) {
+				final Thread t = new Thread(() -> {
+					try {
+						start.await();
+						sequentialDisposable.dispose();
+					} catch (InterruptedException e) {
+						fail(e.getMessage());
+					} finally {
+						end.countDown();
+					}
+				});
+				t.start();
+				threads.add(t);
+			}
 
-		final Disposable underlying = mock(Disposable.class);
-		start.countDown();
-		sequentialDisposable.update(underlying);
-		end.await();
-		verify(firstSet).dispose();
-		verify(underlying).dispose();
+			final Disposable underlying = mock(Disposable.class);
+			start.countDown();
+			sequentialDisposable.update(underlying);
+			end.await();
+			verify(firstSet).dispose();
+			verify(underlying).dispose();
 
-		for (final Thread t : threads) {
-			t.join();
-		}
+			for (final Thread t : threads) {
+				t.join();
+			}
+		});
 	}
 
 	@Test

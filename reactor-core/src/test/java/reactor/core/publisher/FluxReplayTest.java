@@ -21,9 +21,9 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.assertj.core.api.Assertions;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.reactivestreams.Subscription;
 import reactor.core.CoreSubscriber;
 import reactor.core.Disposable;
@@ -78,13 +78,13 @@ public class FluxReplayTest extends FluxOperatorTest<String, String> {
 
 	VirtualTimeScheduler vts;
 
-	@Before
+	@BeforeEach
 	public void vtsStart() {
 		//delayElements (notably) now uses parallel() so VTS must be enabled everywhere
 		vts = VirtualTimeScheduler.getOrSet();
 	}
 
-	@After
+	@AfterEach
 	public void vtsStop() {
 		vts = null;
 		VirtualTimeScheduler.reset();

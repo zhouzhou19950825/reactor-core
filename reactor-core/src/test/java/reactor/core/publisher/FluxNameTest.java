@@ -19,7 +19,7 @@ package reactor.core.publisher;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import reactor.core.Scannable;
 import reactor.util.function.Tuple2;
 import reactor.util.function.Tuples;

@@ -22,8 +22,9 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.DirectProcessor;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.GroupedFlux;
@@ -31,6 +32,7 @@ import reactor.test.subscriber.AssertSubscriber;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Tag("scenarios")
 public class FluxWindowConsistencyTest {
 
 	DirectProcessor<Integer> sourceProcessor = DirectProcessor.create();
@@ -55,7 +57,7 @@ public class FluxWindowConsistencyTest {
 
 	private AtomicInteger mainTerminated = new AtomicInteger();
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		source = sourceProcessor.doOnNext(i -> sourceCount.incrementAndGet());
 	}

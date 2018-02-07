@@ -16,6 +16,7 @@
 
 package reactor.core.publisher;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -26,114 +27,131 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.reactivestreams.Subscription;
 import reactor.core.Scannable;
 import reactor.core.Scannable.Attr;
 import reactor.test.StepVerifier;
 import reactor.util.concurrent.Queues;
 
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.junit.jupiter.api.Assertions.assertTimeout;
 
 public class BlockingIterableTest {
 
-	@Test(timeout = 5000)
+	@Test
 	public void normal() {
-		List<Integer> values = new ArrayList<>();
+		assertTimeout(Duration.ofSeconds(5), () -> {
+			List<Integer> values = new ArrayList<>();
 
-		for (Integer i : Flux.range(1, 10)
-		                     .toIterable()) {
-			values.add(i);
-		}
+			for (Integer i : Flux.range(1, 10)
+			                     .toIterable()) {
+				values.add(i);
+			}
 
-		assertThat(values).containsExactly(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
+			assertThat(values).containsExactly(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
+		});
 	}
 
-	@Test(timeout = 5000)
+	@Test
 	public void normal2() {
-		Queue<Integer> q = new ArrayBlockingQueue<>(1);
-		List<Integer> values = new ArrayList<>();
+		assertTimeout(Duration.ofSeconds(5), () -> {
+			Queue<Integer> q = new ArrayBlockingQueue<>(1);
+			List<Integer> values = new ArrayList<>();
 
-		for (Integer i : Flux.range(1, 10)
-		                     .toIterable(1, () -> q)) {
-			values.add(i);
-		}
+			for (Integer i : Flux.range(1, 10)
+			                     .toIterable(1, () -> q)) {
+				values.add(i);
+			}
 
-		assertThat(values).containsExactly(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
+			assertThat(values).containsExactly(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
+		});
 	}
 
-	@Test(timeout = 5000)
+	@Test
 	public void empty() {
-		List<Integer> values = new ArrayList<>();
+		assertTimeout(Duration.ofSeconds(5), () -> {
+			List<Integer> values = new ArrayList<>();
 
-		for (Integer i : FluxEmpty.<Integer>instance().toIterable()) {
-			values.add(i);
-		}
+			for (Integer i : FluxEmpty.<Integer>instance().toIterable()) {
+				values.add(i);
+			}
 
-		assertThat(values).isEmpty();
+			assertThat(values).isEmpty();
+		});
 	}
 
-	@Test(timeout = 5000)
+	@Test
 	public void error() {
-		List<Integer> values = new ArrayList<>();
+		assertTimeout(Duration.ofSeconds(5), () -> {
+			List<Integer> values = new ArrayList<>();
 
-		assertThatExceptionOfType(RuntimeException.class)
-				.isThrownBy(() -> {
-					for (Integer i : Flux.<Integer>error(new RuntimeException("forced failure")).toIterable()) {
-						values.add(i);
-					}
-				})
-				.withMessage("forced failure");
+			assertThatExceptionOfType(RuntimeException.class)
+					.isThrownBy(() -> {
+						for (Integer i : Flux.<Integer>error(new RuntimeException("forced failure")).toIterable()) {
+							values.add(i);
+						}
+							})
+					.withMessage("forced failure");
 
-		assertThat(values).isEmpty();
+			assertThat(values).isEmpty();
+		});
 	}
 
-	@Test(timeout = 5000)
+	@Test
 	public void toStream() {
-		List<Integer> values = new ArrayList<>();
+		assertTimeout(Duration.ofSeconds(5), () -> {
+			List<Integer> values = new ArrayList<>();
 
-		Flux.range(1, 10)
-		    .toStream()
-		    .forEach(values::add);
+			Flux.range(1, 10)
+			    .toStream()
+			    .forEach(values::add);
 
-		assertThat(values).containsExactly(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
+			assertThat(values).containsExactly(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
+		});
 	}
 
-	@Test(timeout = 5000)
+	@Test
 	public void streamEmpty() {
-		List<Integer> values = new ArrayList<>();
+		assertTimeout(Duration.ofSeconds(5), () -> {
+			List<Integer> values = new ArrayList<>();
 
-		FluxEmpty.<Integer>instance().toStream()
-		                             .forEach(values::add);
+			FluxEmpty.<Integer>instance().toStream()
+			                             .forEach(values::add);
 
-		assertThat(values).isEmpty();
+			assertThat(values).isEmpty();
+		});
 	}
 
-	@Test(timeout = 5000)
+	@Test
 	public void streamLimit() {
-		List<Integer> values = new ArrayList<>();
+		assertTimeout(Duration.ofSeconds(5), () -> {
+			List<Integer> values = new ArrayList<>();
 
-		Flux.range(1, Integer.MAX_VALUE)
-		    .toStream()
-		    .limit(10)
-		    .forEach(values::add);
+			Flux.range(1, Integer.MAX_VALUE)
+			    .toStream()
+			    .limit(10)
+			    .forEach(values::add);
 
-		assertThat(values).containsExactly(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
+			assertThat(values).containsExactly(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
+		});
 	}
 
-	@Test(timeout = 5000)
+	@Test
 	public void streamParallel() {
-		int n = 1_000_000;
+		assertTimeout(Duration.ofSeconds(5), () -> {
+			int n = 1_000_000;
 
-		Optional<Integer> opt = Flux.range(1, n)
-		                            .toStream()
-		                            .parallel()
-		                            .max(Integer::compare);
+			Optional<Integer> opt = Flux.range(1, n)
+			                            .toStream()
+			                            .parallel()
+			                            .max(Integer::compare);
 
-		assertThat(opt)
-				.isPresent()
-				.hasValue(n);
+			assertThat(opt)
+					.isPresent()
+					.hasValue(n);
+		});
 	}
 
 	@Test
@@ -226,95 +244,107 @@ public class BlockingIterableTest {
 		assertThat(test.scan(Scannable.Attr.CANCELLED)).describedAs("after CANCELLED").isTrue();
 	}
 
-	@Test(timeout = 1000)
+	@Test
 	public void gh841_streamCreate() {
-		Flux<String> source = Flux.<String>create(sink -> {
-			sink.next("a");
-			sink.next("b");
-			sink.complete();
-		})
-				.sort((a, b) -> { throw new IllegalStateException("boom"); });
+		assertTimeout(Duration.ofSeconds(1), () -> {
+			Flux<String> source = Flux.<String>create(sink -> {
+				sink.next("a");
+				sink.next("b");
+				sink.complete();
+			})
+					.sort((a, b) -> { throw new IllegalStateException("boom"); });
 
-		assertThatExceptionOfType(IllegalStateException.class)
-				.isThrownBy(() -> source.toStream()
-				                        .collect(Collectors.toSet()))
-				.withMessage("boom");
+			assertThatExceptionOfType(IllegalStateException.class)
+					.isThrownBy(() -> source.toStream()
+					                        .collect(Collectors.toSet()))
+					.withMessage("boom");
+		});
 	}
 
-	@Test(timeout = 1000)
+	@Test
 	public void gh841_streamCreateDeferredError() {
-		Flux<Integer> source = Flux.<Integer>create(sink -> {
-			sink.next(1);
-			sink.next(2);
-			sink.next(0);
-			sink.complete();
-		})
-				.map(v -> 4 / v)
-				.log();
+		assertTimeout(Duration.ofSeconds(1), () -> {
+			Flux<Integer> source = Flux.<Integer>create(sink -> {
+				sink.next(1);
+				sink.next(2);
+				sink.next(0);
+				sink.complete();
+			})
+					.map(v -> 4 / v)
+					.log();
 
-		assertThatExceptionOfType(ArithmeticException.class)
-				.isThrownBy(() -> source.toStream(1)
-				                        .collect(Collectors.toSet()))
-				.withMessage("/ by zero");
+			assertThatExceptionOfType(ArithmeticException.class)
+					.isThrownBy(() -> source.toStream(1)
+					                        .collect(Collectors.toSet()))
+					.withMessage("/ by zero");
+		});
 	}
 
-	@Test(timeout = 1000)
+	@Test
 	public void gh841_streamFromIterable() {
-		Flux<String> source = Flux.fromIterable(Arrays.asList("a","b"))
-		                          .sort((a, b) -> { throw new IllegalStateException("boom"); });
+		assertTimeout(Duration.ofSeconds(1), () -> {
+			Flux<String> source = Flux.fromIterable(Arrays.asList("a","b"))
+			                          .sort((a, b) -> { throw new IllegalStateException("boom"); });
 
-		assertThatExceptionOfType(IllegalStateException.class)
-				.isThrownBy(() -> source.toStream()
-				                        .collect(Collectors.toSet()))
-				.withMessage("boom");
+			assertThatExceptionOfType(IllegalStateException.class)
+					.isThrownBy(() -> source.toStream()
+					                        .collect(Collectors.toSet()))
+					.withMessage("boom");
+		});
 	}
 
-	@Test(timeout = 1000)
+	@Test
 	public void gh841_iteratorFromCreate() {
-		Iterator<String> it = Flux.<String>create(sink -> {
-			sink.next("a");
-			sink.next("b");
-			sink.complete();
-		}).sort((a, b) -> {
-			throw new IllegalStateException("boom");
-		}).toIterable().iterator();
+		assertTimeout(Duration.ofSeconds(1), () -> {
+			Iterator<String> it = Flux.<String>create(sink -> {
+				sink.next("a");
+				sink.next("b");
+				sink.complete();
+			}).sort((a, b) -> {
+				throw new IllegalStateException("boom");
+			}).toIterable().iterator();
 
-		assertThatExceptionOfType(IllegalStateException.class)
-				.isThrownBy(it::hasNext)
-				.withMessage("boom");
+			assertThatExceptionOfType(IllegalStateException.class)
+					.isThrownBy(it::hasNext)
+					.withMessage("boom");
+		});
 	}
 
-	@Test(timeout = 1000)
+	@Test
 	public void gh841_workaroundFlux() {
-		Flux<String> source = Flux.<String>create(sink -> {
-			sink.next("a");
-			sink.next("b");
-			sink.complete();
-		})
-				.collectSortedList((a, b) -> { throw new IllegalStateException("boom"); })
-				.hide()
-				.flatMapIterable(Function.identity());
+		assertTimeout(Duration.ofSeconds(1), () -> {
+			Flux<String> source = Flux.<String>create(sink -> {
+				sink.next("a");
+				sink.next("b");
+				sink.complete();
+			})
+					.collectSortedList((a, b) -> { throw new IllegalStateException("boom"); })
+					.hide()
+					.flatMapIterable(Function.identity());
 
-		StepVerifier.create(source)
-		            .expectErrorSatisfies(e -> assertThat(e).isInstanceOf(IllegalStateException.class)
-		                                                    .hasMessage("boom"))
-		            .verify();
+			StepVerifier.create(source)
+			            .expectErrorSatisfies(e -> assertThat(e).isInstanceOf(IllegalStateException.class)
+			                                                    .hasMessage("boom"))
+			            .verify();
+		});
 	}
 
-	@Test(timeout = 1000)
+	@Test
 	public void gh841_workaroundStream() {
-		Flux<String> source = Flux.<String>create(sink -> {
-			sink.next("a");
-			sink.next("b");
-			sink.complete();
-		})
-				.collectSortedList((a, b) -> { throw new IllegalStateException("boom"); })
-				.hide()
-				.flatMapIterable(Function.identity());
+		assertTimeout(Duration.ofSeconds(1), () -> {
+			Flux<String> source = Flux.<String>create(sink -> {
+				sink.next("a");
+				sink.next("b");
+				sink.complete();
+			})
+					.collectSortedList((a, b) -> { throw new IllegalStateException("boom"); })
+					.hide()
+					.flatMapIterable(Function.identity());
 
-		assertThatExceptionOfType(IllegalStateException.class)
-				.isThrownBy(() -> source.toStream()
-				                        .collect(Collectors.toSet()))
-				.withMessage("boom");
+			assertThatExceptionOfType(IllegalStateException.class)
+					.isThrownBy(() -> source.toStream()
+					                        .collect(Collectors.toSet()))
+					.withMessage("boom");
+		});
 	}
 }

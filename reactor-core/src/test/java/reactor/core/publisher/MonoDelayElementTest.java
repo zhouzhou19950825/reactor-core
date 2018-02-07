@@ -24,7 +24,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.reactivestreams.Subscription;
 import reactor.core.CoreSubscriber;
 import reactor.core.Exceptions;
@@ -37,6 +37,7 @@ import reactor.test.scheduler.VirtualTimeScheduler;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertTimeout;
 
 public class MonoDelayElementTest {
 
@@ -102,16 +103,18 @@ public class MonoDelayElementTest {
 		assertThat(cancelled.get()).isTrue();
 	}
 
-	@Test(timeout = 5000)
+	@Test
 	public void emptyIsImmediate() {
-		Mono<String> source = Mono.<String>empty().log().hide();
+		assertTimeout(Duration.ofSeconds(5), () -> {
+			Mono<String> source = Mono.<String>empty().log().hide();
 
-		Duration d = StepVerifier.create(new MonoDelayElement<>(source, 10, TimeUnit.SECONDS,
-				defaultSchedulerForDelay()).log())
-		                         .expectSubscription()
-		                         .verifyComplete();
+			Duration d = StepVerifier.create(new MonoDelayElement<>(source, 10, TimeUnit.SECONDS,
+					defaultSchedulerForDelay()).log())
+			                         .expectSubscription()
+			                         .verifyComplete();
 
-		assertThat(d).isLessThan(Duration.ofSeconds(1));
+			assertThat(d).isLessThan(Duration.ofSeconds(1));
+		});
 	}
 
 	@Test

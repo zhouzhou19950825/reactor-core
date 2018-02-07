@@ -32,17 +32,19 @@
 
 package reactor.core.publisher;
 
-import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Tag("staticInit")
 public class HooksTestStaticInit {
 
 	//IMPORTANT: this test case depends on System property
 	// `reactor.trace.operatorStacktrace` be set to `true`
 
-	@After
+	@AfterEach
 	public void resetAllHooks() {
 		Hooks.resetOnOperatorError();
 		Hooks.resetOnNextDropped();

@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Queue;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.test.DefaultStepVerifierBuilder.DefaultVerifySubscriber;
 import reactor.test.DefaultStepVerifierBuilder.DescriptionEvent;
@@ -35,6 +35,7 @@ import reactor.test.scheduler.VirtualTimeScheduler;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.junit.jupiter.api.Assertions.assertTimeout;
 
 /**
  * @author Stephane Maldini
@@ -59,35 +60,37 @@ public class DefaultStepVerifierBuilderTests {
 				.withMessageStartingWith("expectation failed (an unexpected Subscription has been received");
 	}
 
-	@Test(timeout = 4000)
+	@Test
 	public void manuallyManagedVirtualTime() {
-		VirtualTimeScheduler vts = VirtualTimeScheduler.create();
-		try {
-			VirtualTimeScheduler.getOrSet(vts);
-			assertThat(VirtualTimeScheduler.get()).isSameAs(vts);
+		assertTimeout(Duration.ofSeconds(4), () -> {
+			VirtualTimeScheduler vts = VirtualTimeScheduler.create();
+			try {
+				VirtualTimeScheduler.getOrSet(vts);
+				assertThat(VirtualTimeScheduler.get()).isSameAs(vts);
 
-			Flux<String> flux = Flux.just("foo").delayElements(Duration.ofSeconds(4));
+				Flux<String> flux = Flux.just("foo").delayElements(Duration.ofSeconds(4));
 
-			DefaultVerifySubscriber<String> s =
-					new DefaultStepVerifierBuilder<String>(StepVerifierOptions.create()
-					                                                          .initialRequest(Long.MAX_VALUE)
-					                                                          .virtualTimeSchedulerSupplier(() -> vts),
-							null)//important to avoid triggering of vts capture-and-enable
-					             .thenAwait(Duration.ofSeconds(1))
-					             .expectNext("foo")
-					             .expectComplete()
-					             .toSubscriber();
+				DefaultVerifySubscriber<String> s =
+						new DefaultStepVerifierBuilder<String>(StepVerifierOptions.create()
+						                                                          .initialRequest(Long.MAX_VALUE)
+						                                                          .virtualTimeSchedulerSupplier(() -> vts),
+								null)//important to avoid triggering of vts capture-and-enable
+						             .thenAwait(Duration.ofSeconds(1))
+						             .expectNext("foo")
+						             .expectComplete()
+						             .toSubscriber();
 
-			flux.subscribe(s);
-			vts.advanceTimeBy(Duration.ofSeconds(3));
-			s.verify();
+				flux.subscribe(s);
+				vts.advanceTimeBy(Duration.ofSeconds(3));
+				s.verify();
 
-			assertThat(s.virtualTimeScheduler()).isSameAs(vts);
-			assertThat(VirtualTimeScheduler.get()).isSameAs(vts);
-		}
-		finally {
-			VirtualTimeScheduler.reset();
-		}
+				assertThat(s.virtualTimeScheduler()).isSameAs(vts);
+				assertThat(VirtualTimeScheduler.get()).isSameAs(vts);
+			}
+			finally {
+				VirtualTimeScheduler.reset();
+			}
+		});
 	}
 
 	@Test

@@ -25,8 +25,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscription;
 import reactor.core.CoreSubscriber;
@@ -1430,7 +1430,7 @@ public class FluxFlatMapTest {
     }
 
 	@Test
-	@Ignore
+	@Disabled
 	public void progressiveRequest() {
 		TestPublisher<Integer> tp = TestPublisher.create();
 		StepVerifier.create(tp.flux()

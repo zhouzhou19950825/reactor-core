@@ -21,8 +21,8 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import reactor.core.Exceptions;
 import reactor.test.StepVerifier;
 
@@ -40,7 +40,7 @@ public class MonoDoFinallyTest implements Consumer<SignalType> {
 	volatile SignalType signalType;
 	volatile int calls;
 
-	@Before
+	@BeforeEach
 	public void before() {
 		signalType = null;
 		calls = 0;

@@ -19,7 +19,7 @@ import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import reactor.core.Disposable;
 import reactor.core.Scannable;
 import reactor.core.publisher.Flux;
@@ -27,6 +27,7 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertTimeout;
 
 /**
  * @author Stephane Maldini
@@ -56,35 +57,37 @@ public class ElasticSchedulerTest extends AbstractSchedulerTest {
 		return true;
 	}
 
-	@Test(timeout = 10000)
+	@Test
 	public void eviction() throws Exception {
-		Scheduler s = Schedulers.newElastic("test-recycle", 2);
-		((ElasticScheduler)s).evictor.shutdownNow();
+		assertTimeout(Duration.ofSeconds(10), () -> {
+			Scheduler s = Schedulers.newElastic("test-recycle", 2);
+			((ElasticScheduler)s).evictor.shutdownNow();
 
-		try{
-			Disposable d = s.schedule(() -> {
-				try {
-					Thread.sleep(10000);
+			try{
+				Disposable d = s.schedule(() -> {
+					try {
+						Thread.sleep(10000);
+					}
+					catch (InterruptedException e) {
+						Thread.currentThread().interrupt();
+					}
+				});
+
+				d.dispose();
+
+				while(((ElasticScheduler)s).cache.peek() != null){
+					((ElasticScheduler)s).eviction();
+					Thread.sleep(100);
 				}
-				catch (InterruptedException e) {
-					Thread.currentThread().interrupt();
-				}
-			});
-
-			d.dispose();
-
-			while(((ElasticScheduler)s).cache.peek() != null){
-				((ElasticScheduler)s).eviction();
-				Thread.sleep(100);
 			}
-		}
-		finally {
-			s.dispose();
-			s.dispose();//noop
-		}
+			finally {
+				s.dispose();
+				s.dispose();//noop
+			}
 
-		assertThat(((ElasticScheduler)s).cache).isEmpty();
-		assertThat(s.isDisposed()).isTrue();
+			assertThat(((ElasticScheduler)s).cache).isEmpty();
+			assertThat(s.isDisposed()).isTrue();
+		});
 	}
 
 	@Test

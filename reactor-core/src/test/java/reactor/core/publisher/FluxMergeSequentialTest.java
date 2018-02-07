@@ -29,8 +29,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.reactivestreams.Subscription;
 import reactor.core.CoreSubscriber;
 import reactor.core.Scannable;
@@ -53,7 +53,7 @@ public class FluxMergeSequentialTest {
 
 	final Function<Integer, Flux<Integer>> toRange = t -> Flux.range(t, 2);
 
-	@Before
+	@BeforeEach
 	public void before() {
 		ts = new AssertSubscriber<>();
 		tsBp = new AssertSubscriber<>(0L);

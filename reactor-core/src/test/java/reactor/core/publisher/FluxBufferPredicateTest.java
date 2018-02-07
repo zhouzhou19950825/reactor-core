@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.function.Supplier;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.reactivestreams.Subscription;
 import reactor.core.CoreSubscriber;
 import reactor.core.Scannable;
@@ -62,7 +62,7 @@ public class FluxBufferPredicateTest {
 				.expectNext(Arrays.asList(7, 8))
 				.expectComplete()
 				.verify();
-		
+
 		assertThat(sp1.hasDownstreams()).as("sp1.hasDownstreams").isFalse();
 	}
 

@@ -17,7 +17,7 @@
 package reactor.core.publisher
 
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.Test
+import org.junit.jupiter.api.Test
 import org.reactivestreams.Publisher
 import reactor.test.StepVerifier
 import reactor.test.test

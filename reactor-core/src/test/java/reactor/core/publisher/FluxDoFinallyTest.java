@@ -23,8 +23,8 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.function.Consumer;
 
 import org.assertj.core.api.Assertions;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.reactivestreams.Subscription;
 import reactor.core.CoreSubscriber;
 import reactor.core.Exceptions;
@@ -40,7 +40,7 @@ public class FluxDoFinallyTest implements Consumer<SignalType> {
 	volatile SignalType signalType;
 	volatile int calls;
 
-	@Before
+	@BeforeEach
 	public void before() {
 		signalType = null;
 		calls = 0;

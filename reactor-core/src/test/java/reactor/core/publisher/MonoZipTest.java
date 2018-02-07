@@ -20,7 +20,7 @@ import java.time.Duration;
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.reactivestreams.Subscription;
 import reactor.core.CoreSubscriber;
 import reactor.core.Exceptions;
@@ -35,6 +35,7 @@ import reactor.util.function.Tuple6;
 import reactor.util.function.Tuples;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTimeout;
 
 public class MonoZipTest {
 
@@ -89,12 +90,14 @@ public class MonoZipTest {
 		               .block()).isEqualTo(3);
 	}
 
-	@Test(timeout = 5000)
+	@Test
 	public void castCheck() {
-		Mono<String[]> mono = Mono.zip(a -> Arrays.copyOf(a, a.length, String[].class),
-				Mono.just("hello"),
-				Mono.just("world"));
-		mono.subscribe(System.out::println);
+		assertTimeout(Duration.ofSeconds(5), () -> {
+			Mono<String[]> mono = Mono.zip(a -> Arrays.copyOf(a, a.length, String[].class),
+					Mono.just("hello"),
+					Mono.just("world"));
+			mono.subscribe(System.out::println);
+		});
 	}
 
 	@Test//(timeout = 5000)
@@ -117,7 +120,8 @@ public class MonoZipTest {
 				Mono.zip(Mono.delay(Duration.ofMillis(150)).then(), Mono.delay(Duration
 						.ofMillis(250))))
 		            .thenAwait(Duration.ofMillis(150))
-		            .verifyComplete();
+		            .expectComplete()
+					.verify(Duration.ofSeconds(5));
 	}
 
 	@Test//(timeout = 5000)

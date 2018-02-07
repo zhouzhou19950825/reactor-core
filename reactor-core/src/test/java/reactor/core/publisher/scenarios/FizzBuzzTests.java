@@ -21,7 +21,8 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.TopicProcessor;
@@ -34,6 +35,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author nitzanvolman
  * @author Stephane Maldini
  */
+@Tag("scenarios")
 public class FizzBuzzTests extends AbstractReactorTest {
 
 

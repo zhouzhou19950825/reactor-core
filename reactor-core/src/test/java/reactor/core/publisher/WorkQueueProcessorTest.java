@@ -33,8 +33,8 @@ import java.util.logging.Level;
 
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.Condition;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.reactivestreams.Subscription;
 import reactor.core.CoreSubscriber;
 import reactor.core.Disposable;
@@ -52,6 +52,7 @@ import reactor.util.concurrent.WaitStrategy;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.Fail.fail;
+import static org.junit.jupiter.api.Assertions.assertTimeout;
 import static reactor.util.concurrent.WaitStrategy.liteBlocking;
 
 /**
@@ -202,47 +203,53 @@ public class WorkQueueProcessorTest {
 		TimeUnit.SECONDS.sleep(1);
 	}
 
-	@Test(timeout = 15000L)
+	@Test
 	public void cancelDoesNotHang() {
-		WorkQueueProcessor<String> wq = WorkQueueProcessor.create();
+		assertTimeout(Duration.ofSeconds(15), () -> {
+			WorkQueueProcessor<String> wq = WorkQueueProcessor.create();
 
-		Disposable d = wq.subscribe();
+			Disposable d = wq.subscribe();
 
-		assertThat(wq.downstreamCount()).isEqualTo(1);
+			assertThat(wq.downstreamCount()).isEqualTo(1);
 
-		d.dispose();
+			d.dispose();
 
-		while (wq.downstreamCount() != 0 && Thread.activeCount() > 2) {
-		}
+			while (wq.downstreamCount() != 0 && Thread.activeCount() > 2) {
+			}
+		});
 	}
 
-	@Test(timeout = 15000L)
+	@Test
 	public void completeDoesNotHang() {
-		WorkQueueProcessor<String> wq = WorkQueueProcessor.create();
+		assertTimeout(Duration.ofSeconds(15), () -> {
+			WorkQueueProcessor<String> wq = WorkQueueProcessor.create();
 
-		wq.subscribe();
+			wq.subscribe();
 
-		assertThat(wq.downstreamCount()).isEqualTo(1);
+			assertThat(wq.downstreamCount()).isEqualTo(1);
 
-		wq.onComplete();
+			wq.onComplete();
 
-		while (wq.downstreamCount() != 0 && Thread.activeCount() > 2) {
-		}
+			while (wq.downstreamCount() != 0 && Thread.activeCount() > 2) {
+			}
+		});
 	}
 
-	@Test(timeout = 15000L)
+	@Test
 	public void disposeSubscribeNoThreadLeak() {
-		WorkQueueProcessor<String> wq = WorkQueueProcessor.<String>builder().autoCancel(false).build();
+		assertTimeout(Duration.ofSeconds(15), () -> {
+			WorkQueueProcessor<String> wq = WorkQueueProcessor.<String>builder().autoCancel(false).build();
 
-		Disposable d = wq.subscribe();
-		d.dispose();
-		d = wq.subscribe();
-		d.dispose();
-		d = wq.subscribe();
-		d.dispose();
+			Disposable d = wq.subscribe();
+			d.dispose();
+			d = wq.subscribe();
+			d.dispose();
+			d = wq.subscribe();
+			d.dispose();
 
-		while (wq.downstreamCount() != 0 && Thread.activeCount() > 2) {
-		}
+			while (wq.downstreamCount() != 0 && Thread.activeCount() > 2) {
+			}
+		});
 	}
 
 	@Test
@@ -438,7 +445,7 @@ public class WorkQueueProcessorTest {
 
 		Executors.newSingleThreadScheduledExecutor()
 		         .schedule(bc::onComplete, 200, TimeUnit.MILLISECONDS);
-		
+
 		assertThatExceptionOfType(RuntimeException.class)
 				.isThrownBy(() -> bc.onNext("baz"))
 				.as("expected 3rd next to time out as newSingleThreadExecutor cannot be introspected")
@@ -446,30 +453,32 @@ public class WorkQueueProcessorTest {
 	}
 
 	/* see https://github.com/reactor/reactor-core/issues/199 */
-	@Test(timeout = 4000)
+	@Test
 	public void singleThreadWorkQueueSucceedsWithOneSubscriber() {
-		ExecutorService executorService = Executors.newSingleThreadExecutor();
-		WorkQueueProcessor<String> bc = WorkQueueProcessor.<String>builder().executor(executorService).bufferSize(2).build();
-		CountDownLatch latch = new CountDownLatch(1);
-		TestWorkQueueSubscriber spec1 = new TestWorkQueueSubscriber(latch, "spec1");
+		assertTimeout(Duration.ofSeconds(4), () -> {
+			ExecutorService executorService = Executors.newSingleThreadExecutor();
+			WorkQueueProcessor<String> bc = WorkQueueProcessor.<String>builder().executor(executorService).bufferSize(2).build();
+			CountDownLatch latch = new CountDownLatch(1);
+			TestWorkQueueSubscriber spec1 = new TestWorkQueueSubscriber(latch, "spec1");
 
-		bc.subscribe(spec1);
+			bc.subscribe(spec1);
 
-		bc.onNext("foo");
-		bc.onNext("bar");
+			bc.onNext("foo");
+			bc.onNext("bar");
 
-		Executors.newSingleThreadScheduledExecutor()
-		         .schedule(bc::onComplete, 200, TimeUnit.MILLISECONDS);
-		bc.onNext("baz");
+			Executors.newSingleThreadScheduledExecutor()
+			         .schedule(bc::onComplete, 200, TimeUnit.MILLISECONDS);
+			bc.onNext("baz");
 
-		try {
-			latch.await(800, TimeUnit.MILLISECONDS);
-		}
-		catch (InterruptedException e1) {
-			fail(e1.toString());
-		}
+			try {
+				latch.await(800, TimeUnit.MILLISECONDS);
+			}
+			catch (InterruptedException e1) {
+				fail(e1.toString());
+			}
 
-		assertThat(spec1.error).isNull();
+			assertThat(spec1.error).isNull();
+		});
 	}
 
 	@Test
@@ -847,7 +856,7 @@ public class WorkQueueProcessorTest {
 	}
 
 	// This test runs ok on it's own but hangs in when running whole class!
-	@Ignore
+	@Disabled
 	@Test
 	public void retryErrorPropagatedFromWorkQueueSubscriberHotPoisonSignalFlatMapPrefetch1()
 			throws Exception {
@@ -887,61 +896,64 @@ public class WorkQueueProcessorTest {
 
 
 	//see https://github.com/reactor/reactor-core/issues/445
-	@Test(timeout = 5_000)
+	@Test
 	public void testBufferSize1Shared() throws Exception {
-		WorkQueueProcessor<String> broadcast = WorkQueueProcessor.<String>builder()
-				.share(true)
-				.name("share-name")
-				.bufferSize(1)
-				.autoCancel(true)
-				.build();
+		assertTimeout(Duration.ofSeconds(5), () -> {
+			WorkQueueProcessor<String> broadcast = WorkQueueProcessor.<String>builder()
+					.share(true)
+					.name("share-name")
+					.bufferSize(1)
+					.autoCancel(true)
+					.build();
 
-		int simultaneousSubscribers = 3000;
-		CountDownLatch latch = new CountDownLatch(simultaneousSubscribers);
-		Scheduler scheduler = Schedulers.single();
+			int simultaneousSubscribers = 3000;
+			CountDownLatch latch = new CountDownLatch(simultaneousSubscribers);
+			Scheduler scheduler = Schedulers.single();
 
-		FluxSink<String> sink = broadcast.sink();
-		Flux<String> flux = broadcast.filter(Objects::nonNull)
-		                             .publishOn(scheduler)
-		                             .cache(1);
+			FluxSink<String> sink = broadcast.sink();
+			Flux<String> flux = broadcast.filter(Objects::nonNull)
+			                             .publishOn(scheduler)
+			                             .cache(1);
 
-		for (int i = 0; i < simultaneousSubscribers; i++) {
-			flux.subscribe(s -> latch.countDown());
-		}
-		sink.next("data");
+			for (int i = 0; i < simultaneousSubscribers; i++) {
+				flux.subscribe(s -> latch.countDown());
+			}
+			sink.next("data");
 
-		assertThat(latch.await(4, TimeUnit.SECONDS))
-				.overridingErrorMessage("Data not received")
-				.isTrue();
+			assertThat(latch.await(4, TimeUnit.SECONDS))
+					.overridingErrorMessage("Data not received")
+					.isTrue();
+		});
 	}
 
 	//see https://github.com/reactor/reactor-core/issues/445
-	@Test(timeout = 5_000)
+	@Test
 	public void testBufferSize1Created() throws Exception {
-		WorkQueueProcessor<String> broadcast = WorkQueueProcessor.<String>builder()
-				.share(true).name("share-name")
-				.bufferSize(1)
-				.autoCancel(true)
-				.build();
+		assertTimeout(Duration.ofSeconds(5), () -> {
+			WorkQueueProcessor<String> broadcast = WorkQueueProcessor.<String>builder()
+					.share(true).name("share-name")
+					.bufferSize(1)
+					.autoCancel(true)
+					.build();
 
-		int simultaneousSubscribers = 3000;
-		CountDownLatch latch = new CountDownLatch(simultaneousSubscribers);
-		Scheduler scheduler = Schedulers.single();
+			int simultaneousSubscribers = 3000;
+			CountDownLatch latch = new CountDownLatch(simultaneousSubscribers);
+			Scheduler scheduler = Schedulers.single();
 
-		FluxSink<String> sink = broadcast.sink();
-		Flux<String> flux = broadcast.filter(Objects::nonNull)
-		                             .publishOn(scheduler)
-		                             .cache(1);
+			FluxSink<String> sink = broadcast.sink();
+			Flux<String> flux = broadcast.filter(Objects::nonNull)
+			                             .publishOn(scheduler)
+			                             .cache(1);
 
-		for (int i = 0; i < simultaneousSubscribers; i++) {
-			flux.subscribe(s -> latch.countDown());
-		}
+			for (int i = 0; i < simultaneousSubscribers; i++) {
+				flux.subscribe(s -> latch.countDown());
+			}
 
-		sink.next("data");
+			sink.next("data");
 
 		assertThat(latch.await(4, TimeUnit.SECONDS))
-				.overridingErrorMessage("Data not received")
-				.isTrue();
+		          .overridingErrorMessage("Data not received")
+		          .isTrue();});
 	}
 
 	@Test
