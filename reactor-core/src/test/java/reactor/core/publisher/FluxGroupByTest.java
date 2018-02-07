@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.reactivestreams.Subscription;
@@ -36,6 +35,7 @@ import reactor.test.subscriber.AssertSubscriber;
 import reactor.util.concurrent.Queues;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 public class FluxGroupByTest extends
                              FluxOperatorTest<String, GroupedFlux<Integer, String>> {
@@ -472,15 +472,15 @@ public class FluxGroupByTest extends
 
 		if (!ts1.await(Duration.ofSeconds(5))
 		        .isTerminated()) {
-			Assert.fail("main subscriber timed out");
+			fail("main subscriber timed out");
 		}
 		if (!ts2.await(Duration.ofSeconds(5))
 		        .isTerminated()) {
-			Assert.fail("group 0 subscriber timed out");
+			fail("group 0 subscriber timed out");
 		}
 		if (!ts3.await(Duration.ofSeconds(5))
 		        .isTerminated()) {
-			Assert.fail("group 1 subscriber timed out");
+			fail("group 1 subscriber timed out");
 		}
 
 		ts1.assertValueCount(500_000)
@@ -540,15 +540,15 @@ public class FluxGroupByTest extends
 
 		if (!ts1.await(Duration.ofSeconds(5))
 		        .isTerminated()) {
-			Assert.fail("main subscriber timed out");
+			fail("main subscriber timed out");
 		}
 		if (!ts2.await(Duration.ofSeconds(5))
 		        .isTerminated()) {
-			Assert.fail("group 0 subscriber timed out");
+			fail("group 0 subscriber timed out");
 		}
 		if (!ts3.await(Duration.ofSeconds(5))
 		        .isTerminated()) {
-			Assert.fail("group 1 subscriber timed out");
+			fail("group 1 subscriber timed out");
 		}
 
 		ts1.assertValueCount(500_000)

@@ -17,25 +17,26 @@ package reactor.core.publisher;
 
 import java.util.Optional;
 
-import org.junit.Assert;
 import org.junit.Test;
 import reactor.core.Fuseable;
 import reactor.test.StepVerifier;
 import reactor.test.subscriber.AssertSubscriber;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatNullPointerException;
 
 public class MonoJustTest {
 
-    @Test(expected = NullPointerException.class)
+    @Test
     public void nullValue() {
-        new MonoJust<Integer>(null);
+	    assertThatNullPointerException()
+			    .isThrownBy(() -> new MonoJust<Integer>(null));
     }
 
     @Test
     public void valueSame() {
 	    try {
-		    Assert.assertSame(1, new MonoJust<>(1).call());
+		    assertThat(new MonoJust<>(1).call()).isSameAs(1);
 	    }
 	    catch (Exception e) {
 		    e.printStackTrace();

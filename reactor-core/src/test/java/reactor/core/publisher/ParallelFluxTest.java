@@ -33,7 +33,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.LongAdder;
 
 import org.assertj.core.api.Assertions;
-import org.junit.Assert;
 import org.junit.Test;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
@@ -47,7 +46,7 @@ import reactor.test.subscriber.AssertSubscriber;
 import reactor.util.concurrent.Queues;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThatNullPointerException;
 
 public class ParallelFluxTest {
 
@@ -273,7 +272,7 @@ public class ParallelFluxTest {
 		flux.subscribe(v -> {
 		}, e -> latch.countDown(), latch::countDown);
 
-		assertTrue(latch.await(2, TimeUnit.SECONDS));
+		assertThat(latch.await(2, TimeUnit.SECONDS)).as("latch").isTrue();
 
 		assertThat(signals.size()).isEqualTo(5);
 		assertThat(signals.get(0).get())
@@ -282,15 +281,9 @@ public class ParallelFluxTest {
 		assertThat(signals.get(1).get())
 				.as("second onNext signal isn't last value")
 				.isEqualTo(2);
-		assertTrue("onComplete for rail 1 expected",
-				signals.get(2)
-				       .isOnComplete());
-		assertTrue("onComplete for rail 2 expected",
-				signals.get(3)
-				       .isOnComplete());
-		assertTrue("onComplete for rail 3 expected",
-				signals.get(4)
-				       .isOnComplete());
+		assertThat(signals.get(2)).matches(Signal::isOnComplete, "onComplete for rail 1");
+		assertThat(signals.get(3)).matches(Signal::isOnComplete, "onComplete for rail 2");
+		assertThat(signals.get(4)).matches(Signal::isOnComplete, "onComplete for rail 3");
 		assertThat(values.get(0)).as("1st onNext value unexpected").isEqualTo(1);
 		assertThat(values.get(1)).as("2nd onNext value unexpected").isEqualTo(2);
 	}
@@ -307,26 +300,23 @@ public class ParallelFluxTest {
 		flux.subscribe(v -> {
 		}, e -> latch.countDown(), latch::countDown);
 
-		assertTrue(latch.await(2, TimeUnit.SECONDS));
+		assertThat(latch.await(2, TimeUnit.SECONDS)).as("latch").isTrue();
 
 		assertThat(signals).hasSize(2);
-		assertTrue("rail 1 onError expected",
-				signals.get(0)
-				       .isOnError());
-		assertTrue("rail 2 onError expected",
-				signals.get(1)
-				       .isOnError());
+		assertThat(signals.get(0)).matches(Signal::isOnError, "rail 1 onError");
+		assertThat(signals.get(1)).matches(Signal::isOnError, "rail 2 onError");
 		assertThat(signals.get(0).getThrowable()).as("plain exception rail 1 expected")
 				.hasMessage("boom");
 		assertThat(signals.get(1).getThrowable()).as("plain exception rail 2 expected")
 				.hasMessage("boom");
 	}
 
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void testDoOnEachSignalNullConsumer() {
-		Flux.just(1)
-		    .parallel()
-		    .doOnEach(null);
+		assertThatNullPointerException()
+				.isThrownBy(() -> Flux.just(1)
+				                      .parallel()
+		                              .doOnEach(null));
 	}
 
 	@Test
@@ -939,8 +929,8 @@ public class ParallelFluxTest {
 
 		latch.await();
 
-		Assert.assertEquals("Multithreaded count", 3, count.get());
-		Assert.assertEquals("Multithreaded threads", 3, threadNames.size());
+		assertThat(count.get()).as("Multithreaded count").isEqualTo(3);
+		assertThat(threadNames).as("Multithreaded threads").hasSize(3);
 	}
 
 	@Test

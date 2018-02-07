@@ -33,9 +33,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doThrow;
-import static reactor.core.Scannable.Attr.TERMINATED;
-import static reactor.core.Scannable.Attr.PARENT;
-import static reactor.core.Scannable.Attr.ERROR;
+import static reactor.core.Scannable.Attr.*;
 
 public class EventLoopProcessorTest {
 

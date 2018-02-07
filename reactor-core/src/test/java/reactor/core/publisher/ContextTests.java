@@ -22,8 +22,7 @@ import org.junit.Test;
 import reactor.test.StepVerifier;
 import reactor.util.context.Context;
 
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Stephane Maldini
@@ -62,8 +61,7 @@ public class ContextTests {
 			    }
 		    });
 
-		assertThat(innerC.get()
-		                 .get("test"), is("baseSubscriber_take_range_innerFlatmap"));
+		assertThat(innerC.get().getOrDefault("test", "no value")).isEqualTo("baseSubscriber_take_range_innerFlatmap");
 	}
 
 	@Test
@@ -88,7 +86,7 @@ public class ContextTests {
 		    .log()
 		    .subscribe();
 
-		assertThat(innerC.get(), is("foobar"));
+		assertThat(innerC.get()).isEqualTo("foobar");
 	}
 
 	@Test

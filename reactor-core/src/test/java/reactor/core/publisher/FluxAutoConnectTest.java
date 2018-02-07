@@ -17,7 +17,6 @@ package reactor.core.publisher;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
 import reactor.core.Disposable;
@@ -48,11 +47,11 @@ public class FluxAutoConnectTest {
 		
 		e.publish().autoConnect(0, cancel::set);
 		
-		Assert.assertNotNull(cancel.get());
-		Assert.assertTrue("sp has no subscribers?", e.downstreamCount() != 0);
+		assertThat(cancel.get()).isNotNull();
+		assertThat(e.downstreamCount()).withFailMessage("sp has no subscribers?").isNotZero();
 
 		cancel.get().dispose();
-		Assert.assertFalse("sp has subscribers?", e.downstreamCount() != 0);
+		assertThat(e.downstreamCount()).withFailMessage("sp has subscribers?").isZero();
 	}
 
 	@Test
@@ -62,22 +61,22 @@ public class FluxAutoConnectTest {
 		AtomicReference<Disposable> cancel = new AtomicReference<>();
 		
 		Flux<Integer> p = e.publish().autoConnect(2, cancel::set);
-		
-		Assert.assertNull(cancel.get());
-		Assert.assertFalse("sp has subscribers?", e.downstreamCount() != 0);
+
+		assertThat(cancel.get()).isNull();
+		assertThat(e.downstreamCount()).withFailMessage("sp has subscribers?").isZero();
 		
 		p.subscribe(AssertSubscriber.create());
-		
-		Assert.assertNull(cancel.get());
-		Assert.assertFalse("sp has subscribers?", e.downstreamCount() != 0);
+
+		assertThat(cancel.get()).isNull();
+		assertThat(e.downstreamCount()).withFailMessage("sp has subscribers?").isZero();
 
 		p.subscribe(AssertSubscriber.create());
 
-		Assert.assertNotNull(cancel.get());
-		Assert.assertTrue("sp has no subscribers?", e.downstreamCount() != 0);
+		assertThat(cancel.get()).isNotNull();
+		assertThat(e.downstreamCount()).withFailMessage("sp has no subscribers?").isNotZero();
 		
 		cancel.get().dispose();
-		Assert.assertFalse("sp has subscribers?", e.downstreamCount() != 0);
+		assertThat(e.downstreamCount()).withFailMessage("sp has subscribers?").isZero();
 	}
 
 	@Test

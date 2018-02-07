@@ -28,12 +28,14 @@ import reactor.test.StepVerifier;
 import reactor.test.subscriber.AssertSubscriber;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatNullPointerException;
 
 public class MonoHasElementsTest {
 
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void sourceNull() {
-		new MonoHasElements<>(null);
+		assertThatNullPointerException()
+				.isThrownBy(() -> new MonoHasElements<>(null));
 	}
 
 	@Test

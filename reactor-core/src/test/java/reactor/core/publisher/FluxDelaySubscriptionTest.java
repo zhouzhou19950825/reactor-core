@@ -27,17 +27,20 @@ import reactor.test.StepVerifier;
 import reactor.test.subscriber.AssertSubscriber;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatNullPointerException;
 
 public class FluxDelaySubscriptionTest {
 
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void sourceNull() {
-		new FluxDelaySubscription<>(null, Flux.never());
+		assertThatNullPointerException()
+				.isThrownBy(() -> new FluxDelaySubscription<>(null, Flux.never()));
 	}
 
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void otherNull() {
-		Flux.never().delaySubscription((Publisher<?>)null);
+		assertThatNullPointerException()
+				.isThrownBy(() -> Flux.never().delaySubscription((Publisher<?>)null));
 	}
 
 	@Test

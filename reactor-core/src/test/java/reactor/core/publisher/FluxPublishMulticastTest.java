@@ -22,17 +22,14 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
-import org.junit.Assert;
 import org.junit.Test;
 import org.reactivestreams.Subscription;
 import reactor.core.CoreSubscriber;
 import reactor.core.Disposable;
 import reactor.core.Fuseable;
 import reactor.core.Scannable;
-import reactor.core.scheduler.Schedulers;
 import reactor.test.StepVerifier;
 import reactor.test.publisher.FluxOperatorTest;
-import reactor.test.publisher.TestPublisher;
 import reactor.test.subscriber.AssertSubscriber;
 import reactor.util.concurrent.Queues;
 import reactor.util.context.Context;
@@ -40,6 +37,7 @@ import reactor.util.function.Tuple2;
 import reactor.util.function.Tuples;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.assertj.core.api.Fail.fail;
 import static reactor.core.publisher.Flux.range;
 import static reactor.core.publisher.Flux.zip;
@@ -116,10 +114,11 @@ public class FluxPublishMulticastTest extends FluxOperatorTest<String, String> {
 		);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
-	public void failPrefetch(){
-		Flux.never()
-	        .publish(f -> f, -1);
+	@Test
+	public void failPrefetch() {
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> Flux.never()
+				                      .publish(f -> f, -1));
 	}
 
 	@Test
@@ -182,11 +181,11 @@ public class FluxPublishMulticastTest extends FluxOperatorTest<String, String> {
 		sp.publish(o -> Flux.<Integer>never())
 		  .subscribe(ts);
 
-		Assert.assertTrue("Not subscribed?", sp.downstreamCount() != 0);
+		assertThat(sp.downstreamCount()).as("downstreamCount").isNotZero();
 
 		ts.cancel();
 
-		Assert.assertTrue("Still subscribed?", sp.downstreamCount() == 0);
+		assertThat(sp.downstreamCount()).as("downstreamCount").isZero();
 	}
 
 	@Test
@@ -198,7 +197,7 @@ public class FluxPublishMulticastTest extends FluxOperatorTest<String, String> {
 		sp.publish(o -> Flux.<Integer>empty())
 		  .subscribe(ts);
 
-		Assert.assertFalse("Still subscribed?", sp.downstreamCount() == 1);
+		assertThat(sp.downstreamCount()).as("downstreamCount").isNotEqualTo(1);
 	}
 
 	@Test

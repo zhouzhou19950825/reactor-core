@@ -33,6 +33,7 @@ import reactor.test.publisher.FluxOperatorTest;
 import reactor.test.subscriber.AssertSubscriber;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatNullPointerException;
 
 public class FluxFilterTest extends FluxOperatorTest<String, String> {
 
@@ -67,15 +68,16 @@ public class FluxFilterTest extends FluxOperatorTest<String, String> {
 		);
 	}
 
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void sourceNull() {
-		new FluxFilter<Integer>(null, e -> true);
+		assertThatNullPointerException()
+				.isThrownBy(() -> new FluxFilter<Integer>(null, e -> true));
 	}
 
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void predicateNull() {
-		Flux.never()
-		    .filter(null);
+		assertThatNullPointerException()
+				.isThrownBy(() -> Flux.never().filter(null));
 	}
 
 	@Test

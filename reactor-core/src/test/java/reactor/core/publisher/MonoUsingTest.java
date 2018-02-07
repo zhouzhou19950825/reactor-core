@@ -20,30 +20,31 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.assertj.core.api.Condition;
-import org.junit.Assert;
 import org.junit.Test;
 import reactor.test.StepVerifier;
 import reactor.test.subscriber.AssertSubscriber;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatNullPointerException;
 
 public class MonoUsingTest {
 
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void resourceSupplierNull() {
-		Mono.using(null, r -> Mono.empty(), r -> {
-		}, false);
+		assertThatNullPointerException()
+				.isThrownBy(() -> Mono.using(null, r -> Mono.empty(), r -> { }, false));
 	}
 
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void sourceFactoryNull() {
-		Mono.using(() -> 1, null, r -> {
-		}, false);
+		assertThatNullPointerException()
+				.isThrownBy(() -> Mono.using(() -> 1, null, r -> { }, false));
 	}
 
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void resourceCleanupNull() {
-		Mono.using(() -> 1, r -> Mono.empty(), null, false);
+		assertThatNullPointerException()
+				.isThrownBy(() -> Mono.using(() -> 1, r -> Mono.empty(), null, false));
 	}
 
 	@Test
@@ -53,14 +54,14 @@ public class MonoUsingTest {
 		AtomicInteger cleanup = new AtomicInteger();
 
 		Mono.using(() -> 1, r -> Mono.just(1), cleanup::set, false)
-		    .doAfterTerminate(() ->  Assert.assertEquals(0, cleanup.get()))
+		    .doAfterTerminate(() ->  assertThat(cleanup.get()).isZero())
 		    .subscribe(ts);
 
 		ts.assertValues(1)
 		  .assertComplete()
 		  .assertNoError();
 
-		Assert.assertEquals(1, cleanup.get());
+		assertThat(cleanup.get()).isEqualTo(1);
 	}
 
 	@Test
@@ -70,14 +71,14 @@ public class MonoUsingTest {
 		AtomicInteger cleanup = new AtomicInteger();
 
 		Mono.using(() -> 1, r -> Mono.just(1), cleanup::set)
-		    .doAfterTerminate(() ->  Assert.assertEquals(0, cleanup.get()))
+		    .doAfterTerminate(() ->  assertThat(cleanup.get()).isZero())
 		    .subscribe(ts);
 
 		ts.assertValues(1)
 		  .assertComplete()
 		  .assertNoError();
 
-		Assert.assertEquals(1, cleanup.get());
+		assertThat(cleanup.get()).isEqualTo(1);
 	}
 
 	void checkCleanupExecutionTime(boolean eager, boolean fail) {
@@ -118,8 +119,8 @@ public class MonoUsingTest {
 			  .assertNoError();
 		}
 
-		Assert.assertEquals(1, cleanup.get());
-		Assert.assertEquals(eager, before.get());
+		assertThat(cleanup.get()).as("cleanup").isEqualTo(1);
+		assertThat(before.get()).as("before").isEqualTo(eager);
 	}
 
 	@Test
@@ -158,7 +159,7 @@ public class MonoUsingTest {
 		  .assertError(RuntimeException.class)
 		  .assertErrorMessage("forced failure");
 
-		Assert.assertEquals(0, cleanup.get());
+		assertThat(cleanup.get()).as("cleanup").isZero();
 	}
 
 	@Test
@@ -177,7 +178,7 @@ public class MonoUsingTest {
 		  .assertError(RuntimeException.class)
 		  .assertErrorMessage("forced failure");
 
-		Assert.assertEquals(1, cleanup.get());
+		assertThat(cleanup.get()).as("cleanup").isEqualTo(1);
 	}
 
 	@Test
@@ -195,7 +196,7 @@ public class MonoUsingTest {
 		  .assertNotComplete()
 		  .assertError(NullPointerException.class);
 
-		Assert.assertEquals(1, cleanup.get());
+		assertThat(cleanup.get()).as("cleanup").isEqualTo(1);
 	}
 
 	@Test
@@ -209,7 +210,7 @@ public class MonoUsingTest {
 		Mono.using(() -> 1, r -> tp, cleanup::set, true)
 		    .subscribe(ts);
 
-		Assert.assertTrue("No subscriber?", tp.hasDownstreams());
+		assertThat(tp.hasDownstreams()).as("hasDownstreams").isTrue();
 
 		tp.onNext(1);
 
@@ -217,8 +218,7 @@ public class MonoUsingTest {
 		  .assertComplete()
 		  .assertNoError();
 
-
-		Assert.assertEquals(1, cleanup.get());
+		assertThat(cleanup.get()).as("cleanup").isEqualTo(1);
 	}
 
 	@Test

@@ -19,7 +19,6 @@ package reactor.core;
 import java.util.Collections;
 import java.util.List;
 
-import org.assertj.core.api.Condition;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;

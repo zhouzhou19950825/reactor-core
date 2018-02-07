@@ -22,13 +22,12 @@ import java.util.concurrent.CountDownLatch;
 
 import org.junit.Test;
 import reactor.core.Disposable;
-import reactor.util.Loggers;
 import reactor.core.publisher.Flux;
+import reactor.util.Logger;
+import reactor.util.Loggers;
 import reactor.util.function.Tuples;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
-
-import reactor.util.Logger;
 
 /**
  * @author Stephane Maldini

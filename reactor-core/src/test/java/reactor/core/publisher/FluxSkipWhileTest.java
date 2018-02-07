@@ -28,6 +28,8 @@ import reactor.test.StepVerifier;
 import reactor.test.publisher.FluxOperatorTest;
 import reactor.test.subscriber.AssertSubscriber;
 
+import static org.assertj.core.api.Assertions.assertThatNullPointerException;
+
 public class FluxSkipWhileTest extends FluxOperatorTest<String, String> {
 
 	@Override
@@ -53,15 +55,17 @@ public class FluxSkipWhileTest extends FluxOperatorTest<String, String> {
 	}
 
 
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void sourceNull() {
-		new FluxSkipWhile<>(null, v -> true);
+		assertThatNullPointerException()
+				.isThrownBy(() -> new FluxSkipWhile<>(null, v -> true));
 	}
 
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void predicateNull() {
-		Flux.never()
-		    .skipWhile(null);
+		assertThatNullPointerException()
+				.isThrownBy(() -> Flux.never()
+				                      .skipWhile(null));
 	}
 
 	@Test

@@ -17,24 +17,26 @@
 package reactor.core.publisher;
 
 import org.junit.Test;
-import org.testng.Assert;
 import reactor.core.Exceptions;
 import reactor.test.StepVerifier;
 import reactor.test.subscriber.AssertSubscriber;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatNullPointerException;
 
 public class MonoFilterTest {
 
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void sourceNull() {
-		new MonoFilter<Integer>(null, e -> true);
+		assertThatNullPointerException()
+				.isThrownBy(() -> new MonoFilter<Integer>(null, e -> true));
 	}
 
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void predicateNull() {
-		Mono.never()
-		    .filter(null);
+		assertThatNullPointerException()
+				.isThrownBy(() -> Mono.never()
+				                      .filter(null));
 	}
 
 	@Test
@@ -159,7 +161,7 @@ public class MonoFilterTest {
 			up.onNext(3);
 		}
 		catch(Exception e){
-			Assert.assertTrue(Exceptions.isCancel(e));
+			assertThat(e).matches(Exceptions::isCancel, "cancelException");
 		}
 
 		ts.assertValues(2)

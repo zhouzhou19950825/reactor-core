@@ -23,14 +23,14 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.junit.AfterClass;
-import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import reactor.core.Exceptions;
 import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 public class BlockingTests {
 
@@ -48,18 +48,18 @@ public class BlockingTests {
 
 	@Test
 	public void blockingFirst() {
-		Assert.assertEquals((Integer) 1,
-				Flux.range(1, 10)
+		assertThat(Flux.range(1, 10)
 				    .publishOn(scheduler)
-				    .blockFirst());
+				    .blockFirst())
+				.isEqualTo(1);
 	}
 
 	@Test
 	public void blockingFirst2() {
-		Assert.assertEquals((Integer) 1,
-				Flux.range(1, 10)
+		assertThat(Flux.range(1, 10)
 				    .publishOn(scheduler)
-				    .blockFirst(Duration.ofSeconds(10)));
+				    .blockFirst(Duration.ofSeconds(10)))
+				.isEqualTo(1);
 	}
 
 	@Test
@@ -70,18 +70,18 @@ public class BlockingTests {
 
 	@Test
 	public void blockingLast() {
-		Assert.assertEquals((Integer) 10,
-				Flux.range(1, 10)
+		assertThat(Flux.range(1, 10)
 				    .publishOn(scheduler)
-				    .blockLast());
+				    .blockLast())
+		.isEqualTo(10);
 	}
 
 	@Test
 	public void blockingLast2() {
-		Assert.assertEquals((Integer) 10,
-				Flux.range(1, 10)
+		assertThat(Flux.range(1, 10)
 				    .publishOn(scheduler)
-				    .blockLast(Duration.ofSeconds(10)));
+				    .blockLast(Duration.ofSeconds(10)))
+				.isEqualTo(10);
 	}
 
 	@Test
@@ -90,32 +90,36 @@ public class BlockingTests {
 		               .blockLast(Duration.ofMillis(1))).isNull();
 	}
 
-	@Test(expected = RuntimeException.class)
+	@Test
 	public void blockingFirstError() {
-		Flux.error(new RuntimeException("test"))
-		    .publishOn(scheduler)
-		    .blockFirst();
+		assertThatExceptionOfType(RuntimeException.class)
+				.isThrownBy(() -> Flux.error(new RuntimeException("test"))
+			                      .publishOn(scheduler)
+			                      .blockFirst());
 	}
 
-	@Test(expected = RuntimeException.class)
+	@Test
 	public void blockingFirstError2() {
-		Flux.error(new RuntimeException("test"))
-		    .publishOn(scheduler)
-		    .blockFirst(Duration.ofSeconds(1));
+		assertThatExceptionOfType(RuntimeException.class)
+				.isThrownBy(() -> Flux.error(new RuntimeException("test"))
+				                      .publishOn(scheduler)
+		                              .blockFirst(Duration.ofSeconds(1)));
 	}
 
-	@Test(expected = RuntimeException.class)
+	@Test
 	public void blockingLastError() {
-		Flux.defer(() -> Mono.error(new RuntimeException("test")))
-		    .subscribeOn(scheduler)
-		    .blockLast();
+		assertThatExceptionOfType(RuntimeException.class)
+				.isThrownBy(() -> Flux.defer(() -> Mono.error(new RuntimeException("test")))
+				                      .subscribeOn(scheduler)
+				                      .blockLast());
 	}
 
-	@Test(expected = RuntimeException.class)
+	@Test
 	public void blockingLastError2() {
-		Flux.defer(() -> Mono.error(new RuntimeException("test")))
-		    .subscribeOn(scheduler)
-		    .blockLast(Duration.ofSeconds(1));
+		assertThatExceptionOfType(RuntimeException.class)
+				.isThrownBy(() -> Flux.defer(() -> Mono.error(new RuntimeException("test")))
+				                      .subscribeOn(scheduler)
+				                      .blockLast(Duration.ofSeconds(1)));
 	}
 
 	@Test
@@ -137,7 +141,9 @@ public class BlockingTests {
 		Thread.sleep(1000);
 		t.interrupt();
 
-		Assert.assertTrue("Not interrupted ?", latch.await(3, TimeUnit.SECONDS));
+		assertThat(latch.await(3, TimeUnit.SECONDS))
+				.as("should be interrupted ")
+				.isTrue();
 	}
 
 	/*@Test

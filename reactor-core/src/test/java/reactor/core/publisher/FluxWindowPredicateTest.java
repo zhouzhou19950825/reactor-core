@@ -24,7 +24,6 @@ import java.util.function.Predicate;
 import java.util.logging.Level;
 
 import org.assertj.core.api.Assertions;
-import org.junit.Assert;
 import org.junit.Test;
 import org.reactivestreams.Subscription;
 import reactor.core.CoreSubscriber;
@@ -38,6 +37,7 @@ import reactor.test.publisher.TestPublisher;
 import reactor.util.concurrent.Queues;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 public class FluxWindowPredicateTest extends
                                      FluxOperatorTest<String, Flux<String>> {
@@ -55,7 +55,7 @@ public class FluxWindowPredicateTest extends
 		return Arrays.asList(
 				scenario(f -> f.windowUntil(t -> true, true, 1))
 						.prefetch(1)
-						.receive(s -> s.buffer().subscribe(b -> Assert.fail()),
+						.receive(s -> s.buffer().subscribe(b -> fail("")),
 								s -> s.buffer().subscribe(b -> assertThat(b).containsExactly(item(0))),
 								s -> s.buffer().subscribe(b -> assertThat(b).containsExactly(item(1))),
 								s -> s.buffer().subscribe(b -> assertThat(b).containsExactly(item(2)))),

@@ -27,6 +27,9 @@ import reactor.core.Scannable;
 import reactor.test.publisher.FluxOperatorTest;
 import reactor.test.subscriber.AssertSubscriber;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.assertThatNullPointerException;
+
 public class FluxSkipLastTest extends FluxOperatorTest<String, String> {
 	@Override
 	protected Scenario<String, String> defaultScenarioOptions(Scenario<String, String> defaultOptions) {
@@ -50,15 +53,17 @@ public class FluxSkipLastTest extends FluxOperatorTest<String, String> {
 	}
 
 
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void sourceNull() {
-		new FluxSkipLast<>(null, 1);
+		assertThatNullPointerException()
+				.isThrownBy(() -> new FluxSkipLast<>(null, 1));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void negativeNumber() {
-		Flux.never()
-		    .skipLast(-1);
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> Flux.never()
+				                      .skipLast(-1));
 	}
 
 	@Test

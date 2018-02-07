@@ -23,17 +23,20 @@ import reactor.core.Scannable;
 import reactor.test.subscriber.AssertSubscriber;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatNullPointerException;
 
 public class FluxDefaultIfEmptyTest {
 
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void sourceNull() {
-		new FluxDefaultIfEmpty<>(null, 1);
+		assertThatNullPointerException()
+				.isThrownBy(() -> new FluxDefaultIfEmpty<>(null, 1));
 	}
 
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void valueNull() {
-		Flux.never().defaultIfEmpty(null);
+		assertThatNullPointerException()
+				.isThrownBy(() -> Flux.never().defaultIfEmpty(null));
 	}
 
 	@Test

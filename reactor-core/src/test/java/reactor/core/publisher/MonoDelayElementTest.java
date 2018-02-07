@@ -102,14 +102,14 @@ public class MonoDelayElementTest {
 		assertThat(cancelled.get()).isTrue();
 	}
 
-	@Test(timeout = 5000L)
+	@Test(timeout = 5000)
 	public void emptyIsImmediate() {
 		Mono<String> source = Mono.<String>empty().log().hide();
 
 		Duration d = StepVerifier.create(new MonoDelayElement<>(source, 10, TimeUnit.SECONDS,
 				defaultSchedulerForDelay()).log())
-		            .expectSubscription()
-		            .verifyComplete();
+		                         .expectSubscription()
+		                         .verifyComplete();
 
 		assertThat(d).isLessThan(Duration.ofSeconds(1));
 	}

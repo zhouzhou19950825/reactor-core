@@ -22,15 +22,14 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 
-import static org.junit.Assert.assertEquals;
-
 import org.junit.Before;
 import org.junit.Test;
-
 import reactor.core.publisher.DirectProcessor;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.GroupedFlux;
 import reactor.test.subscriber.AssertSubscriber;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class FluxWindowConsistencyTest {
 
@@ -108,13 +107,13 @@ public class FluxWindowConsistencyTest {
 		for (int i = 0; i < lists.length; i++) {
 			expectWindow(i, t -> true, lists[i]);
 		}
-		assertEquals("Inner cancel doesn't match", 0, innerCancelled.get());
-		assertEquals("Inner complete doesn't match", lists.length, innerCompleted.get());
-		assertEquals("Inner terminate doesn't match", lists.length, innerTerminated.get());
-		assertEquals("Main cancel doesn't match", 0, mainCancelled.get());
-		assertEquals("Main complete doesn't match", 1, mainCompleted.get());
-		assertEquals("Main terminate doesn't match", 1, mainTerminated.get());
-		assertEquals("Inner not completed", innerCreated.get(), innerCompleted.get());
+		assertThat(innerCancelled.get()).as("innerCancelled").isZero();
+		assertThat(innerCompleted.get()).as("innerCompleted").isEqualTo(lists.length);
+		assertThat(innerTerminated.get()).as("innerTerminated").isEqualTo(lists.length);
+		assertThat(mainCancelled.get()).as("mainCancelled").isZero();
+		assertThat(mainCompleted.get()).as("mainCompleted").isEqualTo(1);
+		assertThat(mainTerminated.get()).as("mainTerminated").isEqualTo(1);
+		assertThat(innerCompleted.get()).as("all completed").isEqualTo(innerCreated.get());
 	}
 
 	@SafeVarargs
@@ -126,12 +125,12 @@ public class FluxWindowConsistencyTest {
 		// All tests except groupBy provide sufficient data/duration for all inner windows to complete
 		int expectedInnerComplete = isGroupBy ? lists.length : 0;
 
-		assertEquals("Inner cancel doesn't match", 0, innerCancelled.get());
-		assertEquals("Inner complete doesn't match", expectedInnerComplete, innerCompleted.get());
-		assertEquals("Inner terminate doesn't match", expectedInnerComplete, innerTerminated.get());
-		assertEquals("Main cancel doesn't match", 1, mainCancelled.get());
-		assertEquals("Main complete doesn't match", 0, mainCompleted.get());
-		assertEquals("Main terminate doesn't match", 0, mainTerminated.get());
+		assertThat(innerCancelled.get()).as("innerCancelled").isZero();
+		assertThat(innerCompleted.get()).as("innerCompleted").isEqualTo(expectedInnerComplete);
+		assertThat(innerTerminated.get()).as("innerTerminated").isEqualTo(expectedInnerComplete);
+		assertThat(mainCancelled.get()).as("mainCancelled").isEqualTo(1);
+		assertThat(mainCompleted.get()).as("mainCompleted").isZero();
+		assertThat(mainTerminated.get()).as("mainTerminated").isZero();
 	}
 
 	@SafeVarargs
@@ -139,12 +138,13 @@ public class FluxWindowConsistencyTest {
 		for (int i = 0; i < lists.length; i++) {
 			expectWindow(i, t -> true, lists[i]);
 		}
-		assertEquals("Inner cancel doesn't match", 0, innerCancelled.get());
-		assertEquals("Inner complete doesn't match", completedWindows, innerCompleted.get());
-		assertEquals("Inner terminate doesn't match", completedWindows, innerTerminated.get());
-		assertEquals("Main cancel doesn't match", 1, mainCancelled.get());
-		assertEquals("Main complete doesn't match", 0, mainCompleted.get());
-		assertEquals("Main terminate doesn't match", 0, mainTerminated.get());
+
+		assertThat(innerCancelled.get()).as("innerCancelled").isZero();
+		assertThat(innerCompleted.get()).as("innerCompleted").isEqualTo(completedWindows);
+		assertThat(innerTerminated.get()).as("innerTerminated").isEqualTo(completedWindows);
+		assertThat(mainCancelled.get()).as("mainCancelled").isEqualTo(1);
+		assertThat(mainCompleted.get()).as("mainCompleted").isZero();
+		assertThat(mainTerminated.get()).as("mainTerminated").isZero();
 	}
 
 	@SafeVarargs
@@ -152,13 +152,12 @@ public class FluxWindowConsistencyTest {
 		for (int i = 0; i < lists.length; i++) {
 			expectWindow(i, predicate, lists[i]);
 		}
-
-		assertEquals("Inner cancel doesn't match", lists.length - completedWindows, innerCancelled.get());
-		assertEquals("Inner complete doesn't match", completedWindows, innerCompleted.get());
-		assertEquals("Inner terminate doesn't match", completedWindows, innerTerminated.get());
-		assertEquals("Main cancel doesn't match", 1, mainCancelled.get());
-		assertEquals("Main complete doesn't match", 0, mainCompleted.get());
-		assertEquals("Main terminate doesn't match", 0, mainTerminated.get());
+		assertThat(innerCancelled.get()).as("innerCancelled").isEqualTo(lists.length - completedWindows);
+		assertThat(innerCompleted.get()).as("innerCompleted").isEqualTo(completedWindows);
+		assertThat(innerTerminated.get()).as("innerTerminated").isEqualTo(completedWindows);
+		assertThat(mainCancelled.get()).as("mainCancelled").isEqualTo(1);
+		assertThat(mainCompleted.get()).as("mainCompleted").isZero();
+		assertThat(mainTerminated.get()).as("mainTerminated").isZero();
 	}
 
 	@Test

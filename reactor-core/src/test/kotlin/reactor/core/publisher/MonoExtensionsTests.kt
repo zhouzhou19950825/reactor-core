@@ -17,7 +17,6 @@
 package reactor.core.publisher
 
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.Assert
 import org.junit.Test
 import org.reactivestreams.Publisher
 import reactor.test.StepVerifier
@@ -168,7 +167,7 @@ class MonoExtensionsTests {
         monoOnError.doOnError(IllegalStateException::class, {
             invoked = true
         }).subscribe()
-        Assert.assertTrue(invoked)
+        assertThat(invoked).isTrue()
     }
 
     @Test

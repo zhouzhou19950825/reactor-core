@@ -25,12 +25,14 @@ import reactor.test.MockUtils;
 import reactor.test.subscriber.AssertSubscriber;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatNullPointerException;
 
 public class FluxArrayTest {
 
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void arrayNull() {
-		Flux.fromArray((Integer[]) null);
+		assertThatNullPointerException()
+				.isThrownBy(() -> Flux.fromArray((Integer[]) null));
 	}
 
 	@Test

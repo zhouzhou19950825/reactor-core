@@ -19,10 +19,11 @@ package reactor.core.publisher;
 import java.lang.ref.WeakReference;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.junit.Assert;
 import org.junit.Test;
 import org.reactivestreams.Subscriber;
 import reactor.test.subscriber.AssertSubscriber;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class MonoDetachTest {
 
@@ -50,8 +51,7 @@ public class MonoDetachTest {
 		System.gc();
 		Thread.sleep(200);
 
-		Assert.assertNull("Object retained!", wr.get());
-
+		assertThat(wr.get()).withFailMessage("Object retained!").isNull();
 	}
 
 	@Test
@@ -106,7 +106,7 @@ public class MonoDetachTest {
 		System.gc();
 		Thread.sleep(200);
 
-		Assert.assertNull("Object retained!", wr.get());
+		assertThat(wr.get()).withFailMessage("Object retained!").isNull();
 	}
 
 	@Test
@@ -127,8 +127,7 @@ public class MonoDetachTest {
 		System.gc();
 		Thread.sleep(200);
 
-		Assert.assertNull("Object retained!", wr.get());
-
+		assertThat(wr.get()).withFailMessage("Object retained!").isNull();
 	}
 
 	@Test

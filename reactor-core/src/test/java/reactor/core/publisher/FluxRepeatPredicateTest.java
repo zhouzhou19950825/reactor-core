@@ -19,12 +19,14 @@ package reactor.core.publisher;
 import org.junit.Test;
 import reactor.test.subscriber.AssertSubscriber;
 
+import static org.assertj.core.api.Assertions.assertThatNullPointerException;
+
 public class FluxRepeatPredicateTest {
 
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void predicateNull() {
-		Flux.never()
-		    .repeat(null);
+		assertThatNullPointerException()
+				.isThrownBy(() -> Flux.never().repeat(null));
 	}
 
 	@Test

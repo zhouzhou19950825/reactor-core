@@ -25,17 +25,20 @@ import reactor.core.Scannable;
 import reactor.test.subscriber.AssertSubscriber;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatNullPointerException;
 
 public class FluxFirstEmittingTest {
 
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void arrayNull() {
-		Flux.first((Publisher<Integer>[]) null);
+		assertThatNullPointerException()
+				.isThrownBy(() -> Flux.first((Publisher<Integer>[]) null));
 	}
 
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void iterableNull() {
-		new FluxFirstEmitting<>((Iterable<Publisher<Integer>>) null);
+		assertThatNullPointerException()
+				.isThrownBy(() -> new FluxFirstEmitting<>((Iterable<Publisher<Integer>>) null));
 	}
 
 	@Test

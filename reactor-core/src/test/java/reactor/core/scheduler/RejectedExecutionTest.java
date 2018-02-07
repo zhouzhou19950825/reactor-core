@@ -40,8 +40,6 @@ import reactor.core.publisher.SignalType;
 import reactor.test.StepVerifier;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 public class RejectedExecutionTest {
 
@@ -338,14 +336,14 @@ public class RejectedExecutionTest {
 
 	private void onNext(long i) {
 		String thread = Thread.currentThread().getName();
-		assertTrue("onNext on the wrong thread " + thread, thread.contains("bounded"));
+		assertThat(thread).withFailMessage("onNext on the wrong thread " + thread).contains("bounded");
 		onNexts.add(i);
 	}
 
 	private void onError(Throwable t) {
 		String thread = Thread.currentThread().getName();
 		//FIXME evaluate if and when it is legit to be on different thread
-		assertFalse("onError on the wrong thread " + thread, thread.contains("bounded"));
+		assertThat(thread).withFailMessage("onError on the wrong thread " + thread).doesNotContain("bounded");
 		onErrors.add(t);
 	}
 

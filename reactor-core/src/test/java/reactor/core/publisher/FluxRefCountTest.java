@@ -23,7 +23,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.junit.Assert;
 import org.junit.Test;
 import org.reactivestreams.Subscription;
 import reactor.core.CoreSubscriber;
@@ -85,30 +84,30 @@ public class FluxRefCountTest {
 
 		Flux<Integer> p = e.publish().refCount();
 
-		Assert.assertFalse("sp has subscribers?", e.downstreamCount() != 0);
+		assertThat(e.downstreamCount()).withFailMessage("sp has subscribers?").isZero();
 
 		AssertSubscriber<Integer> ts1 = AssertSubscriber.create();
 		p.subscribe(ts1);
 
-		Assert.assertTrue("sp has no subscribers?", e.downstreamCount() != 0);
+		assertThat(e.downstreamCount()).withFailMessage("sp has no subscribers?").isNotZero();
 
 		AssertSubscriber<Integer> ts2 = AssertSubscriber.create();
 		p.subscribe(ts2);
 
-		Assert.assertTrue("sp has no subscribers?", e.downstreamCount() != 0);
+		assertThat(e.downstreamCount()).withFailMessage("sp has no subscribers?").isNotZero();
 
 		e.onNext(1);
 		e.onNext(2);
 
 		ts1.cancel();
 
-		Assert.assertTrue("sp has no subscribers?", e.downstreamCount() != 0);
+		assertThat(e.downstreamCount()).withFailMessage("sp has no subscribers?").isNotZero();
 
 		e.onNext(3);
 
 		ts2.cancel();
 
-		Assert.assertFalse("sp has subscribers?", e.downstreamCount() != 0);
+		assertThat(e.downstreamCount()).withFailMessage("sp has subscribers?").isZero();
 
 		ts1.assertValues(1, 2)
 		.assertNoError()
@@ -125,30 +124,30 @@ public class FluxRefCountTest {
 
 		Flux<Integer> p = e.publish().refCount(2);
 
-		Assert.assertFalse("sp has subscribers?", e.downstreamCount() != 0);
+		assertThat(e.downstreamCount()).withFailMessage("sp has subscribers?").isZero();
 
 		AssertSubscriber<Integer> ts1 = AssertSubscriber.create();
 		p.subscribe(ts1);
 
-		Assert.assertFalse("sp has subscribers?", e.downstreamCount() != 0);
+		assertThat(e.downstreamCount()).withFailMessage("sp has subscribers?").isZero();
 
 		AssertSubscriber<Integer> ts2 = AssertSubscriber.create();
 		p.subscribe(ts2);
 
-		Assert.assertTrue("sp has no subscribers?", e.downstreamCount() != 0);
+		assertThat(e.downstreamCount()).withFailMessage("sp has no subscribers?").isNotZero();
 
 		e.onNext(1);
 		e.onNext(2);
 
 		ts1.cancel();
 
-		Assert.assertTrue("sp has no subscribers?", e.downstreamCount() != 0);
+		assertThat(e.downstreamCount()).withFailMessage("sp has no subscribers?").isNotZero();
 
 		e.onNext(3);
 
 		ts2.cancel();
 
-		Assert.assertFalse("sp has subscribers?", e.downstreamCount() != 0);
+		assertThat(e.downstreamCount()).withFailMessage("sp has subscribers?").isZero();
 
 		ts1.assertValues(1, 2)
 		.assertNoError()

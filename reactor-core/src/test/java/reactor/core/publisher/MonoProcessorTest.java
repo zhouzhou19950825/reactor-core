@@ -32,8 +32,7 @@ import reactor.core.Scannable;
 import reactor.test.StepVerifier;
 import reactor.util.function.Tuple2;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.*;
 
 public class MonoProcessorTest {
 
@@ -124,10 +123,11 @@ public class MonoProcessorTest {
 		                  .isPositive();
 	}
 
-	@Test(expected = IllegalStateException.class)
+	@Test
 	public void MonoProcessorResultNotAvailable() {
 		MonoProcessor<String> mp = MonoProcessor.create();
-		mp.block(Duration.ofMillis(1));
+		assertThatIllegalStateException()
+				.isThrownBy(() -> mp.block(Duration.ofMillis(1)));
 	}
 
 	@Test
@@ -221,11 +221,12 @@ public class MonoProcessorTest {
 		assertThat(mp.isError()).isTrue();
 	}
 
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void MonoProcessorRejectedSubscribeCallbackNull() {
 		MonoProcessor<String> mp = MonoProcessor.create();
 
-		mp.subscribe((Subscriber<String>)null);
+		assertThatNullPointerException()
+				.isThrownBy(() -> mp.subscribe((Subscriber<String>)null));
 	}
 
 	@Test
@@ -343,20 +344,26 @@ public class MonoProcessorTest {
 		            .verifyErrorMessage("test");
 	}
 
-	@Test(expected = Exception.class)
+	@Test
 	public void MonoProcessorDoubleError() {
-		MonoProcessor<String> mp = MonoProcessor.create();
+		assertThatExceptionOfType(Exception.class)
+				.isThrownBy(() -> {
+					MonoProcessor<String> mp = MonoProcessor.create();
 
-		mp.onError(new Exception("test"));
-		mp.onError(new Exception("test"));
+					mp.onError(new Exception("test"));
+					mp.onError(new Exception("test"));
+				});
 	}
 
-	@Test(expected = Exception.class)
+	@Test
 	public void MonoProcessorDoubleSignal() {
-		MonoProcessor<String> mp = MonoProcessor.create();
+		assertThatExceptionOfType(Exception.class)
+				.isThrownBy(() -> {
+					MonoProcessor<String> mp = MonoProcessor.create();
 
-		mp.onNext("test");
-		mp.onError(new Exception("test"));
+					mp.onNext("test");
+					mp.onError(new Exception("test"));
+				});
 	}
 
 	@Test

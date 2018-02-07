@@ -20,16 +20,20 @@ import org.junit.Test;
 import reactor.test.StepVerifier;
 import reactor.test.subscriber.AssertSubscriber;
 
+import static org.assertj.core.api.Assertions.assertThatNullPointerException;
+
 public class MonoDefaultIfEmptyTest {
 
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void sourceNull() {
-		new MonoDefaultIfEmpty<>(null, 1);
+		assertThatNullPointerException()
+				.isThrownBy(() -> new MonoDefaultIfEmpty<>(null, 1));
 	}
 
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void valueNull() {
-		Mono.never().defaultIfEmpty(null);
+		assertThatNullPointerException()
+				.isThrownBy(() -> Mono.never().defaultIfEmpty(null));
 	}
 
 	@Test

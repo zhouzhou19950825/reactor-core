@@ -22,7 +22,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.assertj.core.api.AssertionsForClassTypes;
-import org.junit.Assert;
 import org.junit.Test;
 import org.reactivestreams.Subscriber;
 import reactor.core.Scannable;
@@ -30,25 +29,28 @@ import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
 import reactor.test.StepVerifier;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 
 public class FluxProcessorTest {
 
-	@Test(expected = NullPointerException.class)
+	@Test
 	@SuppressWarnings("unchecked")
 	public void failNullSubscriber(){
-		FluxProcessor.wrap(UnicastProcessor.create(), UnicastProcessor.create())
-	                 .subscribe((Subscriber)null);
+		assertThatNullPointerException()
+				.isThrownBy(() -> FluxProcessor.wrap(UnicastProcessor.create(), UnicastProcessor.create())
+	                 .subscribe((Subscriber)null));
 	}
 
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void failNullUpstream(){
-		FluxProcessor.wrap(null, UnicastProcessor.create());
+		assertThatNullPointerException()
+				.isThrownBy(() -> FluxProcessor.wrap(null, UnicastProcessor.create()));
 	}
 
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void failNullDownstream(){
-		FluxProcessor.wrap(UnicastProcessor.create(), null);
+		assertThatNullPointerException()
+				.isThrownBy(() -> FluxProcessor.wrap(UnicastProcessor.create(), null));
 	}
 
 	@Test
@@ -133,7 +135,7 @@ public class FluxProcessorTest {
 		session.complete();
 
 		latch.await(5, TimeUnit.SECONDS);
-		Assert.assertTrue("latch : " + count, count.get() == 1);
+		assertThat(count.get()).as("count, latch=" + latch.getCount()).isEqualTo(1);
 		scheduler.dispose();
 	}
 
@@ -161,7 +163,7 @@ public class FluxProcessorTest {
 		session.complete();
 
 		boolean waited = latch.await(5, TimeUnit.SECONDS);
-		Assert.assertTrue( "latch : " + latch.getCount(), waited);
+		assertThat(waited).as("waited, latch=" + latch.getCount()).isTrue();
 		c.dispose();
 	}
 	@Test
@@ -189,7 +191,7 @@ public class FluxProcessorTest {
 		session.complete();
 
 		boolean waited = latch.await(5, TimeUnit.SECONDS);
-		Assert.assertTrue( "latch : " + latch.getCount(), waited);
+		assertThat(waited).as("waited, latch=" + latch.getCount()).isTrue();
 		c.dispose();
 	}
 
@@ -214,7 +216,7 @@ public class FluxProcessorTest {
 					            latch2.await();
 				            }
 				            catch (InterruptedException e) {
-					            Assert.fail();
+					            fail("");
 				            }
 				            w2.schedule(() -> {
 					            serialized.onNext("test2");
@@ -232,7 +234,7 @@ public class FluxProcessorTest {
 					            latch.await();
 				            }
 				            catch (InterruptedException e) {
-					            Assert.fail();
+					            fail("");
 				            }
 			            })
 			            .assertNext(s -> {

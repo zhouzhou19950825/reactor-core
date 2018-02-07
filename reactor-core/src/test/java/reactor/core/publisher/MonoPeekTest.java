@@ -23,6 +23,7 @@ import org.reactivestreams.Subscription;
 import reactor.test.StepVerifier;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatNullPointerException;
 
 public class MonoPeekTest {
 
@@ -146,10 +147,10 @@ public class MonoPeekTest {
 		assertThat(ref.get()).isNull();
 	}
 
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void onMonoSuccessNullDoOnSuccess() {
 		Mono<String> mp = Mono.just("test");
-		mp.doOnSuccess(null)
-		  .subscribe();
+		assertThatNullPointerException()
+				.isThrownBy(() -> mp.doOnSuccess(null));
 	}
 }

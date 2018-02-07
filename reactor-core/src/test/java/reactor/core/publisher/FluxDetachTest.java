@@ -18,7 +18,6 @@ package reactor.core.publisher;
 import java.lang.ref.WeakReference;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.junit.Assert;
 import org.junit.Test;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
@@ -55,8 +54,7 @@ public class FluxDetachTest {
 		System.gc();
 		Thread.sleep(200);
 
-		Assert.assertNull("Object retained!", wr.get());
-
+		assertThat(wr.get()).withFailMessage("Object retained!").isNull();
 	}
 
 	@Test
@@ -125,7 +123,7 @@ public class FluxDetachTest {
 		System.gc();
 		Thread.sleep(200);
 
-		Assert.assertNull("Object retained!", wr.get());
+		assertThat(wr.get()).withFailMessage("Object retained!").isNull();
 	}
 
 	@Test
@@ -148,8 +146,7 @@ public class FluxDetachTest {
 		System.gc();
 		Thread.sleep(200);
 
-		Assert.assertNull("Object retained!", wr.get());
-
+		assertThat(wr.get()).withFailMessage("Object retained!").isNull();
 	}
 
 	@Test

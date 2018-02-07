@@ -19,7 +19,6 @@ package reactor.core.publisher;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.junit.Assert;
 import org.junit.Test;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
@@ -61,9 +60,8 @@ public class StrictSubscriberTest {
 			    }
 		    });
 
-		Assert.assertNull("Error: " + e.get(), e.get());
-
-		Assert.assertTrue("Not open!", state.get());
+		assertThat(e.get()).isNull();
+		assertThat(state.get()).withFailMessage("Not open!").isTrue();
 	}
 
 	@Test
@@ -97,10 +95,10 @@ public class StrictSubscriberTest {
 			  }
 		  });
 
-		Assert.assertNull("Error: " + e.get(), e.get());
+		assertThat(e.get()).isNull();
 
-		Assert.assertTrue("Cancel executed before onSubscribe finished", state2.get());
-		Assert.assertFalse("Has subscribers?!", sp.hasDownstreams());
+		assertThat(state2.get()).withFailMessage("Cancel executed before onSubscribe finished").isTrue();
+		assertThat(sp.hasDownstreams()).withFailMessage("Has subscribers?!").isFalse();
 	}
 
 	@Test
@@ -134,9 +132,9 @@ public class StrictSubscriberTest {
 			    }
 		    });
 
-		Assert.assertNull("Error: " + e.get(), e.get());
+		assertThat(e.get()).isNull();
 
-		Assert.assertFalse("Request delayed!", state.get());
+		assertThat(state.get()).withFailMessage("Request delayed!").isFalse();
 	}
 
 	@Test
@@ -169,9 +167,9 @@ public class StrictSubscriberTest {
 			    }
 		    });
 
-		Assert.assertNull("Error: " + e.get(), e.get());
+		assertThat(e.get()).isNull();
 
-		Assert.assertFalse("Cancel executed before onSubscribe finished", state2.get());
+		assertThat(state2.get()).withFailMessage("Cancel executed before onSubscribe finished").isFalse();
 	}
 
 	@Test

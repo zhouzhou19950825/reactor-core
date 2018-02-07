@@ -28,7 +28,7 @@ import reactor.core.Scannable;
 import reactor.test.StepVerifier;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.fail;
 import static reactor.core.publisher.BufferOverflowStrategy.*;
 
 public class FluxOnBackpressureBufferStrategyTest implements Consumer<String>,
@@ -87,9 +87,9 @@ public class FluxOnBackpressureBufferStrategyTest implements Consumer<String>,
 		            .expectComplete()
 		            .verify();
 
-		assertEquals("over3", droppedValue);
-		assertNull("unexpected hookCapturedValue", hookCapturedValue);
-		assertNull("unexpected hookCapturedError",hookCapturedError);
+		assertThat(droppedValue).isEqualTo("over3");
+		assertThat(hookCapturedValue).as("hookCapturedValue").isNull();
+		assertThat(hookCapturedError).as("hookCapturedError").isNull();
 	}
 
 	@Test
@@ -115,9 +115,9 @@ public class FluxOnBackpressureBufferStrategyTest implements Consumer<String>,
 		            .expectComplete()
 		            .verify();
 
-		assertEquals("over1", droppedValue);
-		assertNull("unexpected hookCapturedValue",hookCapturedValue);
-		assertNull("unexpected hookCapturedError",hookCapturedError);
+		assertThat(droppedValue).isEqualTo("over1");
+		assertThat(hookCapturedValue).as("hookCapturedValue").isNull();
+		assertThat(hookCapturedError).as("hookCapturedError").isNull();
 	}
 
 	@Test
@@ -143,9 +143,9 @@ public class FluxOnBackpressureBufferStrategyTest implements Consumer<String>,
 		            .expectErrorMessage("The receiver is overrun by more signals than expected (bounded queue...)")
 		            .verify();
 
-		assertEquals("over3", droppedValue);
-		assertEquals("over3", hookCapturedValue);
-		assertTrue("unexpected hookCapturedError: " + hookCapturedError, hookCapturedError instanceof IllegalStateException);
+		assertThat(droppedValue).as("droppedValue").isEqualTo("over3");
+		assertThat(hookCapturedValue).as("hookCapturedValue").isEqualTo("over3");
+		assertThat(hookCapturedError).isInstanceOf(IllegalStateException.class);
 	}
 
 	@Test
@@ -172,10 +172,10 @@ public class FluxOnBackpressureBufferStrategyTest implements Consumer<String>,
 		            .expectErrorMessage("boom")
 		            .verify();
 
-		assertNull("unexpected droppedValue", droppedValue);
-		assertEquals("over3", hookCapturedValue);
-		assertTrue("unexpected hookCapturedError: " + hookCapturedError, hookCapturedError instanceof IllegalArgumentException);
-		assertEquals("boom", hookCapturedError.getMessage());
+		assertThat(droppedValue).as("droppedValue").isNull();
+		assertThat(hookCapturedValue).isEqualTo("over3");
+		assertThat(hookCapturedError).isInstanceOf(IllegalArgumentException.class)
+		                             .hasMessage("boom");
 	}
 
 	@Test
@@ -202,10 +202,10 @@ public class FluxOnBackpressureBufferStrategyTest implements Consumer<String>,
 		            .expectErrorMessage("boom")
 		            .verify();
 
-		assertNull("unexpected droppedValue", droppedValue);
-		assertEquals("over1", hookCapturedValue);
-		assertTrue("unexpected hookCapturedError: " + hookCapturedError, hookCapturedError instanceof IllegalArgumentException);
-		assertEquals("boom", hookCapturedError.getMessage());
+		assertThat(droppedValue).as("droppedValue").isNull();
+		assertThat(hookCapturedValue).isEqualTo("over1");
+		assertThat(hookCapturedError).isInstanceOf(IllegalArgumentException.class)
+		                             .hasMessage("boom");
 	}
 
 	@Test
@@ -232,10 +232,10 @@ public class FluxOnBackpressureBufferStrategyTest implements Consumer<String>,
 		            .expectErrorMessage("boom")
 		            .verify();
 
-		assertNull("unexpected droppedValue", droppedValue);
-		assertEquals("over3", hookCapturedValue);
-		assertTrue("unexpected hookCapturedError: " + hookCapturedError, hookCapturedError instanceof IllegalArgumentException);
-		assertEquals("boom", hookCapturedError.getMessage());
+		assertThat(droppedValue).as("droppedValue").isNull();
+		assertThat(hookCapturedValue).isEqualTo("over3");
+		assertThat(hookCapturedError).isInstanceOf(IllegalArgumentException.class)
+		                             .hasMessage("boom");
 	}
 
 	@Test
@@ -260,10 +260,10 @@ public class FluxOnBackpressureBufferStrategyTest implements Consumer<String>,
 		            .expectErrorMessage("The receiver is overrun by more signals than expected (bounded queue...)")
 		            .verify();
 
-		assertNull("unexpected droppedValue", droppedValue);
-		assertEquals("over3", hookCapturedValue);
-		assertTrue("unexpected hookCapturedError: " + hookCapturedError, hookCapturedError instanceof IllegalStateException);
-		assertEquals("The receiver is overrun by more signals than expected (bounded queue...)", hookCapturedError.getMessage());
+		assertThat(droppedValue).as("droppedValue").isNull();
+		assertThat(hookCapturedValue).isEqualTo("over3");
+		assertThat(hookCapturedError).isInstanceOf(IllegalStateException.class)
+		                             .hasMessage("The receiver is overrun by more signals than expected (bounded queue...)");
 	}
 
 	@Test
@@ -289,9 +289,9 @@ public class FluxOnBackpressureBufferStrategyTest implements Consumer<String>,
 		            .expectComplete()
 		            .verify();
 
-		assertNull("unexpected droppedValue", droppedValue);
-		assertNull("unexpected hookCapturedValue", hookCapturedValue);
-		assertNull("unexpected hookCapturedError",hookCapturedError);
+		assertThat(droppedValue).as("droppedValue").isNull();
+		assertThat(hookCapturedValue).as("hookCapturedValue").isNull();
+		assertThat(hookCapturedError).as("hookCapturedError").isNull();
 	}
 
 	@Test
@@ -317,9 +317,9 @@ public class FluxOnBackpressureBufferStrategyTest implements Consumer<String>,
 		            .expectComplete()
 		            .verify();
 
-		assertNull("unexpected droppedValue", droppedValue);
-		assertNull("unexpected hookCapturedValue",hookCapturedValue);
-		assertNull("unexpected hookCapturedError",hookCapturedError);
+		assertThat(droppedValue).as("droppedValue").isNull();
+		assertThat(hookCapturedValue).as("hookCapturedValue").isNull();
+		assertThat(hookCapturedError).as("hookCapturedError").isNull();
 	}
 
 	@Test
@@ -342,9 +342,9 @@ public class FluxOnBackpressureBufferStrategyTest implements Consumer<String>,
 		            .expectComplete()
 		            .verify();
 
-		assertNull("unexpected droppedValue", droppedValue);
-		assertNull("unexpected hookCapturedValue",hookCapturedValue);
-		assertNull("unexpected hookCapturedError",hookCapturedError);
+		assertThat(droppedValue).as("droppedValue").isNull();
+		assertThat(hookCapturedValue).as("hookCapturedValue").isNull();
+		assertThat(hookCapturedError).as("hookCapturedError").isNull();
 	}
 
 	@Test
@@ -356,7 +356,7 @@ public class FluxOnBackpressureBufferStrategyTest implements Consumer<String>,
 			fail("expected NullPointerException");
 		}
 		catch (NullPointerException e) {
-			assertEquals("onBufferOverflow", e.getMessage());
+			assertThat(e).hasMessageContaining("onBufferOverflow");
 		}
 	}
 
@@ -369,7 +369,7 @@ public class FluxOnBackpressureBufferStrategyTest implements Consumer<String>,
 			fail("expected NullPointerException");
 		}
 		catch (NullPointerException e) {
-			assertEquals("bufferOverflowStrategy", e.getMessage());
+			assertThat(e).hasMessage("bufferOverflowStrategy");
 		}
 	}
 

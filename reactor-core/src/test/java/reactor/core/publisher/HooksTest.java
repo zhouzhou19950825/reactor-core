@@ -29,7 +29,6 @@ import java.util.function.Function;
 import java.util.logging.Level;
 
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Test;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscription;
@@ -43,8 +42,7 @@ import reactor.test.publisher.TestPublisher;
 import reactor.test.subscriber.AssertSubscriber;
 import reactor.util.context.Context;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.*;
 
 /**
  * @author Stephane Maldini
@@ -537,29 +535,26 @@ public class HooksTest {
 
 		Throwable w = Operators.onOperatorError(null, new Exception(), "hello", Context.empty());
 
-		Assert.assertTrue(w instanceof TestException);
-		Assert.assertTrue(w.getMessage()
-		                   .equals("hello"));
+		assertThat(w).isInstanceOf(TestException.class)
+		             .hasMessage("hello");
 
 		try {
 			Operators.onNextDropped("hello", Context.empty());
-			Assert.fail();
+			fail("");
 		}
 		catch (Throwable t) {
 			t.printStackTrace();
-			Assert.assertTrue(t instanceof TestException);
-			Assert.assertTrue(t.getMessage()
-			                   .equals("hello"));
+			assertThat(t).isInstanceOf(TestException.class)
+			             .hasMessage("hello");
 		}
 
 		try {
 			Operators.onErrorDropped(new Exception(), Context.empty());
-			Assert.fail();
+			fail("");
 		}
 		catch (Throwable t) {
-			Assert.assertTrue(t instanceof TestException);
-			Assert.assertTrue(t.getMessage()
-			                   .equals("errorDrop"));
+			assertThat(t).isInstanceOf(TestException.class)
+			             .hasMessage("errorDrop");
 		}
 	}
 
@@ -764,13 +759,10 @@ public class HooksTest {
 			    })).flux().publish();
 
 			t.map(d -> d).subscribe(null,
-					e -> Assert.assertTrue(e.getSuppressed()[0].getMessage().contains
-							("\t|_\tFlux.publish")));
+					e -> assertThat(e.getSuppressed()[0]).hasMessageContaining("\t|_\tFlux.publish"));
 
-			t.filter(d -> true).subscribe(null, e -> Assert.assertTrue(e.getSuppressed()[0].getMessage().contains
-					("\t\t|_\tFlux.publish")));
-			t.distinct().subscribe(null, e -> Assert.assertTrue(e.getSuppressed()[0].getMessage().contains
-					("\t\t\t|_\tFlux.publish")));
+			t.filter(d -> true).subscribe(null, e -> assertThat(e.getSuppressed()[0]).hasMessageContaining("\t\t|_\tFlux.publish"));
+			t.distinct().subscribe(null, e -> assertThat(e.getSuppressed()[0]).hasMessageContaining("\t\t\t|_\tFlux.publish"));
 
 			t.connect();
 		}

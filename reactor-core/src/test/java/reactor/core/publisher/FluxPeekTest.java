@@ -24,7 +24,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.junit.Assert;
 import org.junit.Test;
 import org.reactivestreams.Subscription;
 import reactor.core.CoreSubscriber;
@@ -37,9 +36,7 @@ import reactor.test.subscriber.AssertSubscriber;
 import reactor.util.concurrent.Queues;
 
 import static java.lang.Thread.sleep;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.*;
 import static reactor.core.scheduler.Schedulers.parallel;
 
 public class FluxPeekTest extends FluxOperatorTest<String, String> {
@@ -139,9 +136,7 @@ public class FluxPeekTest extends FluxOperatorTest<String, String> {
 				})).producerNever()
 				   .verifier(step -> {
 					   //fixme Support bubbled error verification in reactor-test
-					   Hooks.onErrorDropped(d -> assertTrue(d.getMessage(),
-							   d.getMessage()
-							    .equals(exception().getMessage())));
+					   Hooks.onErrorDropped(d -> assertThat(d).hasMessage(exception().getMessage()));
 					   step.consumeSubscriptionWith(Subscription::cancel)
 					       .verifyErrorMessage(exception().getMessage());
 				   }));
@@ -160,9 +155,7 @@ public class FluxPeekTest extends FluxOperatorTest<String, String> {
 						step.verifyErrorMessage(exception().getMessage());
 					}
 			           catch (Exception e) {
-				           assertTrue(Exceptions.unwrap(e)
-				                                .getMessage()
-				                                .equals(droppedException().getMessage()));
+				           assertThat(Exceptions.unwrap(e)).hasMessage(droppedException().getMessage());
 					}
 				}),
 
@@ -176,13 +169,11 @@ public class FluxPeekTest extends FluxOperatorTest<String, String> {
 				                  .verifier(step -> {
 					                  try {
 						step.verifyErrorMessage("unsupported");
-						Assert.fail();
+						fail("");
 					}
 					                  catch (Exception e) {
-						                  assertTrue(Exceptions.unwrap(e)
-						                                       .getCause()
-						                                       .getMessage()
-						                                       .equals("unsupported"));
+						                  assertThat(Exceptions.unwrap(e).getCause())
+								                  .hasMessage("unsupported");
 					}
 				}),
 
@@ -205,9 +196,8 @@ public class FluxPeekTest extends FluxOperatorTest<String, String> {
 						    .verify();
 					}
 					catch (Exception e) {
-						assertTrue(Exceptions.unwrap(e)
-						                     .getMessage()
-						                     .equals(droppedException().getMessage()));
+						assertThat(Exceptions.unwrap(e))
+								.hasMessage(droppedException().getMessage());
 					}
 				}),
 
@@ -227,9 +217,8 @@ public class FluxPeekTest extends FluxOperatorTest<String, String> {
 						    .verify();
 					}
 					catch (Exception e) {
-						assertTrue(Exceptions.unwrap(e)
-						                     .getMessage()
-						                     .equals(droppedException().getMessage()));
+						assertThat(Exceptions.unwrap(e))
+								.hasMessage(droppedException().getMessage());
 					}
 				}),
 
@@ -248,9 +237,8 @@ public class FluxPeekTest extends FluxOperatorTest<String, String> {
 						step.verifyErrorMessage("test");
 					}
 					catch (Exception e) {
-						assertTrue(Exceptions.unwrap(e)
-						                     .getMessage()
-						                     .equals(droppedException().getMessage()));
+						assertThat(Exceptions.unwrap(e))
+								.hasMessage(droppedException().getMessage());
 					}
 				})
 
@@ -258,9 +246,11 @@ public class FluxPeekTest extends FluxOperatorTest<String, String> {
 		return combinedScenarios;
 	}
 
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void nullSource() {
-		new FluxPeek<>(null, null, null, null, null, null, null, null);
+		assertThatNullPointerException()
+				.isThrownBy(() -> new FluxPeek<>(null, null, null,
+						null, null, null, null, null));
 	}
 
 	@Test
@@ -285,13 +275,13 @@ public class FluxPeekTest extends FluxOperatorTest<String, String> {
 				onRequest::set,
 				() -> onCancel.set(true)).subscribe(ts);
 
-		Assert.assertNotNull(onSubscribe.get());
-		Assert.assertEquals((Integer) 1, onNext.get());
-		Assert.assertNull(onError.get());
-		Assert.assertTrue(onComplete.get());
-		Assert.assertTrue(onAfterComplete.get());
-		Assert.assertEquals(Long.MAX_VALUE, onRequest.get());
-		Assert.assertFalse(onCancel.get());
+		assertThat(onSubscribe.get()).as("onSubscribe").isNotNull();
+		assertThat(onNext.get()).as("onNext").isEqualTo(1);
+		assertThat(onError.get()).as("onError").isNull();
+		assertThat(onComplete.get()).as("onComplete").isTrue();
+		assertThat(onAfterComplete.get()).as("onAfterComplete").isTrue();
+		assertThat(onRequest.get()).as("onRequest").isEqualTo(Long.MAX_VALUE);
+		assertThat(onCancel.get()).as("onCancel").isFalse();
 	}
 
 	@Test
@@ -315,13 +305,13 @@ public class FluxPeekTest extends FluxOperatorTest<String, String> {
 				onRequest::set,
 				() -> onCancel.set(true)).subscribe(ts);
 
-		Assert.assertNotNull(onSubscribe.get());
-		Assert.assertNull(onNext.get());
-		Assert.assertTrue(onError.get() instanceof RuntimeException);
-		Assert.assertFalse(onComplete.get());
-		Assert.assertTrue(onAfterComplete.get());
-		Assert.assertEquals(Long.MAX_VALUE, onRequest.get());
-		Assert.assertFalse(onCancel.get());
+		assertThat(onSubscribe.get()).as("onSubscribe").isNotNull();
+		assertThat(onNext.get()).as("onNext").isNull();
+		assertThat(onError.get()).as("onError").isInstanceOf(RuntimeException.class);
+		assertThat(onComplete.get()).as("onComplete").isFalse();
+		assertThat(onAfterComplete.get()).as("onAfterComplete").isTrue();
+		assertThat(onRequest.get()).as("onRequest").isEqualTo(Long.MAX_VALUE);
+		assertThat(onCancel.get()).as("onCancel").isFalse();
 	}
 
 	@Test
@@ -345,13 +335,13 @@ public class FluxPeekTest extends FluxOperatorTest<String, String> {
 				onRequest::set,
 				() -> onCancel.set(true)).subscribe(ts);
 
-		Assert.assertNotNull(onSubscribe.get());
-		Assert.assertNull(onNext.get());
-		Assert.assertNull(onError.get());
-		Assert.assertTrue(onComplete.get());
-		Assert.assertTrue(onAfterComplete.get());
-		Assert.assertEquals(Long.MAX_VALUE, onRequest.get());
-		Assert.assertFalse(onCancel.get());
+		assertThat(onSubscribe.get()).as("onSubscribe").isNotNull();
+		assertThat(onNext.get()).as("onNext").isNull();
+		assertThat(onError.get()).as("onError").isNull();
+		assertThat(onComplete.get()).as("onComplete").isTrue();
+		assertThat(onAfterComplete.get()).as("onAfterComplete").isTrue();
+		assertThat(onRequest.get()).as("onRequest").isEqualTo(Long.MAX_VALUE);
+		assertThat(onCancel.get()).as("onCancel").isFalse();
 	}
 
 	@Test
@@ -375,13 +365,13 @@ public class FluxPeekTest extends FluxOperatorTest<String, String> {
 				onRequest::set,
 				() -> onCancel.set(true)).subscribe(ts);
 
-		Assert.assertNotNull(onSubscribe.get());
-		Assert.assertNull(onNext.get());
-		Assert.assertNull(onError.get());
-		Assert.assertFalse(onComplete.get());
-		Assert.assertFalse(onAfterComplete.get());
-		Assert.assertEquals(Long.MAX_VALUE, onRequest.get());
-		Assert.assertFalse(onCancel.get());
+		assertThat(onSubscribe.get()).as("onSubscribe").isNotNull();
+		assertThat(onNext.get()).as("onNext").isNull();
+		assertThat(onError.get()).as("onError").isNull();
+		assertThat(onComplete.get()).as("onComplete").isFalse();
+		assertThat(onAfterComplete.get()).as("onAfterComplete").isFalse();
+		assertThat(onRequest.get()).as("onRequest").isEqualTo(Long.MAX_VALUE);
+		assertThat(onCancel.get()).as("onCancel").isFalse();
 	}
 
 	@Test
@@ -405,17 +395,17 @@ public class FluxPeekTest extends FluxOperatorTest<String, String> {
 				onRequest::set,
 				() -> onCancel.set(true)).subscribe(ts);
 
-		Assert.assertNotNull(onSubscribe.get());
-		Assert.assertNull(onNext.get());
-		Assert.assertNull(onError.get());
-		Assert.assertFalse(onComplete.get());
-		Assert.assertFalse(onAfterComplete.get());
-		Assert.assertEquals(Long.MAX_VALUE, onRequest.get());
-		Assert.assertFalse(onCancel.get());
+		assertThat(onSubscribe.get()).as("onSubscribe").isNotNull();
+		assertThat(onNext.get()).as("onNext").isNull();
+		assertThat(onError.get()).as("onError").isNull();
+		assertThat(onComplete.get()).as("onComplete").isFalse();
+		assertThat(onAfterComplete.get()).as("onAfterComplete").isFalse();
+		assertThat(onRequest.get()).as("onRequest").isEqualTo(Long.MAX_VALUE);
+		assertThat(onCancel.get()).as("onCancel").isFalse();
 
 		ts.cancel();
 
-		Assert.assertTrue(onCancel.get());
+		assertThat(onCancel.get()).as("onCancel post cancel").isTrue();
 	}
 
 	@Test
@@ -444,10 +434,10 @@ public class FluxPeekTest extends FluxOperatorTest<String, String> {
 			    })
 			    .subscribe(ts);
 
-			fail();
+			fail("");
 		}
 		catch (Exception e) {
-			Assert.assertTrue(Exceptions.unwrap(e) == err);
+			assertThat(Exceptions.unwrap(e)).isSameAs(err);
 		}
 	}
 
@@ -477,10 +467,10 @@ public class FluxPeekTest extends FluxOperatorTest<String, String> {
 			    })
 			    .subscribe(ts);
 
-			fail();
+			fail("");
 		}
 		catch (Exception e) {
-			Assert.assertTrue(Exceptions.unwrap(e) == err);
+			assertThat(Exceptions.unwrap(e)).isSameAs(err);
 		}
 	}
 
@@ -542,10 +532,10 @@ public class FluxPeekTest extends FluxOperatorTest<String, String> {
 			    })
 			    .subscribe(ts);
 
-			Assert.fail();
+			fail("");
 		}
 		catch (Exception e) {
-			Assert.assertTrue(Exceptions.unwrap(e) == err);
+			assertThat(Exceptions.unwrap(e)).isSameAs(err);
 		}
 	}
 
@@ -623,12 +613,12 @@ public class FluxPeekTest extends FluxOperatorTest<String, String> {
 			fail("expected thrown exception");
 		}
 		catch (Throwable e) {
-			assertSame(fatal, e);
+			assertThat(e).isSameAs(fatal);
 		}
 		ts.assertNoValues();
 		ts.assertComplete();
 
-		Assert.assertThat(errorCallbackCapture.get(), is(nullValue()));
+		assertThat(errorCallbackCapture.get()).isNull();
 
 		//same with after error
 		errorCallbackCapture.set(null);
@@ -650,13 +640,12 @@ public class FluxPeekTest extends FluxOperatorTest<String, String> {
 			fail("expected thrown exception");
 		}
 		catch (Throwable e) {
-			assertSame(fatal, e);
+			assertThat(e).isSameAs(fatal);
 		}
 		ts.assertNoValues();
 		ts.assertError(NullPointerException.class);
 
-		Assert.assertThat(errorCallbackCapture.get(),
-				is(instanceOf(NullPointerException.class)));
+		assertThat(errorCallbackCapture.get()).isInstanceOf(NullPointerException.class);
 	}
 
 	@Test
@@ -677,8 +666,8 @@ public class FluxPeekTest extends FluxOperatorTest<String, String> {
 			fail("expected thrown exception");
 		}
 		catch (Exception e) {
-			assertSame(err, e.getCause());
-			assertEquals(0, err2.getSuppressed().length);
+			assertThat(e).hasCause(err);
+			assertThat(err2).hasNoSuppressedExceptions();
 			//err2 is never thrown
 		}
 		ts.assertNoValues();
@@ -705,13 +694,10 @@ public class FluxPeekTest extends FluxOperatorTest<String, String> {
 			fail("expected thrown exception");
 		}
 		catch (Exception e) {
-			assertSame(afterTerminate, e.getCause());
+			assertThat(e).hasCause(afterTerminate);
 			//afterTerminate suppressed error which itself suppressed original err
-			assertEquals(1, afterTerminate.getSuppressed().length);
-			assertEquals(error, afterTerminate.getSuppressed()[0]);
-
-			assertEquals(1, error.getSuppressed().length);
-			assertEquals(err, error.getSuppressed()[0]);
+			assertThat(afterTerminate).hasSuppressedException(error);
+			assertThat(error).hasSuppressedException(err);
 		}
 		ts.assertNoValues();
 		//the subscriber still sees the 'error' message since actual.onError is called before the afterTerminate callback
@@ -728,8 +714,8 @@ public class FluxPeekTest extends FluxOperatorTest<String, String> {
 		    .subscribe(ts);
 
 		Subscription s = ts.upstream();
-		Assert.assertTrue("Non-fuseable upstream: " + s,
-				s instanceof Fuseable.QueueSubscription);
+		assertThat(s).withFailMessage("Non-fuseable upstream: " + s)
+		             .isInstanceOf(Fuseable.QueueSubscription.class);
 	}
 
 	@Test
@@ -742,8 +728,8 @@ public class FluxPeekTest extends FluxOperatorTest<String, String> {
 		                .subscribe(ts);
 
 		Subscription s = ts.upstream();
-		Assert.assertTrue("Non-fuseable upstream" + s,
-				s instanceof Fuseable.QueueSubscription);
+		assertThat(s).withFailMessage("Non-fuseable upstream: " + s)
+		             .isInstanceOf(Fuseable.QueueSubscription.class);
 	}
 
 	@Test
@@ -807,7 +793,7 @@ public class FluxPeekTest extends FluxOperatorTest<String, String> {
 		  .assertValues(1, 2)
 		  .assertComplete();
 
-		Assert.assertTrue("onComplete not called back", onComplete.get());
+		assertThat(onComplete.get()).withFailMessage("onComplete not called back").isTrue();
 	}
 
 	@Test
@@ -825,7 +811,7 @@ public class FluxPeekTest extends FluxOperatorTest<String, String> {
 		  .assertValues(1, 2)
 		  .assertComplete();
 
-		Assert.assertTrue("onComplete not called back", onTerminate.get());
+		assertThat(onTerminate.get()).withFailMessage("onAfterTerminate not called back").isTrue();
 	}
 
 	@Test
@@ -843,7 +829,7 @@ public class FluxPeekTest extends FluxOperatorTest<String, String> {
 		  .assertValues(1, 2)
 		  .assertComplete();
 
-		Assert.assertTrue("onComplete not called back", onTerminate.get());
+		assertThat(onTerminate.get()).withFailMessage("onTerminate not called back").isTrue();
 	}
 
 	@Test
@@ -860,7 +846,7 @@ public class FluxPeekTest extends FluxOperatorTest<String, String> {
 		ts.assertNoError()
 		  .assertComplete();
 
-		Assert.assertTrue("onComplete not called back", onTerminate.get());
+		assertThat(onTerminate.get()).withFailMessage("onTerminate not called back").isTrue();
 	}
 
 	@Test
@@ -877,7 +863,7 @@ public class FluxPeekTest extends FluxOperatorTest<String, String> {
 		ts.assertErrorMessage("test")
 		  .assertNotComplete();
 
-		Assert.assertTrue("onComplete not called back", onTerminate.get());
+		assertThat(onTerminate.get()).withFailMessage("onTerminate not called back").isTrue();
 	}
 
 	@Test
@@ -895,7 +881,7 @@ public class FluxPeekTest extends FluxOperatorTest<String, String> {
 			                      }))
 			    .blockLast();
 
-			assertEquals(10, count.get());
+			assertThat(count).hasValue(10);
 		}
 	}
 
@@ -915,7 +901,7 @@ public class FluxPeekTest extends FluxOperatorTest<String, String> {
 			                      .filter(v -> true))
 			    .blockLast();
 
-			assertEquals(10, count.get());
+			assertThat(count).hasValue(10);
 		}
 	}
 

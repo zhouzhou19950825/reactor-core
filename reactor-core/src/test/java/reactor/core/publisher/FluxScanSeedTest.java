@@ -27,6 +27,8 @@ import reactor.core.Scannable;
 import reactor.test.publisher.FluxOperatorTest;
 import reactor.test.subscriber.AssertSubscriber;
 
+import static org.assertj.core.api.Assertions.assertThatNullPointerException;
+
 public class FluxScanSeedTest extends FluxOperatorTest<String, String> {
 
 	@Override
@@ -71,21 +73,24 @@ public class FluxScanSeedTest extends FluxOperatorTest<String, String> {
 		);
 	}
 
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void sourceNull() {
-		new FluxScanSeed<>(null, () -> 1, (a, b) -> a);
+		assertThatNullPointerException()
+				.isThrownBy(() -> new FluxScanSeed<>(null, () -> 1, (a, b) -> a));
 	}
 
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void initialValueNull() {
-		Flux.never()
-		    .scan(null, (a, b) -> a);
+		assertThatNullPointerException()
+				.isThrownBy(() -> Flux.never()
+				                      .scan(null, (a, b) -> a));
 	}
 
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void accumulatorNull() {
-		Flux.never()
-		    .scan(1, null);
+		assertThatNullPointerException()
+				.isThrownBy(() -> Flux.never()
+				                      .scan(1, null));
 	}
 
 	@Test

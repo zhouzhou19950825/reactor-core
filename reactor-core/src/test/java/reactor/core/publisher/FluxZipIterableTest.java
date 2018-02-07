@@ -21,8 +21,6 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-import org.assertj.core.api.Assertions;
-import org.junit.Assert;
 import org.junit.Test;
 import org.reactivestreams.Subscription;
 import reactor.core.CoreSubscriber;
@@ -31,6 +29,9 @@ import reactor.test.StepVerifier;
 import reactor.test.publisher.FluxOperatorTest;
 import reactor.test.subscriber.AssertSubscriber;
 import reactor.util.function.Tuples;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatNullPointerException;
 
 public class FluxZipIterableTest extends FluxOperatorTest<String, String> {
 
@@ -101,21 +102,24 @@ public class FluxZipIterableTest extends FluxOperatorTest<String, String> {
 		);
 	}
 
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void sourceNull() {
-		new FluxZipIterable<>(null, Collections.emptyList(), (a, b) -> a);
+		assertThatNullPointerException()
+				.isThrownBy(() -> new FluxZipIterable<>(null, Collections.emptyList(), (a, b) -> a));
 	}
 
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void iterableNull() {
-		Flux.never()
-		    .zipWithIterable(null, (a, b) -> a);
+		assertThatNullPointerException()
+				.isThrownBy(() -> Flux.never()
+				                      .zipWithIterable(null, (a, b) -> a));
 	}
 
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void zipperNull() {
-		Flux.never()
-		    .zipWithIterable(Collections.emptyList(), null);
+		assertThatNullPointerException()
+				.isThrownBy(() -> Flux.never()
+				                      .zipWithIterable(Collections.emptyList(), null));
 	}
 
 	@Test
@@ -251,7 +255,7 @@ public class FluxZipIterableTest extends FluxOperatorTest<String, String> {
 		ts.assertNoValues()
 		.assertNotComplete()
 		.assertError(RuntimeException.class)
-		  .assertErrorWith( e -> Assert.assertTrue(e.getMessage().contains("forced failure")));
+		  .assertErrorWith( e -> assertThat(e).hasMessageContaining("forced failure"));
 	}
 
 	@Test
@@ -265,7 +269,7 @@ public class FluxZipIterableTest extends FluxOperatorTest<String, String> {
 		ts.assertNoValues()
 		.assertNotComplete()
 		.assertError(RuntimeException.class)
-		  .assertErrorWith( e -> Assert.assertTrue(e.getMessage().contains("forced failure")));
+		  .assertErrorWith( e -> assertThat(e).hasMessageContaining("forced failure"));
 	}
 
 	@Test
@@ -285,12 +289,12 @@ public class FluxZipIterableTest extends FluxOperatorTest<String, String> {
         Subscription parent = Operators.emptySubscription();
         test.onSubscribe(parent);
 
-        Assertions.assertThat(test.scan(Scannable.Attr.PARENT)).isSameAs(parent);
-        Assertions.assertThat(test.scan(Scannable.Attr.ACTUAL)).isSameAs(actual);
+        assertThat(test.scan(Scannable.Attr.PARENT)).isSameAs(parent);
+        assertThat(test.scan(Scannable.Attr.ACTUAL)).isSameAs(actual);
 
-        Assertions.assertThat(test.scan(Scannable.Attr.TERMINATED)).isFalse();
+        assertThat(test.scan(Scannable.Attr.TERMINATED)).isFalse();
         test.onComplete();
-        Assertions.assertThat(test.scan(Scannable.Attr.TERMINATED)).isTrue();
+        assertThat(test.scan(Scannable.Attr.TERMINATED)).isTrue();
     }
 
 }

@@ -23,14 +23,13 @@ import reactor.core.Scannable;
 import reactor.test.StepVerifier;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertTrue;
 
 public class MonoSourceTest {
 
 	@Test
 	public void empty() {
 		Mono<Integer> m = Mono.from(Flux.empty());
-		assertTrue(m == Mono.<Integer>empty());
+		assertThat(m).isSameAs(Mono.<Integer>empty());
 		StepVerifier.create(m)
 		            .verifyComplete();
 	}
@@ -38,7 +37,7 @@ public class MonoSourceTest {
 	@Test
 	public void just() {
 		Mono<Integer> m = Mono.from(Flux.just(1));
-		assertTrue(m instanceof MonoJust);
+		assertThat(m).isInstanceOf(MonoJust.class);
 		StepVerifier.create(m)
 	                .expectNext(1)
 	                .verifyComplete();
@@ -47,7 +46,7 @@ public class MonoSourceTest {
 	@Test
 	public void error() {
 		Mono<Integer> m = Mono.from(Flux.error(new Exception("test")));
-		assertTrue(m instanceof MonoError);
+		assertThat(m).isInstanceOf(MonoError.class);
 		StepVerifier.create(m)
 		            .verifyErrorMessage("test");
 	}
@@ -55,7 +54,7 @@ public class MonoSourceTest {
 	@Test
 	public void errorPropagate() {
 		Mono<Integer> m = Mono.from(Flux.error(new Error("test")));
-		assertTrue(m instanceof MonoError);
+		assertThat(m).isInstanceOf(MonoError.class);
 		StepVerifier.create(m)
 		            .verifyErrorMessage("test");
 	}
@@ -153,7 +152,7 @@ public class MonoSourceTest {
 	public void onAssemblyDescription() {
 		String monoOnAssemblyStr = Mono.just(1).checkpoint("onAssemblyDescription").toString();
 		System.out.println(Mono.just(1).checkpoint("onAssemblyDescription"));
-		assertTrue("Description not included: " + monoOnAssemblyStr, monoOnAssemblyStr.contains("\"description\" : \"onAssemblyDescription\""));
+		assertThat(monoOnAssemblyStr).contains("\"description\" : \"onAssemblyDescription\"");
 	}
 
 	@Test

@@ -36,10 +36,7 @@ import reactor.core.publisher.TopicProcessor;
 import reactor.core.publisher.WorkQueueProcessor;
 import reactor.core.scheduler.Schedulers;
 
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Stephane Maldini
@@ -63,13 +60,13 @@ public class ConsistentProcessorTests {
 		for (int t = 0; t < iter; t++) {
 			List<List<String>> clientDatas = getClientDatas(threads, sender, count);
 
-			assertThat(clientDatas.size(), is(threads));
+			assertThat(clientDatas).hasSize(threads);
 
 			List<String> numbersNoEnds = new ArrayList<>();
 			List<Integer> numbersNoEndsInt = new ArrayList<>();
 			for (int i = 0; i < clientDatas.size(); i++) {
 				List<String> datas = clientDatas.get(i);
-				assertThat(datas, notNullValue());
+				assertThat(datas).isNotNull();
 				StringBuffer buf = new StringBuffer();
 				for (int j = 0; j < datas.size(); j++) {
 					buf.append(datas.get(j));
@@ -97,16 +94,16 @@ public class ConsistentProcessorTests {
 			System.out.println("dups:" + findDuplicates(numbersNoEndsInt));
 			// we can't measure individual session anymore so just
 			// check that below lists match.
-			assertThat(msg, numbersNoEndsInt.size(), is(numbersNoEnds.size()));
+			assertThat(numbersNoEndsInt).as(msg).hasSameSizeAs(numbersNoEnds);
 		}
 		Set<Integer> dups = findDuplicates(total);
 		System.out.println("total dups:" + dups);
 		System.out.println("total int:" + fulltotalints);
 		System.out.println("total text:" + fulltotaltext);
 		// check full totals because we know what this should be
-		assertThat(fulltotalints, is(count * iter));
-		assertThat(fulltotaltext, is(count * iter));
-		assertTrue(dups.isEmpty());
+		assertThat(fulltotalints).isEqualTo(count * iter);
+		assertThat(fulltotaltext).isEqualTo(count * iter);
+		assertThat(dups).isEmpty();
 	}
 
 	@Before

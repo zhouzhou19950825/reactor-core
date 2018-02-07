@@ -34,13 +34,14 @@ import reactor.util.context.Context;
 import reactor.util.function.Tuples;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatNullPointerException;
 
 public class FluxRepeatWhenTest {
 
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void whenFactoryNull() {
-		Flux.never()
-		    .repeatWhen(null);
+		assertThatNullPointerException()
+				.isThrownBy(() -> Flux.never().repeatWhen(null));
 	}
 
 	@Test

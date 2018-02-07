@@ -24,8 +24,6 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.ThreadPoolExecutor.AbortPolicy;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.assertj.core.api.Assertions;
-import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.reactivestreams.Subscription;
@@ -38,8 +36,8 @@ import reactor.test.subscriber.AssertSubscriber;
 
 import static java.util.concurrent.Executors.newCachedThreadPool;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
-import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static reactor.core.scheduler.Schedulers.fromExecutor;
 import static reactor.core.scheduler.Schedulers.fromExecutorService;
 
@@ -90,9 +88,8 @@ public class MonoPublishOnTest {
 
 			hookLatch.await();
 
-			assertThat(throwableInOnOperatorError.get(),
-					instanceOf(RejectedExecutionException.class));
-			Assert.assertSame(dataInOnOperatorError.get(), data);
+			assertThat(throwableInOnOperatorError.get()).isInstanceOf(RejectedExecutionException.class);
+			assertThat(data).isSameAs(dataInOnOperatorError.get());
 		}
 		finally {
 			Hooks.resetOnOperatorError();
@@ -146,10 +143,9 @@ public class MonoPublishOnTest {
 
 			hookLatch.await();
 
-			assertThat(throwableInOnOperatorError.get(),
-					instanceOf(RejectedExecutionException.class));
-			Assert.assertSame(throwableInOnOperatorError.get()
-			                                            .getSuppressed()[0], exception);
+			assertThat(throwableInOnOperatorError.get()).isInstanceOf(RejectedExecutionException.class);
+			assertThat(throwableInOnOperatorError.get())
+					.hasSuppressedException(exception);
 		}
 		finally {
 			Hooks.resetOnOperatorError();
@@ -201,9 +197,8 @@ public class MonoPublishOnTest {
 
 			hookLatch.await();
 
-			assertThat(throwableInOnOperatorError.get(),
-					instanceOf(RejectedExecutionException.class));
-			Assert.assertSame(dataInOnOperatorError.get(), data);
+			assertThat(throwableInOnOperatorError.get()).isInstanceOf(RejectedExecutionException.class);
+			assertThat(data).isSameAs(dataInOnOperatorError.get());
 		}
 		finally {
 			Hooks.resetOnOperatorError();
@@ -257,10 +252,8 @@ public class MonoPublishOnTest {
 
 			hookLatch.await();
 
-			assertThat(throwableInOnOperatorError.get(),
-					instanceOf(RejectedExecutionException.class));
-			Assert.assertSame(throwableInOnOperatorError.get()
-			                                            .getSuppressed()[0], exception);
+			assertThat(throwableInOnOperatorError.get()).isInstanceOf(RejectedExecutionException.class)
+			                                            .hasSuppressedException(exception);
 		}
 		finally {
 			Hooks.resetOnOperatorError();
@@ -293,10 +286,10 @@ public class MonoPublishOnTest {
 				Mono.just(1)
 				    .publishOn(fromExecutor(executor))
 				    .block();
-				Assert.fail("Bubbling RejectedExecutionException expected");
+				fail("Bubbling RejectedExecutionException expected");
 			}
 			catch (Exception e) {
-				assertThat(Exceptions.unwrap(e), instanceOf(RejectedExecutionException.class));
+				assertThat(Exceptions.unwrap(e)).isInstanceOf(RejectedExecutionException.class);
 			}
 		}
 		finally {
@@ -333,10 +326,10 @@ public class MonoPublishOnTest {
 				Mono.just(1)
 				    .publishOn(fromExecutor(executor))
 				    .block();
-				Assert.fail("Bubbling RejectedExecutionException expected");
+				fail("Bubbling RejectedExecutionException expected");
 			}
 			catch (Exception e) {
-				assertThat(Exceptions.unwrap(e), instanceOf(RejectedExecutionException.class));
+				assertThat(Exceptions.unwrap(e)).isInstanceOf(RejectedExecutionException.class);
 			}
 		}
 		finally {
@@ -349,7 +342,7 @@ public class MonoPublishOnTest {
 	public void scanOperator() {
 		MonoPublishOn<String> test = new MonoPublishOn<>(Mono.empty(), Schedulers.immediate());
 
-		Assertions.assertThat(test.scan(Scannable.Attr.RUN_ON)).isSameAs(Schedulers.immediate());
+		assertThat(test.scan(Scannable.Attr.RUN_ON)).isSameAs(Schedulers.immediate());
 	}
 
 	@Test
@@ -360,13 +353,13 @@ public class MonoPublishOnTest {
 		Subscription parent = Operators.emptySubscription();
 		test.onSubscribe(parent);
 
-		Assertions.assertThat(test.scan(Scannable.Attr.RUN_ON)).isSameAs(Schedulers.single());
-		Assertions.assertThat(test.scan(Scannable.Attr.PARENT)).isSameAs(parent);
-		Assertions.assertThat(test.scan(Scannable.Attr.ACTUAL)).isSameAs(actual);
+		assertThat(test.scan(Scannable.Attr.RUN_ON)).isSameAs(Schedulers.single());
+		assertThat(test.scan(Scannable.Attr.PARENT)).isSameAs(parent);
+		assertThat(test.scan(Scannable.Attr.ACTUAL)).isSameAs(actual);
 
-		Assertions.assertThat(test.scan(Scannable.Attr.CANCELLED)).isFalse();
+		assertThat(test.scan(Scannable.Attr.CANCELLED)).isFalse();
 		test.cancel();
-		Assertions.assertThat(test.scan(Scannable.Attr.CANCELLED)).isTrue();
+		assertThat(test.scan(Scannable.Attr.CANCELLED)).isTrue();
 	}
 
 	@Test
@@ -375,9 +368,9 @@ public class MonoPublishOnTest {
 		MonoPublishOn.PublishOnSubscriber<String> test = new MonoPublishOn.PublishOnSubscriber<>(
 				actual, Schedulers.single());
 
-		Assertions.assertThat(test.scan(Scannable.Attr.ERROR)).isNull();
+		assertThat(test.scan(Scannable.Attr.ERROR)).isNull();
 		test.onError(new IllegalStateException("boom"));
-		Assertions.assertThat(test.scan(Scannable.Attr.ERROR)).hasMessage("boom");
+		assertThat(test.scan(Scannable.Attr.ERROR)).hasMessage("boom");
 	}
 
 	@Test

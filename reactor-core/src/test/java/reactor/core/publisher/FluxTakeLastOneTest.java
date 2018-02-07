@@ -19,6 +19,7 @@ import org.junit.Test;
 import reactor.test.StepVerifier;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 public class FluxTakeLastOneTest {
 
@@ -40,11 +41,11 @@ public class FluxTakeLastOneTest {
 	                .verifyErrorMessage("test");
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void illegal() {
-		StepVerifier.create(Flux.empty()
-		                        .takeLast(-1))
-	                .verifyComplete();
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> StepVerifier.create(Flux.empty().takeLast(-1))
+				                              .verifyComplete());
 	}
 
 	@Test

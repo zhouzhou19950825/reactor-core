@@ -29,13 +29,15 @@ import reactor.test.StepVerifier;
 import reactor.test.publisher.FluxOperatorTest;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 public class FluxOnBackpressureBufferTest
 		extends FluxOperatorTest<String, String> {
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void failNegativeHistory(){
-		Flux.never().onBackpressureBuffer(-1);
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> Flux.never().onBackpressureBuffer(-1));
 	}
 
 	@Override

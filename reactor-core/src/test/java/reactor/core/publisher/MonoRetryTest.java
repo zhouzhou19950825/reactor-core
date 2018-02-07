@@ -22,17 +22,22 @@ import org.junit.Test;
 import reactor.core.Exceptions;
 import reactor.test.subscriber.AssertSubscriber;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.assertThatNullPointerException;
+
 public class MonoRetryTest {
 
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void sourceNull() {
-		new MonoRetry<>(null, 1);
+		assertThatNullPointerException()
+				.isThrownBy(() -> new MonoRetry<>(null, 1));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void timesInvalid() {
-		Mono.never()
-		    .retry(-1);
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> Mono.never()
+				                      .retry(-1));
 	}
 
 	@Test

@@ -17,12 +17,11 @@ package reactor.core;
 
 import java.util.Collections;
 
-
+import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import reactor.util.annotation.Nullable;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.Assert.fail;
 
 /**
  * @author Stephane Maldini
@@ -58,7 +57,7 @@ public class CoreTest {
 	final void testUnsupported(Runnable r){
 		try{
 			r.run();
-			fail();
+			Assertions.fail("expected UnsupportedOperationException");
 		}
 		catch (UnsupportedOperationException uoe){
 			//IGNORE

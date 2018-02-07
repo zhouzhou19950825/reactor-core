@@ -23,12 +23,14 @@ import reactor.core.Scannable;
 import reactor.test.subscriber.AssertSubscriber;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatNullPointerException;
 
 public class FluxOnBackpressureLatestTest {
 
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void sourceNull() {
-		new FluxOnBackpressureLatest<>(null);
+		assertThatNullPointerException()
+				.isThrownBy(() -> new FluxOnBackpressureLatest<>(null));
 	}
 
 	@Test

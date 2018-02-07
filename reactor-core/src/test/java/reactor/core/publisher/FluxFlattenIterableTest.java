@@ -19,7 +19,6 @@ package reactor.core.publisher;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.function.Function;
@@ -32,12 +31,12 @@ import reactor.core.CoreSubscriber;
 import reactor.core.Fuseable;
 import reactor.core.Scannable;
 import reactor.core.Scannable.Attr;
-import reactor.core.Scannable.Attr;
 import reactor.test.StepVerifier;
 import reactor.test.publisher.FluxOperatorTest;
 import reactor.test.subscriber.AssertSubscriber;
 import reactor.util.concurrent.Queues;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.assertj.core.api.Java6Assertions.assertThat;
 
 public class FluxFlattenIterableTest extends FluxOperatorTest<String, String> {
@@ -137,10 +136,11 @@ public class FluxFlattenIterableTest extends FluxOperatorTest<String, String> {
 		);
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test
 	public void failPrefetch(){
-		Flux.never()
-	        .flatMapIterable(t -> null, -1);
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> Flux.never()
+				                      .flatMapIterable(t -> null, -1));
 	}
 
 	@Test

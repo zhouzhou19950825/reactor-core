@@ -18,7 +18,6 @@ package reactor.core.publisher;
 
 import java.util.Arrays;
 
-import org.junit.Assert;
 import org.junit.Test;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscription;
@@ -28,12 +27,14 @@ import reactor.test.StepVerifier;
 import reactor.test.subscriber.AssertSubscriber;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatNullPointerException;
 
 public class FluxConcatArrayTest {
 
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void arrayNull() {
-		Flux.concat((Publisher<Object>[]) null);
+		assertThatNullPointerException()
+				.isThrownBy(() -> Flux.concat((Publisher<Object>[]) null));
 	}
 
 	final Publisher<Integer> source = Flux.range(1, 3);
@@ -171,10 +172,11 @@ public class FluxConcatArrayTest {
 		Flux<String> f = Flux.concat(Flux.just("test"), Flux.just("test2"))
 		                     .concatWith(Flux.just("test3"));
 
-		Assert.assertTrue(f instanceof FluxConcatArray);
+		assertThat(f).isInstanceOf(FluxConcatArray.class);
 		FluxConcatArray<String> s = (FluxConcatArray<String>) f;
-		Assert.assertTrue(s.array != null);
-		Assert.assertTrue(s.array.length == 3);
+		assertThat(s.array).as("s.array")
+		                   .isNotNull()
+		                   .hasSize(3);
 
 		StepVerifier.create(f)
 	                .expectNext("test", "test2", "test3")
@@ -187,10 +189,11 @@ public class FluxConcatArrayTest {
 		Flux<String> f = Mono.just("test")
 		                     .concatWith(Flux.just("test2"));
 
-		Assert.assertTrue(f instanceof FluxConcatArray);
+		assertThat(f).isInstanceOf(FluxConcatArray.class);
 		FluxConcatArray<String> s = (FluxConcatArray<String>) f;
-		Assert.assertTrue(s.array != null);
-		Assert.assertTrue(s.array.length == 2);
+		assertThat(s.array).as("s.array")
+		                   .isNotNull()
+		                   .hasSize(2);
 
 		StepVerifier.create(f)
 	                .expectNext("test", "test2")

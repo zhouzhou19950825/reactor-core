@@ -21,17 +21,13 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
-import org.assertj.core.api.Assertions;
 import org.junit.Before;
 import org.junit.Test;
 import reactor.core.Exceptions;
 import reactor.test.StepVerifier;
 
-import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.*;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatNullPointerException;
 import static reactor.core.Fuseable.SYNC;
 
 /**
@@ -64,8 +60,8 @@ public class MonoDoFinallyTest implements Consumer<SignalType> {
 		            .expectComplete()
 		            .verify();
 
-		assertEquals(1, calls);
-		assertEquals(SignalType.ON_COMPLETE, signalType);
+		assertThat(calls).isEqualTo(1);
+		assertThat(signalType).isEqualTo(SignalType.ON_COMPLETE);
 	}
 
 	@Test
@@ -75,8 +71,8 @@ public class MonoDoFinallyTest implements Consumer<SignalType> {
 		            .expectComplete()
 		            .verify();
 
-		assertEquals(1, calls);
-		assertEquals(SignalType.ON_COMPLETE, signalType);
+		assertThat(calls).isEqualTo(1);
+		assertThat(signalType).isEqualTo(SignalType.ON_COMPLETE);
 	}
 
 	@Test
@@ -86,8 +82,8 @@ public class MonoDoFinallyTest implements Consumer<SignalType> {
 		            .expectError(IllegalArgumentException.class)
 		            .verify();
 
-		assertEquals(1, calls);
-		assertEquals(SignalType.ON_ERROR, signalType);
+		assertThat(calls).isEqualTo(1);
+		assertThat(signalType).isEqualTo(SignalType.ON_ERROR);
 	}
 
 
@@ -102,10 +98,10 @@ public class MonoDoFinallyTest implements Consumer<SignalType> {
 		            .expectNext(1)
 		            .thenCancel()
 		            .verify();
-		
-		assertEquals("expected doFinally to be invoked exactly once", 1, calls);
-		assertEquals(SignalType.CANCEL, signalType);
-		assertTrue("expected tested mono to be cancelled", cancelCheck.get());
+
+		assertThat(calls).as("doFinally").isEqualTo(1);
+		assertThat(signalType).isEqualTo(SignalType.CANCEL);
+		assertThat(cancelCheck.get()).as("tested Mono cancelled").isTrue();
 	}
 
 	@Test
@@ -119,8 +115,8 @@ public class MonoDoFinallyTest implements Consumer<SignalType> {
 		            .expectComplete()
 		            .verify();
 
-		assertEquals(1, calls);
-		assertEquals(SignalType.ON_COMPLETE, signalType);
+		assertThat(calls).isEqualTo(1);
+		assertThat(signalType).isEqualTo(SignalType.ON_COMPLETE);
 	}
 
 	@Test
@@ -131,7 +127,8 @@ public class MonoDoFinallyTest implements Consumer<SignalType> {
 		            .expectComplete()
 		            .verify();
 
-		assertEquals(1, calls); assertEquals(SignalType.ON_COMPLETE, signalType);
+		assertThat(calls).isEqualTo(1);
+		assertThat(signalType).isEqualTo(SignalType.ON_COMPLETE);
 	}
 
 	@Test
@@ -142,13 +139,15 @@ public class MonoDoFinallyTest implements Consumer<SignalType> {
 		            .expectComplete()
 		            .verify();
 
-		assertEquals(1, calls); assertEquals(SignalType.ON_COMPLETE, signalType);
+		assertThat(calls).isEqualTo(1);
+		assertThat(signalType).isEqualTo(SignalType.ON_COMPLETE);
 	}
 
 
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void nullCallback() {
-		Mono.just(1).doFinally(null);
+		assertThatNullPointerException()
+				.isThrownBy(() -> Mono.just(1).doFinally(null));
 	}
 
 	@Test
@@ -164,8 +163,8 @@ public class MonoDoFinallyTest implements Consumer<SignalType> {
 		}
 		catch (Throwable e) {
 			Throwable _e = Exceptions.unwrap(e);
-			assertNotSame(e, _e);
-			assertThat(_e, is(instanceOf(IllegalStateException.class)));
+			assertThat(_e).isNotSameAs(e)
+			              .isInstanceOf(IllegalStateException.class);
 		}
 	}
 
@@ -183,8 +182,8 @@ public class MonoDoFinallyTest implements Consumer<SignalType> {
 		}
 		catch (Throwable e) {
 			Throwable _e = Exceptions.unwrap(e);
-			assertNotSame(e, _e);
-			assertThat(_e, is(instanceOf(IllegalStateException.class)));
+			assertThat(_e).isNotSameAs(e)
+			              .isInstanceOf(IllegalStateException.class);
 		}
 	}
 
@@ -198,7 +197,7 @@ public class MonoDoFinallyTest implements Consumer<SignalType> {
 		    .doFinally(s -> finallyOrder.offer("SECOND"))
 		    .blockLast();
 
-		Assertions.assertThat(finallyOrder)
+		assertThat(finallyOrder)
 		          .containsExactly("SECOND", "FIRST");
 	}
 

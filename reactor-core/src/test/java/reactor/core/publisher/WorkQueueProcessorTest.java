@@ -33,8 +33,6 @@ import java.util.logging.Level;
 
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.Condition;
-import org.hamcrest.CoreMatchers;
-import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.reactivestreams.Subscription;
@@ -52,8 +50,8 @@ import reactor.util.annotation.Nullable;
 import reactor.util.concurrent.Queues;
 import reactor.util.concurrent.WaitStrategy;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Fail.fail;
 import static reactor.util.concurrent.WaitStrategy.liteBlocking;
 
 /**
@@ -108,12 +106,10 @@ public class WorkQueueProcessorTest {
 		bc.onNext("foo");
 		bc.onComplete();
 
-		assertThat(spec1.error, is(nullValue()));
-		assertThat(spec2.error, is(nullValue()));
-		assertThat(spec3.error, is(notNullValue()));
-		assertThat(spec3.error.getMessage(),
-				startsWith(
-						"The executor service could not accommodate another subscriber, detected limit 2"));
+		assertThat(spec1.error).isNull();
+		assertThat(spec2.error).isNull();
+		assertThat(spec3.error).isNotNull();
+		assertThat(spec3.error).hasMessageStartingWith("The executor service could not accommodate another subscriber, detected limit 2");
 
 		try {
 			latch.await(1, TimeUnit.SECONDS);
@@ -140,11 +136,10 @@ public class WorkQueueProcessorTest {
 		bc.onNext("foo");
 		bc.onComplete();
 
-		assertThat(spec1.error, is(nullValue()));
-		assertThat(spec2.error, is(nullValue()));
-		assertThat(spec3.error, is(notNullValue()));
-		assertThat(spec3.error.getMessage(),
-				is("The executor service could not accommodate another subscriber, detected limit 2"));
+		assertThat(spec1.error).isNull();
+		assertThat(spec2.error).isNull();
+		assertThat(spec3.error).isNotNull();
+		assertThat(spec3.error).hasMessage("The executor service could not accommodate another subscriber, detected limit 2");
 
 		try {
 			latch.await(1, TimeUnit.SECONDS);
@@ -208,12 +203,12 @@ public class WorkQueueProcessorTest {
 	}
 
 	@Test(timeout = 15000L)
-	public void cancelDoesNotHang() throws Exception {
+	public void cancelDoesNotHang() {
 		WorkQueueProcessor<String> wq = WorkQueueProcessor.create();
 
 		Disposable d = wq.subscribe();
 
-		Assert.assertTrue(wq.downstreamCount() == 1);
+		assertThat(wq.downstreamCount()).isEqualTo(1);
 
 		d.dispose();
 
@@ -222,12 +217,12 @@ public class WorkQueueProcessorTest {
 	}
 
 	@Test(timeout = 15000L)
-	public void completeDoesNotHang() throws Exception {
+	public void completeDoesNotHang() {
 		WorkQueueProcessor<String> wq = WorkQueueProcessor.create();
 
 		wq.subscribe();
 
-		Assert.assertTrue(wq.downstreamCount() == 1);
+		assertThat(wq.downstreamCount()).isEqualTo(1);
 
 		wq.onComplete();
 
@@ -236,7 +231,7 @@ public class WorkQueueProcessorTest {
 	}
 
 	@Test(timeout = 15000L)
-	public void disposeSubscribeNoThreadLeak() throws Exception {
+	public void disposeSubscribeNoThreadLeak() {
 		WorkQueueProcessor<String> wq = WorkQueueProcessor.<String>builder().autoCancel(false).build();
 
 		Disposable d = wq.subscribe();
@@ -272,7 +267,7 @@ public class WorkQueueProcessorTest {
 		            .expectNext(1, 2, 3)
 		            .verifyComplete();
 
-		assertThat(onNextSignals.get(), equalTo(5));
+		assertThat(onNextSignals.get()).isEqualTo(5);
 
 		while (wq.downstreamCount() != 0 && Thread.activeCount() > 1) {
 		}
@@ -302,7 +297,7 @@ public class WorkQueueProcessorTest {
 		            .thenCancel()
 		            .verify();
 
-		assertThat(onNextSignals.get(), equalTo(3));
+		assertThat(onNextSignals.get()).isEqualTo(3);
 
 		while (wq.downstreamCount() != 0 && Thread.activeCount() > 1) {
 		}
@@ -332,7 +327,7 @@ public class WorkQueueProcessorTest {
 		            .thenCancel()
 		            .verify();
 
-		assertThat(onNextSignals.get(), equalTo(3));
+		assertThat(onNextSignals.get()).isEqualTo(3);
 
 		while (wq.downstreamCount() != 0 && Thread.activeCount() > 1) {
 		}
@@ -363,7 +358,7 @@ public class WorkQueueProcessorTest {
 		            .thenCancel()
 		            .verify();
 
-		assertThat(onNextSignals.get(), equalTo(3));
+		assertThat(onNextSignals.get()).isEqualTo(3);
 
 		while (wq.downstreamCount() != 0 && Thread.activeCount() > 1) {
 		}
@@ -423,7 +418,7 @@ public class WorkQueueProcessorTest {
 		latch.await(5, TimeUnit.SECONDS);
 		System.out.println("count " + count + " errors: " + errorCount);
 		sink.onComplete();
-		Assert.assertTrue("Latch is " + latch.getCount(), latch.getCount() <= 1);
+		assertThat(latch.getCount()).as("Latch is " + latch.getCount()).isLessThanOrEqualTo(1);
 	}
 
 	/* see https://github.com/reactor/reactor-core/issues/199 */
@@ -443,13 +438,11 @@ public class WorkQueueProcessorTest {
 
 		Executors.newSingleThreadScheduledExecutor()
 		         .schedule(bc::onComplete, 200, TimeUnit.MILLISECONDS);
-		try {
-			bc.onNext("baz");
-			fail("expected 3rd next to time out as newSingleThreadExecutor cannot be introspected");
-		}
-		catch (Throwable e) {
-			assertTrue("expected AlertException, got " + e, WaitStrategy.isAlert(e));
-		}
+		
+		assertThatExceptionOfType(RuntimeException.class)
+				.isThrownBy(() -> bc.onNext("baz"))
+				.as("expected 3rd next to time out as newSingleThreadExecutor cannot be introspected")
+				.matches(WaitStrategy::isAlert, "expected AlertException");
 	}
 
 	/* see https://github.com/reactor/reactor-core/issues/199 */
@@ -476,7 +469,7 @@ public class WorkQueueProcessorTest {
 			fail(e1.toString());
 		}
 
-		assertNull(spec1.error);
+		assertThat(spec1.error).isNull();
 	}
 
 	@Test
@@ -514,14 +507,14 @@ public class WorkQueueProcessorTest {
 		executorService7.shutdown();
 		executorService8.shutdown();
 
-		assertEquals("newSingleThreadExecutor", expectedUnknown, maxSub1);
-		assertEquals("newSingleThreadScheduledExecutor", expectedUnknown, maxSub2);
-		assertEquals("newCachedThreadPool", expectedUnbounded, maxSub3);
-		assertEquals("newFixedThreadPool(2)", 2, maxSub4);
-		assertEquals("newScheduledThreadPool(3)", expectedUnbounded, maxSub5);
-		assertEquals("newWorkStealingPool(4)", 4, maxSub6);
-		assertEquals("unconfigurableExecutorService", expectedUnknown, maxSub7);
-		assertEquals("unconfigurableScheduledExecutorService", expectedUnknown, maxSub8);
+		assertThat(maxSub1).as("newSingleThreadExecutor").isEqualTo(expectedUnknown);
+		assertThat(maxSub2).as("newSingleThreadScheduledExecutor").isEqualTo(expectedUnknown);
+		assertThat(maxSub3).as("newCachedThreadPool").isEqualTo(expectedUnbounded);
+		assertThat(maxSub4).as("newFixedThreadPool(2)").isEqualTo(2);
+		assertThat(maxSub5).as("newFixedThreadPool(3)").isEqualTo(expectedUnbounded);
+		assertThat(maxSub6).as("newFixedThreadPool(4)").isEqualTo(4);
+		assertThat(maxSub7).as("unconfigurableExecutorService").isEqualTo(expectedUnknown);
+		assertThat(maxSub8).as("unconfigurableScheduledExecutorService").isEqualTo(expectedUnknown);
 	}
 
 	private static class TestWorkQueueSubscriber extends BaseSubscriber<String> {
@@ -572,7 +565,7 @@ public class WorkQueueProcessorTest {
 			    .map(s -> "hello " + s)
 			    .subscribe(bc);
 
-			assertTrue(latch.await(5000, TimeUnit.MILLISECONDS));
+			assertThat(latch.await(5000, TimeUnit.MILLISECONDS)).isTrue();
 		}
 		finally {
 			es.shutdown();
@@ -581,32 +574,34 @@ public class WorkQueueProcessorTest {
 
 	@Test
 	public void testWorkQueueProcessorGetters() {
-
 		final int TEST_BUFFER_SIZE = 16;
 		WorkQueueProcessor<Object> processor = WorkQueueProcessor.builder().name("testProcessor").bufferSize(TEST_BUFFER_SIZE).build();
 
-		assertEquals(TEST_BUFFER_SIZE, processor.getAvailableCapacity());
+		assertThat(processor.getAvailableCapacity()).isEqualTo(TEST_BUFFER_SIZE);
 
 		processor.onNext(new Object());
 
-		assertEquals(TEST_BUFFER_SIZE - 1, processor.getAvailableCapacity());
+		assertThat(processor.getAvailableCapacity()).isEqualTo(TEST_BUFFER_SIZE - 1);
 		processor.awaitAndShutdown();
 
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void failNonPowerOfTwo() {
-		WorkQueueProcessor.builder().name("test").bufferSize(3);
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> WorkQueueProcessor.builder().name("test").bufferSize(3));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void failNullBufferSize() {
-		WorkQueueProcessor.builder().name("test").bufferSize(0);
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> WorkQueueProcessor.builder().name("test").bufferSize(0));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void failNegativeBufferSize() {
-		WorkQueueProcessor.builder().name("test").bufferSize(-1);
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> WorkQueueProcessor.builder().name("test").bufferSize(-1));
 	}
 
 
@@ -644,7 +639,7 @@ public class WorkQueueProcessorTest {
 		// Need to explicitly complete processor due to use of publish()
 		wq.onComplete();
 
-		assertThat(onNextSignals.get(), equalTo(3));
+		assertThat(onNextSignals.get()).isEqualTo(3);
 
 		while (wq.downstreamCount() != 0 && Thread.activeCount() > 1) {
 		}
@@ -681,7 +676,7 @@ public class WorkQueueProcessorTest {
 		            .thenCancel()
 		            .verify();
 
-		assertThat(onNextSignals.get(), equalTo(3));
+		assertThat(onNextSignals.get()).isEqualTo(3);
 
 		// Need to explicitly complete processor due to use of publish()
 		wq.onComplete();
@@ -717,7 +712,7 @@ public class WorkQueueProcessorTest {
 		            .thenCancel()
 		            .verify();
 
-		assertThat(onNextSignals.get(), equalTo(3));
+		assertThat(onNextSignals.get()).isEqualTo(3);
 
 		// Need to explicitly complete processor due to use of publish()
 		wq.onComplete();
@@ -765,7 +760,7 @@ public class WorkQueueProcessorTest {
 		            .thenCancel()
 		            .verify();
 
-		assertThat(onNextSignals.get(), CoreMatchers.either(equalTo(2)).or(equalTo(3)));
+		assertThat(onNextSignals.get()).isBetween(2, 3);
 
 		// Need to explicitly complete processor due to use of publish()
 		wq.onComplete();
@@ -804,7 +799,7 @@ public class WorkQueueProcessorTest {
 		// Need to explicitly complete processor due to use of publish()
 		wq.onComplete();
 
-		assertThat(onNextSignals.get(), equalTo(3));
+		assertThat(onNextSignals.get()).isEqualTo(3);
 
 		while (wq.downstreamCount() != 0 && Thread.activeCount() > 1) {
 		}
@@ -845,7 +840,7 @@ public class WorkQueueProcessorTest {
 
 		wq.onComplete();
 
-		assertThat(onNextSignals.get(), equalTo(3));
+		assertThat(onNextSignals.get()).isEqualTo(3);
 
 		while (wq.downstreamCount() != 0 && Thread.activeCount() > 1) {
 		}
@@ -884,7 +879,7 @@ public class WorkQueueProcessorTest {
 
 		wq.onComplete();
 
-		assertThat(onNextSignals.get(), equalTo(3));
+		assertThat(onNextSignals.get()).isEqualTo(3);
 
 		while (wq.downstreamCount() != 0 && Thread.activeCount() > 1) {
 		}
@@ -915,9 +910,9 @@ public class WorkQueueProcessorTest {
 		}
 		sink.next("data");
 
-		Assertions.assertThat(latch.await(4, TimeUnit.SECONDS))
-		          .overridingErrorMessage("Data not received")
-		          .isTrue();
+		assertThat(latch.await(4, TimeUnit.SECONDS))
+				.overridingErrorMessage("Data not received")
+				.isTrue();
 	}
 
 	//see https://github.com/reactor/reactor-core/issues/445
@@ -944,9 +939,9 @@ public class WorkQueueProcessorTest {
 
 		sink.next("data");
 
-		Assertions.assertThat(latch.await(4, TimeUnit.SECONDS))
-		          .overridingErrorMessage("Data not received")
-		          .isTrue();
+		assertThat(latch.await(4, TimeUnit.SECONDS))
+				.overridingErrorMessage("Data not received")
+				.isTrue();
 	}
 
 	@Test
@@ -968,7 +963,7 @@ public class WorkQueueProcessorTest {
 				thread -> expectedName.equals(thread.getName()),
 				"a thread named \"%s\"", expectedName);
 
-		Assertions.assertThat(threads)
+		assertThat(threads)
 		          .haveExactly(1, defaultRequestTaskThread);
 	}
 
@@ -999,7 +994,7 @@ public class WorkQueueProcessorTest {
 				thread -> expectedName.equals(thread.getName()),
 				"a thread named \"%s\"", expectedName);
 
-		Assertions.assertThat(threads)
+		assertThat(threads)
 		          .haveExactly(1, customRequestTaskThread);
 	}
 
@@ -1030,7 +1025,7 @@ public class WorkQueueProcessorTest {
 				thread -> expectedName.equals(thread.getName()),
 				"a thread named \"%s\"", expectedName);
 
-		Assertions.assertThat(threads)
+		assertThat(threads)
 		          .haveExactly(1, customRequestTaskThread);
 	}
 
@@ -1359,15 +1354,15 @@ public class WorkQueueProcessorTest {
 		Subscription subscription = Operators.emptySubscription();
 		test.onSubscribe(subscription);
 
-		Assertions.assertThat(test.scan(Scannable.Attr.PARENT)).isEqualTo(subscription);
+		assertThat(test.scan(Scannable.Attr.PARENT)).isEqualTo(subscription);
 
-		Assertions.assertThat(test.scan(Scannable.Attr.CAPACITY)).isEqualTo(16);
-		Assertions.assertThat(test.scan(Scannable.Attr.TERMINATED)).isFalse();
-		Assertions.assertThat(test.scan(Scannable.Attr.ERROR)).isNull();
+		assertThat(test.scan(Scannable.Attr.CAPACITY)).isEqualTo(16);
+		assertThat(test.scan(Scannable.Attr.TERMINATED)).isFalse();
+		assertThat(test.scan(Scannable.Attr.ERROR)).isNull();
 
 		test.onError(new IllegalStateException("boom"));
-		Assertions.assertThat(test.scan(Scannable.Attr.ERROR)).hasMessage("boom");
-		Assertions.assertThat(test.scan(Scannable.Attr.TERMINATED)).isTrue();
+		assertThat(test.scan(Scannable.Attr.ERROR)).hasMessage("boom");
+		assertThat(test.scan(Scannable.Attr.TERMINATED)).isTrue();
 	}
 
 	@Test
@@ -1378,23 +1373,23 @@ public class WorkQueueProcessorTest {
 		WorkQueueProcessor.WorkQueueInner<String> test = new WorkQueueProcessor.WorkQueueInner<>(
 				subscriber, main);
 
-		Assertions.assertThat(test.scan(Scannable.Attr.PARENT)).isSameAs(main);
-		Assertions.assertThat(test.scan(Scannable.Attr.ACTUAL)).isSameAs(subscriber);
-		Assertions.assertThat(test.scan(Scannable.Attr.PREFETCH)).isEqualTo(Integer.MAX_VALUE);
-		Assertions.assertThat(test.scan(Scannable.Attr.REQUESTED_FROM_DOWNSTREAM)).isEqualTo(0L);
+		assertThat(test.scan(Scannable.Attr.PARENT)).isSameAs(main);
+		assertThat(test.scan(Scannable.Attr.ACTUAL)).isSameAs(subscriber);
+		assertThat(test.scan(Scannable.Attr.PREFETCH)).isEqualTo(Integer.MAX_VALUE);
+		assertThat(test.scan(Scannable.Attr.REQUESTED_FROM_DOWNSTREAM)).isEqualTo(0L);
 
 		test.pendingRequest.set(123);
-		Assertions.assertThat(test.scan(Scannable.Attr.REQUESTED_FROM_DOWNSTREAM)).isEqualTo(123L);
+		assertThat(test.scan(Scannable.Attr.REQUESTED_FROM_DOWNSTREAM)).isEqualTo(123L);
 
-		Assertions.assertThat(test.scan(Scannable.Attr.TERMINATED)).isFalse();
-		Assertions.assertThat(test.scan(Scannable.Attr.CANCELLED)).isFalse();
+		assertThat(test.scan(Scannable.Attr.TERMINATED)).isFalse();
+		assertThat(test.scan(Scannable.Attr.CANCELLED)).isFalse();
 
 		main.terminated = 1;
-		Assertions.assertThat(test.scan(Scannable.Attr.TERMINATED)).isTrue();
-		Assertions.assertThat(test.scan(Scannable.Attr.CANCELLED)).isFalse();
+		assertThat(test.scan(Scannable.Attr.TERMINATED)).isTrue();
+		assertThat(test.scan(Scannable.Attr.CANCELLED)).isFalse();
 
 		test.cancel();
-		Assertions.assertThat(test.scan(Scannable.Attr.CANCELLED)).isTrue();
+		assertThat(test.scan(Scannable.Attr.CANCELLED)).isTrue();
 	}
 
 	private void assertProcessor(WorkQueueProcessor<Integer> processor,
@@ -1412,15 +1407,15 @@ public class WorkQueueProcessorTest {
 		WaitStrategy expectedWaitStrategy = waitStrategy != null ? waitStrategy : WaitStrategy.liteBlocking();
 		Class<?> sequencerClass = shared ? MultiProducerRingBuffer.class : SingleProducerSequencer.class;
 
-		assertEquals(expectedName, processor.name);
-		assertEquals(expectedBufferSize, processor.getBufferSize());
-		assertEquals(expectedAutoCancel, processor.autoCancel);
-		assertEquals(expectedWaitStrategy.getClass(), processor.ringBuffer.getSequencer().waitStrategy.getClass());
-		assertEquals(sequencerClass, processor.ringBuffer.getSequencer().getClass());
+		assertThat(processor.name).isEqualTo(expectedName);
+		assertThat(processor.getBufferSize()).isEqualTo(expectedBufferSize);
+		assertThat(processor.autoCancel).isEqualTo(expectedAutoCancel);
+		assertThat(processor.ringBuffer.getSequencer().waitStrategy.getClass()).isEqualTo(expectedWaitStrategy.getClass());
+		assertThat(processor.ringBuffer.getSequencer().getClass()).isEqualTo(sequencerClass);
 		if (executor != null)
-			assertEquals(executor, processor.executor);
+			assertThat(processor.executor).isEqualTo(executor);
 		if (requestTaskExecutor != null)
-			assertEquals(requestTaskExecutor, processor.requestTaskExecutor);
+			assertThat(processor.requestTaskExecutor).isEqualTo(requestTaskExecutor);
 	}
 
 	@Test
@@ -1429,11 +1424,11 @@ public class WorkQueueProcessorTest {
 				.share(false).build();
 
 		FluxSink<Integer> sink = queueProcessor.sink();
-		Assertions.assertThat(sink).isInstanceOf(SerializedSink.class);
+		assertThat(sink).isInstanceOf(SerializedSink.class);
 		sink = sink.next(1);
-		Assertions.assertThat(sink).isInstanceOf(SerializedSink.class);
+		assertThat(sink).isInstanceOf(SerializedSink.class);
 		sink = sink.onRequest(n -> {});
-		Assertions.assertThat(sink).isInstanceOf(SerializedSink.class);
+		assertThat(sink).isInstanceOf(SerializedSink.class);
 	}
 
 	@Test
@@ -1445,14 +1440,14 @@ public class WorkQueueProcessorTest {
 		TestSubscriber subscriber = new TestSubscriber(count);
 		queueProcessor.subscribe(subscriber);
 		FluxSink<Integer> sink = queueProcessor.sink();
-		Assertions.assertThat(sink).isNotInstanceOf(SerializedSink.class);
+		assertThat(sink).isNotInstanceOf(SerializedSink.class);
 
 		for (int i = 0; i < count; i++) {
 			sink = sink.next(i);
-			Assertions.assertThat(sink).isNotInstanceOf(SerializedSink.class);
+			assertThat(sink).isNotInstanceOf(SerializedSink.class);
 		}
 		subscriber.await(Duration.ofSeconds(5));
-		assertNull("Unexpected exception in subscriber", subscriber.failure);
+		assertThat(subscriber.failure).as("don't expect exception in subscriber").isNull();
 	}
 
 	@Test
@@ -1469,15 +1464,15 @@ public class WorkQueueProcessorTest {
 			for (int i = 0; i < n; i++) {
 				synchronized (s) { // to ensure that elements are in order for testing
 					FluxSink<Integer> retSink = sink.next(next.getAndIncrement());
-					Assertions.assertThat(retSink).isInstanceOf(SerializedSink.class);
+					assertThat(retSink).isInstanceOf(SerializedSink.class);
 				}
 			}
 		});
-		Assertions.assertThat(serializedSink).isInstanceOf(SerializedSink.class);
+		assertThat(serializedSink).isInstanceOf(SerializedSink.class);
 
 		subscriber.await(Duration.ofSeconds(5));
 		sink.complete();
-		assertNull("Unexpected exception in subscriber", subscriber.failure);
+		assertThat(subscriber.failure).as("don't expect exception in subscriber").isNull();
 	}
 
 	static class TestSubscriber implements CoreSubscriber<Integer> {
@@ -1494,13 +1489,15 @@ public class WorkQueueProcessorTest {
 		}
 
 		public void await(Duration duration) throws InterruptedException {
-			assertTrue("Did not receive all, remaining=" + latch.getCount(), latch.await(duration.toMillis(), TimeUnit.MILLISECONDS));
+			assertThat(latch.await(duration.toMillis(), TimeUnit.MILLISECONDS))
+					.withFailMessage("Did not receive all, remaining=" + latch.getCount())
+					.isTrue();
 		}
 
 		@Override
 		public void onComplete() {
 			try {
-				assertEquals(0, latch.getCount());
+				assertThat(latch.getCount()).isZero();
 			}
 			catch (Throwable t) {
 				failure = t;
@@ -1516,7 +1513,7 @@ public class WorkQueueProcessorTest {
 		public void onNext(Integer n) {
 			latch.countDown();
 			try {
-				assertEquals(next.getAndIncrement(), n.intValue());
+				assertThat(n.intValue()).isEqualTo(next.getAndIncrement());
 			}
 			catch (Throwable t) {
 				failure = t;

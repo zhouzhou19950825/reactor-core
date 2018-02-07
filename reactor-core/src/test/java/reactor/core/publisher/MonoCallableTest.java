@@ -20,14 +20,14 @@ import java.io.IOException;
 import org.junit.Test;
 import reactor.test.subscriber.AssertSubscriber;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.*;
 
 public class MonoCallableTest {
 
-    @Test(expected = NullPointerException.class)
+    @Test
     public void nullCallable() {
-        Mono.<Integer>fromCallable(null);
+        assertThatNullPointerException()
+                .isThrownBy(() -> Mono.<Integer>fromCallable(null));
     }
 
     @Test
@@ -106,12 +106,12 @@ public class MonoCallableTest {
                        .block()).isNull();
     }
 
-    @Test(expected = RuntimeException.class)
+    @Test
     public void onMonoErrorCallableOnBlock() {
-        Mono.fromCallable(() -> {
-            throw new Exception("test");
-        })
-            .block();
+        assertThatExceptionOfType(RuntimeException.class)
+                .isThrownBy(() -> Mono.fromCallable(() -> {
+                    throw new Exception("test");
+                }).block());
     }
 
     @Test

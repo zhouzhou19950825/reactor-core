@@ -23,33 +23,38 @@ import reactor.core.Scannable;
 import reactor.test.publisher.TestPublisher;
 import reactor.test.subscriber.AssertSubscriber;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 
 public class MonoElementAtTest {
 
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void source1Null() {
-		new MonoElementAt<>(null, 1);
+		assertThatNullPointerException()
+				.isThrownBy(() -> new MonoElementAt<>(null, 1));
 	}
 
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void source2Null() {
-		new MonoElementAt<>(null, 1, 1);
+		assertThatNullPointerException()
+				.isThrownBy(() -> new MonoElementAt<>(null, 1, 1));
 	}
 
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void defaultSupplierNull() {
-		Flux.never().elementAt(1, null);
+		assertThatNullPointerException()
+				.isThrownBy(() -> Flux.never().elementAt(1, null));
 	}
 
-	@Test(expected = IndexOutOfBoundsException.class)
+	@Test
 	public void indexNegative1() {
-		Flux.never().elementAt(-1);
+		assertThatExceptionOfType(IndexOutOfBoundsException.class)
+				.isThrownBy(() -> Flux.never().elementAt(-1));
 	}
 
-	@Test(expected = IndexOutOfBoundsException.class)
+	@Test
 	public void indexNegative2() {
-		Flux.never().elementAt(-1, 1);
+		assertThatExceptionOfType(IndexOutOfBoundsException.class)
+				.isThrownBy(() -> Flux.never().elementAt(-1, 1));
 	}
 
 	@Test

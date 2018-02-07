@@ -24,11 +24,7 @@ import org.junit.Test;
 import reactor.test.RaceTestUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static reactor.core.Exceptions.NOT_TIME_CAPABLE_REJECTED_EXECUTION;
-import static reactor.core.Exceptions.REJECTED_EXECUTION;
-import static reactor.core.Exceptions.TERMINATED;
+import static reactor.core.Exceptions.*;
 
 /**
  * @author Stephane Maldini
@@ -42,7 +38,7 @@ public class ExceptionsTest {
 
 		Throwable w = Exceptions.bubble(Exceptions.propagate(t));
 
-		assertTrue(Exceptions.unwrap(w) == t);
+		assertThat(Exceptions.unwrap(w)).isSameAs(t);
 	}
 
 	@Test
@@ -50,7 +46,7 @@ public class ExceptionsTest {
 
 		Throwable w = Exceptions.bubble(null);
 
-		assertTrue(Exceptions.unwrap(w) == w);
+		assertThat(Exceptions.unwrap(w)).isSameAs(w);
 	}
 
 	@Test
@@ -58,15 +54,15 @@ public class ExceptionsTest {
 		IllegalStateException overflow1 = Exceptions.failWithOverflow();
 		IllegalStateException overflow2 = Exceptions.failWithOverflow("foo");
 
-		assertTrue(Exceptions.isOverflow(overflow1));
-		assertTrue(Exceptions.isOverflow(overflow2));
+		assertThat(Exceptions.isOverflow(overflow1)).as("overflow1").isTrue();
+		assertThat(Exceptions.isOverflow(overflow2)).as("overflow2").isTrue();
 	}
 
 	@Test
 	public void allIllegalStateIsntOverflow() {
 		IllegalStateException ise = new IllegalStateException("foo");
 
-		assertFalse(Exceptions.isOverflow(ise));
+		assertThat(Exceptions.isOverflow(ise)).as("ise").isFalse();
 	}
 
 	@Test

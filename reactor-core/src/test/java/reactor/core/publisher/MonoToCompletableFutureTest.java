@@ -16,9 +16,11 @@
 package reactor.core.publisher;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 import org.junit.Test;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 public class MonoToCompletableFutureTest {
@@ -31,14 +33,16 @@ public class MonoToCompletableFutureTest {
 		assertThat(f.get()).isEqualTo(1);
 	}
 
-	@Test(expected = Exception.class)
+	@Test
 	public void error() throws Exception {
 		CompletableFuture<Integer> f =
 				Mono.<Integer>error(new Exception("test")).toFuture();
 
 		assertThat(f.isDone()).isTrue();
 		assertThat(f.isCompletedExceptionally()).isTrue();
-		f.get();
+		assertThatExceptionOfType(ExecutionException.class)
+				.isThrownBy(f::get)
+				.withCause(new Exception("test"));
 	}
 
 	@Test

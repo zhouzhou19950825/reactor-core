@@ -23,12 +23,14 @@ import reactor.core.Scannable;
 import reactor.test.subscriber.AssertSubscriber;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatNullPointerException;
 
 public class MonoCountTest {
 
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void sourceNull() {
-		new MonoCount<>(null);
+		assertThatNullPointerException()
+				.isThrownBy(() -> new MonoCount<>(null));
 	}
 
 	public void normal() {

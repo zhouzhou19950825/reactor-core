@@ -22,11 +22,14 @@ import org.junit.Test;
 import org.reactivestreams.Publisher;
 import reactor.test.subscriber.AssertSubscriber;
 
+import static org.assertj.core.api.Assertions.assertThatNullPointerException;
+
 public class FluxConcatIterableTest {
 
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void arrayNull() {
-		Flux.concat((Iterable<? extends Publisher<?>>)null);
+		assertThatNullPointerException()
+				.isThrownBy(() -> Flux.concat((Iterable<? extends Publisher<?>>)null));
 	}
 
 	final Publisher<Integer> source = Flux.range(1, 3);

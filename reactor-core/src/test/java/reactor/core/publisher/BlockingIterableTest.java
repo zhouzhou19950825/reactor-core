@@ -18,7 +18,6 @@ package reactor.core.publisher;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
@@ -27,7 +26,6 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import org.junit.Assert;
 import org.junit.Test;
 import org.reactivestreams.Subscription;
 import reactor.core.Scannable;
@@ -49,7 +47,7 @@ public class BlockingIterableTest {
 			values.add(i);
 		}
 
-		Assert.assertEquals(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10), values);
+		assertThat(values).containsExactly(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
 	}
 
 	@Test(timeout = 5000)
@@ -62,7 +60,7 @@ public class BlockingIterableTest {
 			values.add(i);
 		}
 
-		Assert.assertEquals(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10), values);
+		assertThat(values).containsExactly(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
 	}
 
 	@Test(timeout = 5000)
@@ -73,18 +71,22 @@ public class BlockingIterableTest {
 			values.add(i);
 		}
 
-		Assert.assertEquals(Collections.emptyList(), values);
+		assertThat(values).isEmpty();
 	}
 
-	@Test(timeout = 5000, expected = RuntimeException.class)
+	@Test(timeout = 5000)
 	public void error() {
 		List<Integer> values = new ArrayList<>();
 
-		for (Integer i : Flux.<Integer>error(new RuntimeException("forced failure")).toIterable()) {
-			values.add(i);
-		}
+		assertThatExceptionOfType(RuntimeException.class)
+				.isThrownBy(() -> {
+					for (Integer i : Flux.<Integer>error(new RuntimeException("forced failure")).toIterable()) {
+						values.add(i);
+					}
+				})
+				.withMessage("forced failure");
 
-		Assert.assertEquals(Collections.emptyList(), values);
+		assertThat(values).isEmpty();
 	}
 
 	@Test(timeout = 5000)
@@ -95,7 +97,7 @@ public class BlockingIterableTest {
 		    .toStream()
 		    .forEach(values::add);
 
-		Assert.assertEquals(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10), values);
+		assertThat(values).containsExactly(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
 	}
 
 	@Test(timeout = 5000)
@@ -105,7 +107,7 @@ public class BlockingIterableTest {
 		FluxEmpty.<Integer>instance().toStream()
 		                             .forEach(values::add);
 
-		Assert.assertEquals(Collections.emptyList(), values);
+		assertThat(values).isEmpty();
 	}
 
 	@Test(timeout = 5000)
@@ -117,7 +119,7 @@ public class BlockingIterableTest {
 		    .limit(10)
 		    .forEach(values::add);
 
-		Assert.assertEquals(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10), values);
+		assertThat(values).containsExactly(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
 	}
 
 	@Test(timeout = 5000)
@@ -129,8 +131,9 @@ public class BlockingIterableTest {
 		                            .parallel()
 		                            .max(Integer::compare);
 
-		Assert.assertTrue("No maximum?", opt.isPresent());
-		Assert.assertEquals((Integer) n, opt.get());
+		assertThat(opt)
+				.isPresent()
+				.hasValue(n);
 	}
 
 	@Test
@@ -294,7 +297,7 @@ public class BlockingIterableTest {
 
 		StepVerifier.create(source)
 		            .expectErrorSatisfies(e -> assertThat(e).isInstanceOf(IllegalStateException.class)
-		            .hasMessage("boom"))
+		                                                    .hasMessage("boom"))
 		            .verify();
 	}
 

@@ -18,19 +18,20 @@ package reactor.core.publisher;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.junit.Assert;
 import org.junit.Test;
 import reactor.core.scheduler.Schedulers;
 import reactor.test.StepVerifier;
 import reactor.test.subscriber.AssertSubscriber;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatNullPointerException;
 
 public class MonoRunnableTest {
 
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void nullValue() {
-		new MonoRunnable(null);
+		assertThatNullPointerException()
+				.isThrownBy(() -> new MonoRunnable(null));
 	}
 
 	@Test
@@ -118,6 +119,6 @@ public class MonoRunnableTest {
 		    .ignoreElements()
 		    .block();
 
-		Assert.assertEquals(1000, c[0]);
+		assertThat(c[0]).isEqualTo(1000);
 	}
 }

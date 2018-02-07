@@ -20,10 +20,8 @@ import java.util.List;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.junit.Assert;
 import org.junit.Test;
 import org.reactivestreams.Subscription;
-
 import reactor.core.Disposable;
 import reactor.core.Scannable;
 import reactor.core.scheduler.Schedulers;
@@ -33,6 +31,7 @@ import reactor.test.subscriber.AssertSubscriber;
 import reactor.util.concurrent.Queues;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 public class FluxPublishTest extends FluxOperatorTest<String, String> {
 
@@ -50,10 +49,10 @@ public class FluxPublishTest extends FluxOperatorTest<String, String> {
 		);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void failPrefetch(){
-		Flux.never()
-		    .publish( -1);
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> Flux.never().publish( -1));
 	}
 
 	@Test
@@ -406,7 +405,7 @@ public class FluxPublishTest extends FluxOperatorTest<String, String> {
 		.assertError(CancellationException.class)
 		.assertNotComplete();
 
-		Assert.assertFalse("sp has subscribers?", e.downstreamCount() != 0);
+		assertThat(e.downstreamCount()).withFailMessage("sp has subscribers?").isZero();
 	}
 
 	@Test
@@ -427,7 +426,7 @@ public class FluxPublishTest extends FluxOperatorTest<String, String> {
 		.assertError(CancellationException.class)
 		.assertNotComplete();
 
-		Assert.assertFalse("sp has subscribers?", e.downstreamCount() != 0);
+		assertThat(e.downstreamCount()).withFailMessage("sp has subscribers?").isZero();
 	}
 
 	@Test
@@ -448,7 +447,7 @@ public class FluxPublishTest extends FluxOperatorTest<String, String> {
 
 		ts.assertValues(1, 2)
 		.assertError(RuntimeException.class)
-		  .assertErrorWith( x -> Assert.assertTrue(x.getMessage().contains("forced failure")))
+		  .assertErrorWith( x -> assertThat(x).hasMessageContaining("forced failure"))
 		.assertNotComplete();
 	}
 

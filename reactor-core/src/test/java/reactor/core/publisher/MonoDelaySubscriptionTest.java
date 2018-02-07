@@ -23,16 +23,20 @@ import org.reactivestreams.Publisher;
 import reactor.test.StepVerifier;
 import reactor.test.subscriber.AssertSubscriber;
 
+import static org.assertj.core.api.Assertions.assertThatNullPointerException;
+
 public class MonoDelaySubscriptionTest {
 
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void sourceNull() {
-		new MonoDelaySubscription<>(null, Mono.never());
+		assertThatNullPointerException()
+				.isThrownBy(() -> new MonoDelaySubscription<>(null, Mono.never()));
 	}
 
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void otherNull() {
-		Mono.never().delaySubscription((Publisher<?>)null);
+		assertThatNullPointerException()
+				.isThrownBy(() -> Mono.never().delaySubscription((Publisher<?>)null));
 	}
 
 	@Test

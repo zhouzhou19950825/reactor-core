@@ -26,7 +26,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.IntStream;
 
-import org.junit.Assert;
 import org.junit.Test;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
@@ -42,6 +41,7 @@ import reactor.test.StepVerifier;
 import reactor.test.StepVerifier.Step;
 import reactor.test.subscriber.AssertSubscriber;
 
+import static org.assertj.core.api.Assertions.fail;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 public class FluxCreateTest {
@@ -443,7 +443,7 @@ public class FluxCreateTest {
 				latch2.await();
 			}
 			catch (InterruptedException e) {
-				Assert.fail();
+				fail("");
 			}
 			w2.schedule(() -> {
 				serialized.next("test2");
@@ -464,7 +464,7 @@ public class FluxCreateTest {
 					            latch.await();
 				            }
 				            catch (InterruptedException e) {
-					            Assert.fail();
+					            fail("");
 				            }
 			            })
 			            .assertNext(s -> {
@@ -907,7 +907,7 @@ public class FluxCreateTest {
 			            .thenAwait()
 			            .thenRequest(2)
 			            .verifyComplete();
-			Assert.fail();
+			fail("");
 		}
 		catch (AssertionError error){
 			assertThat(error).hasMessageContaining(

@@ -19,7 +19,6 @@ package reactor;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Assert;
 import org.junit.Test;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscription;
@@ -52,7 +51,7 @@ public class HooksTraceTest {
 		}
 		catch(Exception e){
 			e.printStackTrace();
-			Assert.assertTrue(e.getSuppressed()[0].getMessage().contains("MonoCallable"));
+			assertThat(e.getSuppressed()[0]).hasMessageContaining("MonoCallable");
 			return;
 		}
 		finally {
@@ -77,10 +76,8 @@ public class HooksTraceTest {
 		}
 		catch(Exception e){
 			e.printStackTrace();
-			Assert.assertTrue(e.getSuppressed()[0].getMessage().contains
-					("HooksTraceTest.java:"));
-			Assert.assertTrue(e.getSuppressed()[0].getMessage().contains("|_\tMono.map" +
-					"(HooksTraceTest.java:"));
+			assertThat(e.getSuppressed()[0]).hasMessageContaining("HooksTraceTest.java:");
+			assertThat(e.getSuppressed()[0]).hasMessageContaining("|_\tMono.map(HooksTraceTest.java:");
 			return;
 		}
 		finally {
@@ -105,11 +102,8 @@ public class HooksTraceTest {
 		}
 		catch(Exception e){
 			e.printStackTrace();
-			Assert.assertTrue(e.getSuppressed()[0].getMessage().contains
-					("HooksTraceTest.java:"));
-			Assert.assertTrue(e.getSuppressed()[0].getMessage().contains("|_\tFlux" +
-					".share" +
-					"(HooksTraceTest.java:"));
+			assertThat(e.getSuppressed()[0]).hasMessageContaining("HooksTraceTest.java:");
+			assertThat(e.getSuppressed()[0]).hasMessageContaining("|_\tFlux.share(HooksTraceTest.java:");
 			return;
 		}
 		finally {
@@ -131,11 +125,8 @@ public class HooksTraceTest {
 		}
 		catch(Exception e){
 			e.printStackTrace();
-			Assert.assertTrue(e.getSuppressed()[0].getMessage().contains
-					("HooksTraceTest.java:"));
-			Assert.assertTrue(e.getSuppressed()[0].getMessage().contains("|_\tMono" +
-					".flatMap" +
-					"(HooksTraceTest.java:"));
+			assertThat(e.getSuppressed()[0]).hasMessageContaining("HooksTraceTest.java:");
+			assertThat(e.getSuppressed()[0]).hasMessageContaining("|_\tMono.flatMap(HooksTraceTest.java:");
 			return;
 		}
 		finally {
@@ -157,10 +148,8 @@ public class HooksTraceTest {
 		}
 		catch (Exception e) {
 			e.printStackTrace();
-			Assert.assertTrue(e.getSuppressed()[0].getMessage()
-			                                      .contains("HooksTraceTest.java:"));
-			Assert.assertTrue(e.getSuppressed()[0].getMessage()
-			                                      .contains("|_\tMono" + ".flatMap" + "(HooksTraceTest.java:"));
+			assertThat(e.getSuppressed()[0]).hasMessageContaining("HooksTraceTest.java:");
+			assertThat(e.getSuppressed()[0]).hasMessageContaining("|_\tMono.flatMap(HooksTraceTest.java:");
 			return;
 		}
 		finally {
@@ -184,11 +173,8 @@ public class HooksTraceTest {
 		}
 		catch(Exception e){
 			e.printStackTrace();
-			Assert.assertTrue(e.getSuppressed()[0].getMessage().contains
-					("HooksTraceTest.java:"));
-			Assert.assertTrue(e.getSuppressed()[0].getMessage().contains("|_\tFlux" +
-					".flatMap" +
-					"(HooksTraceTest.java:"));
+			assertThat(e.getSuppressed()[0]).hasMessageContaining("HooksTraceTest.java:");
+			assertThat(e.getSuppressed()[0]).hasMessageContaining("|_\tFlux.flatMap(HooksTraceTest.java:");
 			return;
 		}
 		finally {
@@ -229,13 +215,10 @@ public class HooksTraceTest {
 			    })).flux().publish();
 
 			t.map(d -> d).subscribe(null,
-					e -> Assert.assertTrue(e.getSuppressed()[0].getMessage().contains
-							("\t|_\tFlux.publish")));
+					e -> assertThat(e.getSuppressed()[0]).hasMessageContaining("\t|_\tFlux.publish"));
 
-			t.filter(d -> true).subscribe(null, e -> Assert.assertTrue(e.getSuppressed()[0].getMessage().contains
-					("\t\t|_\tFlux.publish")));
-			t.distinct().subscribe(null, e -> Assert.assertTrue(e.getSuppressed()[0].getMessage().contains
-					("\t\t\t|_\tFlux.publish")));
+			t.filter(d -> true).subscribe(null, e -> assertThat(e.getSuppressed()[0]).hasMessageContaining("\t\t|_\tFlux.publish"));
+			t.distinct().subscribe(null, e -> assertThat(e.getSuppressed()[0]).hasMessageContaining("\t\t\t|_\tFlux.publish"));
 
 			t.connect();
 		}

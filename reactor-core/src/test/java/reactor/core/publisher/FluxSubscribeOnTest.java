@@ -20,7 +20,6 @@ import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 
-import org.junit.Assert;
 import org.junit.Test;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscription;
@@ -158,11 +157,11 @@ public class FluxSubscribeOnTest {
 
 		Mono<Integer> p = Mono.fromCallable(count::incrementAndGet).subscribeOn(Schedulers.fromExecutorService(ForkJoinPool.commonPool()));
 
-		Assert.assertEquals(0, count.get());
+		assertThat(count.get()).as("pre-subscribe").isZero();
 
 		p.subscribeWith(AssertSubscriber.create()).await();
 
-		Assert.assertEquals(1, count.get());
+		assertThat(count.get()).as("post-subscribe").isEqualTo(1);
 	}
 
 	@Test

@@ -19,7 +19,6 @@ package reactor.core.publisher;
 import java.util.Arrays;
 import java.util.List;
 
-import org.junit.Assert;
 import org.junit.Test;
 import org.reactivestreams.Subscription;
 import reactor.core.CoreSubscriber;
@@ -28,6 +27,7 @@ import reactor.test.publisher.ReduceOperatorTest;
 import reactor.test.subscriber.AssertSubscriber;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatNullPointerException;
 
 public class MonoReduceSeedTest extends ReduceOperatorTest<String, String> {
 
@@ -52,21 +52,24 @@ public class MonoReduceSeedTest extends ReduceOperatorTest<String, String> {
 		);
 	}
 
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void sourceNull() {
-		new MonoReduceSeed<>(null, () -> 1, (a, b) -> (Integer) b);
+		assertThatNullPointerException()
+				.isThrownBy(() -> new MonoReduceSeed<>(null, () -> 1, (a, b) -> (Integer) b));
 	}
 
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void supplierNull() {
-		Flux.never()
-		    .reduceWith(null, (a, b) -> b);
+		assertThatNullPointerException()
+				.isThrownBy(() -> Flux.never()
+				                      .reduceWith(null, (a, b) -> b));
 	}
 
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void accumulatorNull() {
-		Flux.never()
-		    .reduceWith(() -> 1, null);
+		assertThatNullPointerException()
+				.isThrownBy(() -> Flux.never()
+				                      .reduceWith(() -> 1, null));
 	}
 
 	@Test
@@ -112,8 +115,7 @@ public class MonoReduceSeedTest extends ReduceOperatorTest<String, String> {
 		ts.assertNoValues()
 		  .assertNotComplete()
 		  .assertError(RuntimeException.class)
-		  .assertErrorWith(e -> Assert.assertTrue(e.getMessage()
-		                                           .contains("forced failure")));
+		  .assertErrorWith(e -> assertThat(e).hasMessageContaining("forced failure"));
 	}
 
 	@Test
@@ -127,8 +129,7 @@ public class MonoReduceSeedTest extends ReduceOperatorTest<String, String> {
 		ts.assertNoValues()
 		  .assertNotComplete()
 		  .assertError(RuntimeException.class)
-		  .assertErrorWith(e -> Assert.assertTrue(e.getMessage()
-		                                           .contains("forced failure")));
+		  .assertErrorWith(e -> assertThat(e).hasMessageContaining("forced failure"));
 	}
 
 	@Test

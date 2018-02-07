@@ -31,9 +31,8 @@ import reactor.core.Exceptions;
 import reactor.core.Scannable;
 import reactor.test.StepVerifier;
 
-import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatNullPointerException;
 import static reactor.core.Fuseable.*;
 
 public class FluxDoFinallyTest implements Consumer<SignalType> {
@@ -61,8 +60,8 @@ public class FluxDoFinallyTest implements Consumer<SignalType> {
 		            .expectComplete()
 		            .verify();
 
-		assertEquals(1, calls);
-		assertEquals(SignalType.ON_COMPLETE, signalType);
+		assertThat(calls).as("calls").isEqualTo(1);
+		assertThat(signalType).isEqualTo(SignalType.ON_COMPLETE);
 	}
 
 	@Test
@@ -72,8 +71,8 @@ public class FluxDoFinallyTest implements Consumer<SignalType> {
 		            .expectComplete()
 		            .verify();
 
-		assertEquals(1, calls);
-		assertEquals(SignalType.ON_COMPLETE, signalType);
+		assertThat(calls).as("calls").isEqualTo(1);
+		assertThat(signalType).isEqualTo(SignalType.ON_COMPLETE);
 	}
 
 	@Test
@@ -83,8 +82,8 @@ public class FluxDoFinallyTest implements Consumer<SignalType> {
 		            .expectError(IllegalArgumentException.class)
 		            .verify();
 
-		assertEquals(1, calls);
-		assertEquals(SignalType.ON_ERROR, signalType);
+		assertThat(calls).as("calls").isEqualTo(1);
+		assertThat(signalType).isEqualTo(SignalType.ON_ERROR);
 	}
 
 	@Test
@@ -95,8 +94,8 @@ public class FluxDoFinallyTest implements Consumer<SignalType> {
 		            .expectComplete()
 		            .verify();
 
-		assertEquals(1, calls);
-		assertEquals(SignalType.CANCEL, signalType);
+		assertThat(calls).as("calls").isEqualTo(1);
+		assertThat(signalType).isEqualTo(SignalType.CANCEL);
 	}
 
 	@Test
@@ -109,8 +108,8 @@ public class FluxDoFinallyTest implements Consumer<SignalType> {
 		            .expectComplete()
 		            .verify();
 
-		assertEquals(1, calls);
-		assertEquals(SignalType.ON_COMPLETE, signalType);
+		assertThat(calls).as("calls").isEqualTo(1);
+		assertThat(signalType).isEqualTo(SignalType.ON_COMPLETE);
 	}
 
 	@Test
@@ -121,7 +120,8 @@ public class FluxDoFinallyTest implements Consumer<SignalType> {
 		            .expectComplete()
 		            .verify();
 
-		assertEquals(1, calls); assertEquals(SignalType.ON_COMPLETE, signalType);
+		assertThat(calls).as("calls").isEqualTo(1);
+		assertThat(signalType).isEqualTo(SignalType.ON_COMPLETE);
 	}
 
 	@Test
@@ -132,8 +132,8 @@ public class FluxDoFinallyTest implements Consumer<SignalType> {
 		            .expectComplete()
 		            .verify();
 
-		assertEquals(1, calls);
-		assertEquals(SignalType.ON_COMPLETE, signalType);
+		assertThat(calls).as("calls").isEqualTo(1);
+		assertThat(signalType).isEqualTo(SignalType.ON_COMPLETE);
 	}
 
 	@Test
@@ -152,8 +152,8 @@ public class FluxDoFinallyTest implements Consumer<SignalType> {
 		            .expectComplete()
 		            .verify();
 
-		assertEquals(1, calls);
-		assertEquals(SignalType.ON_COMPLETE, signalType);
+		assertThat(calls).as("calls").isEqualTo(1);
+		assertThat(signalType).isEqualTo(SignalType.ON_COMPLETE);
 	}
 
 	@Test
@@ -172,8 +172,8 @@ public class FluxDoFinallyTest implements Consumer<SignalType> {
 		            .expectComplete()
 		            .verify();
 
-		assertEquals(1, calls);
-		assertEquals(SignalType.ON_COMPLETE, signalType);
+		assertThat(calls).as("calls").isEqualTo(1);
+		assertThat(signalType).isEqualTo(SignalType.ON_COMPLETE);
 	}
 
 	@Test
@@ -187,8 +187,8 @@ public class FluxDoFinallyTest implements Consumer<SignalType> {
 		            .expectComplete()
 		            .verify();
 
-		assertEquals(1, calls);
-		assertEquals(SignalType.ON_COMPLETE, signalType);
+		assertThat(calls).as("calls").isEqualTo(1);
+		assertThat(signalType).isEqualTo(SignalType.ON_COMPLETE);
 	}
 
 	@Test
@@ -201,8 +201,8 @@ public class FluxDoFinallyTest implements Consumer<SignalType> {
 		            .expectComplete()
 		            .verify();
 
-		assertEquals(1, calls);
-		assertEquals(SignalType.ON_COMPLETE, signalType);
+		assertThat(calls).as("calls").isEqualTo(1);
+		assertThat(signalType).isEqualTo(SignalType.ON_COMPLETE);
 	}
 
 	@Test
@@ -215,8 +215,8 @@ public class FluxDoFinallyTest implements Consumer<SignalType> {
 		            .expectError(IllegalArgumentException.class)
 		            .verify();
 
-		assertEquals(1, calls);
-		assertEquals(SignalType.ON_ERROR, signalType);
+		assertThat(calls).as("calls").isEqualTo(1);
+		assertThat(signalType).isEqualTo(SignalType.ON_ERROR);
 	}
 
 	@Test
@@ -231,8 +231,8 @@ public class FluxDoFinallyTest implements Consumer<SignalType> {
 		            .expectComplete()
 		            .verify();
 
-		assertEquals(1, calls);
-		assertEquals(SignalType.CANCEL, signalType);
+		assertThat(calls).as("calls").isEqualTo(1);
+		assertThat(signalType).isEqualTo(SignalType.CANCEL);
 	}
 
 	@Test
@@ -246,8 +246,8 @@ public class FluxDoFinallyTest implements Consumer<SignalType> {
 		            .expectComplete()
 		            .verify();
 
-		assertEquals(1, calls);
-		assertEquals(SignalType.ON_COMPLETE, signalType);
+		assertThat(calls).as("calls").isEqualTo(1);
+		assertThat(signalType).isEqualTo(SignalType.ON_COMPLETE);
 	}
 
 	@Test
@@ -260,8 +260,8 @@ public class FluxDoFinallyTest implements Consumer<SignalType> {
 		            .expectComplete()
 		            .verify();
 
-		assertEquals(1, calls);
-		assertEquals(SignalType.ON_COMPLETE, signalType);
+		assertThat(calls).as("calls").isEqualTo(1);
+		assertThat(signalType).isEqualTo(SignalType.ON_COMPLETE);
 	}
 
 	@Test
@@ -274,8 +274,8 @@ public class FluxDoFinallyTest implements Consumer<SignalType> {
 		            .expectComplete()
 		            .verify();
 
-		assertEquals(1, calls);
-		assertEquals(SignalType.ON_COMPLETE, signalType);
+		assertThat(calls).as("calls").isEqualTo(1);
+		assertThat(signalType).isEqualTo(SignalType.ON_COMPLETE);
 	}
 
 	@Test
@@ -295,8 +295,8 @@ public class FluxDoFinallyTest implements Consumer<SignalType> {
 		            .expectComplete()
 		            .verify();
 
-		assertEquals(1, calls);
-		assertEquals(SignalType.ON_COMPLETE, signalType);
+		assertThat(calls).as("calls").isEqualTo(1);
+		assertThat(signalType).isEqualTo(SignalType.ON_COMPLETE);
 	}
 
 	@Test
@@ -316,13 +316,14 @@ public class FluxDoFinallyTest implements Consumer<SignalType> {
 		            .expectComplete()
 		            .verify();
 
-		assertEquals(1, calls);
-		assertEquals(SignalType.ON_COMPLETE, signalType);
+		assertThat(calls).as("calls").isEqualTo(1);
+		assertThat(signalType).isEqualTo(SignalType.ON_COMPLETE);
 	}
 
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void nullCallback() {
-		Flux.just(1).doFinally(null);
+		assertThatNullPointerException()
+				.isThrownBy(() -> Flux.just(1).doFinally(null));
 	}
 
 	@Test
@@ -338,8 +339,8 @@ public class FluxDoFinallyTest implements Consumer<SignalType> {
 		}
 		catch (Throwable e) {
 			Throwable _e = Exceptions.unwrap(e);
-			assertNotSame(e, _e);
-			assertThat(_e, is(instanceOf(IllegalStateException.class)));
+			assertThat(_e).isNotSameAs(e)
+			              .isInstanceOf(IllegalStateException.class);
 		}
 	}
 
@@ -357,8 +358,8 @@ public class FluxDoFinallyTest implements Consumer<SignalType> {
 		}
 		catch (Throwable e) {
 			Throwable _e = Exceptions.unwrap(e);
-			assertNotSame(e, _e);
-			assertThat(_e, is(instanceOf(IllegalStateException.class)));
+			assertThat(_e).isNotSameAs(e)
+			              .isInstanceOf(IllegalStateException.class);
 		}
 	}
 
@@ -372,7 +373,7 @@ public class FluxDoFinallyTest implements Consumer<SignalType> {
 		    .doFinally(s -> finallyOrder.offer("SECOND"))
 		    .blockLast();
 
-		Assertions.assertThat(finallyOrder)
+		assertThat(finallyOrder)
 		          .containsExactly("SECOND", "FIRST");
 	}
 
@@ -383,14 +384,14 @@ public class FluxDoFinallyTest implements Consumer<SignalType> {
 		Subscription parent = Operators.emptySubscription();
 		test.onSubscribe(parent);
 
-		Assertions.assertThat(test.scan(Scannable.Attr.PARENT)).isSameAs(parent);
-		Assertions.assertThat(test.scan(Scannable.Attr.ACTUAL)).isSameAs(actual);
+		assertThat(test.scan(Scannable.Attr.PARENT)).isSameAs(parent);
+		assertThat(test.scan(Scannable.Attr.ACTUAL)).isSameAs(actual);
 
-		Assertions.assertThat(test.scan(Scannable.Attr.CANCELLED)).isFalse();
-		Assertions.assertThat(test.scan(Scannable.Attr.TERMINATED)).isFalse();
+		assertThat(test.scan(Scannable.Attr.CANCELLED)).isFalse();
+		assertThat(test.scan(Scannable.Attr.TERMINATED)).isFalse();
 		test.onError(new IllegalStateException("boom"));
-		Assertions.assertThat(test.scan(Scannable.Attr.TERMINATED)).isTrue();
-		Assertions.assertThat(test.scan(Scannable.Attr.CANCELLED)).isTrue();
+		assertThat(test.scan(Scannable.Attr.TERMINATED)).isTrue();
+		assertThat(test.scan(Scannable.Attr.CANCELLED)).isTrue();
 	}
 
 	//TODO test multiple subscriptions?
@@ -405,7 +406,7 @@ public class FluxDoFinallyTest implements Consumer<SignalType> {
 		    .doFinally(any -> events.add("doFinally " + any.toString()))
 		    .subscribe();
 
-		Assertions.assertThat(events)
+		assertThat(events)
 		          .as("subscribe without consumer: map_doOnError_doFinally")
 		          .containsExactly("doOnError", "doFinally onError");
 
@@ -416,7 +417,7 @@ public class FluxDoFinallyTest implements Consumer<SignalType> {
 		    .doOnError(e -> events.add("doOnError"))
 		    .subscribe();
 
-		Assertions.assertThat(events)
+		assertThat(events)
 		          .as("subscribe without consumer: doFinally_map_doOnError")
 		          .containsExactly("doFinally cancel", "doOnError");
 
@@ -427,7 +428,7 @@ public class FluxDoFinallyTest implements Consumer<SignalType> {
 		    .doOnError(e -> events.add("doOnError"))
 		    .subscribe();
 
-		Assertions.assertThat(events)
+		assertThat(events)
 		          .as("subscribe without consumer:  map_doFinally_doOnError")
 		          .containsExactly("doOnError", "doFinally onError");
 	}
@@ -443,7 +444,7 @@ public class FluxDoFinallyTest implements Consumer<SignalType> {
 		    .doFinally(any -> events.add("doFinally " + any.toString()))
 		    .subscribe(v -> { }, e -> { });
 
-		Assertions.assertThat(events)
+		assertThat(events)
 		          .as("subscribe with consumer: map_doOnError_doFinally")
 		          .containsExactly("doOnError", "doFinally onError");
 
@@ -454,7 +455,7 @@ public class FluxDoFinallyTest implements Consumer<SignalType> {
 		    .doOnError(e -> events.add("doOnError"))
 		    .subscribe(v -> { }, e -> { });
 
-		Assertions.assertThat(events)
+		assertThat(events)
 		          .as("subscribe with consumer: doFinally_map_doOnError")
 		          .containsExactly("doFinally cancel", "doOnError");
 
@@ -465,7 +466,7 @@ public class FluxDoFinallyTest implements Consumer<SignalType> {
 		    .doOnError(e -> events.add("doOnError"))
 		    .subscribe(v -> { }, e -> { });
 
-		Assertions.assertThat(events)
+		assertThat(events)
 		          .as("subscribe with consumer: map_doFinally_doOnError")
 		          .containsExactly("doOnError", "doFinally onError");
 	}
@@ -482,7 +483,7 @@ public class FluxDoFinallyTest implements Consumer<SignalType> {
 		                          ::subscribe)
 		          .withMessage("java.lang.IllegalStateException: boom");
 
-		Assertions.assertThat(events)
+		assertThat(events)
 		          .as("whithoutDoOnError")
 		          .containsExactly("doFinally onError");
 	}

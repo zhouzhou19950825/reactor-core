@@ -21,7 +21,6 @@ import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.junit.Assert;
 import org.junit.Test;
 import org.reactivestreams.Subscription;
 import reactor.core.CoreSubscriber;
@@ -185,12 +184,12 @@ public class MonoSubscribeOnTest {
 		Mono<Integer> p = Mono.fromCallable(count::incrementAndGet)
 		                      .subscribeOn(Schedulers.fromExecutorService(ForkJoinPool.commonPool()));
 
-		Assert.assertEquals(0, count.get());
+		assertThat(count).as("count before subscribe").hasValue(0);
 
 		p.subscribeWith(AssertSubscriber.create())
 		 .await();
 
-		Assert.assertEquals(1, count.get());
+		assertThat(count).as("count after subscribe").hasValue(1);
 	}
 
 	@Test

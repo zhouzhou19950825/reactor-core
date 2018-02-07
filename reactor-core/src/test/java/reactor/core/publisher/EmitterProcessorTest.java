@@ -24,9 +24,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.LockSupport;
-import java.util.stream.Stream;
 
-import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.reactivestreams.Processor;
@@ -43,12 +41,9 @@ import reactor.test.subscriber.AssertSubscriber;
 import reactor.util.annotation.Nullable;
 import reactor.util.concurrent.Queues;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
-import static reactor.core.Scannable.Attr.CANCELLED;
-import static reactor.core.Scannable.Attr.TERMINATED;
-import static reactor.core.Scannable.Attr.*;
+import static org.assertj.core.api.Assertions.*;
 import static reactor.core.Scannable.Attr;
+import static reactor.core.Scannable.Attr.*;
 
 /**
  * @author Stephane Maldini
@@ -105,9 +100,10 @@ public class EmitterProcessorTest {
 		latch.await(8, TimeUnit.SECONDS);
 
 		long count = latch.getCount();
-		org.junit.Assert.assertTrue("Count > 0 : " + count + " (" + list + ")  , Running on " + Schedulers.DEFAULT_POOL_SIZE + " CPU",
-				latch.getCount() == 0);
-
+		assertThat(latch.getCount())
+				.as("latch count")
+				.withFailMessage("Count > 0 : " + count + " (" + list + ")  , Running on " + Schedulers.DEFAULT_POOL_SIZE + " CPU")
+				.isZero();
 	}
 
 	/*@Test
@@ -159,31 +155,37 @@ public class EmitterProcessorTest {
 		latch.await(8, TimeUnit.SECONDS);
 
 		long count = latch.getCount();
-		org.junit.Assert.assertTrue("Count > 0 : " + count + "  , Running on " + Schedulers.DEFAULT_POOL_SIZE + " CPU",
-				latch.getCount() == 0);
+		assertThat(latch.getCount())
+				.as("latch count")
+				.withFailMessage("Count > 0 : " + count + "  , Running on " + Schedulers.DEFAULT_POOL_SIZE + " CPU")
+				.isZero();
 
 		stream.onComplete();
 
 	}
 
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void onNextNull() {
-		EmitterProcessor.create().onNext(null);
+		assertThatNullPointerException()
+				.isThrownBy(() -> EmitterProcessor.create().onNext(null));
 	}
 
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void onErrorNull() {
-		EmitterProcessor.create().onError(null);
+		assertThatNullPointerException()
+				.isThrownBy(() -> EmitterProcessor.create().onError(null));
 	}
 
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void onSubscribeNull() {
-		EmitterProcessor.create().onSubscribe(null);
+		assertThatNullPointerException()
+				.isThrownBy(() -> EmitterProcessor.create().onSubscribe(null));
 	}
 
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void subscribeNull() {
-		EmitterProcessor.create().subscribe((Subscriber<Object>)null);
+		assertThatNullPointerException()
+				.isThrownBy(() -> EmitterProcessor.create().subscribe((Subscriber<Object>)null));
 	}
 
 	@Test
@@ -191,9 +193,9 @@ public class EmitterProcessorTest {
 		EmitterProcessor<Integer> tp = EmitterProcessor.create();
 		StepVerifier.create(tp)
 		            .then(() -> {
-			            Assert.assertTrue("No subscribers?", tp.hasDownstreams());
-			            Assert.assertFalse("Completed?", tp.isTerminated());
-			            Assert.assertNull("Has error?", tp.getError());
+			            assertThat(tp.hasDownstreams()).as("hasDownstreams").isTrue();
+			            assertThat(tp.isTerminated()).as("isTerminated").isFalse();
+			            assertThat(tp.getError()).as("getError").isNull();
 		            })
 		            .then(() -> {
 			            tp.onNext(1);
@@ -208,9 +210,9 @@ public class EmitterProcessorTest {
 		            .expectComplete()
 		            .verify();
 
-		Assert.assertFalse("Subscribers present?", tp.hasDownstreams());
-		Assert.assertTrue("Not completed?", tp.isTerminated());
-		Assert.assertNull("Has error?", tp.getError());
+		assertThat(tp.hasDownstreams()).as("hasDownstreams").isFalse();
+		assertThat(tp.isTerminated()).as("isTerminated").isTrue();
+		assertThat(tp.getError()).as("getError").isNull();
 	}
 
 	@Test
@@ -218,9 +220,9 @@ public class EmitterProcessorTest {
 		EmitterProcessor<Integer> tp = EmitterProcessor.create();
 		StepVerifier.create(tp, 0L)
 		            .then(() -> {
-			            Assert.assertTrue("No subscribers?", tp.hasDownstreams());
-			            Assert.assertFalse("Completed?", tp.isTerminated());
-			            Assert.assertNull("Has error?", tp.getError());
+			            assertThat(tp.hasDownstreams()).as("hasDownstreams").isTrue();
+			            assertThat(tp.isTerminated()).as("isTerminated").isFalse();
+			            assertThat(tp.getError()).as("getError").isNull();
 		            })
 		            .then(() -> {
 			            tp.onNext(1);
@@ -232,9 +234,9 @@ public class EmitterProcessorTest {
 		            .expectComplete()
 		            .verify();
 
-		Assert.assertFalse("Subscribers present?", tp.hasDownstreams());
-		Assert.assertTrue("Not completed?", tp.isTerminated());
-		Assert.assertNull("Has error?", tp.getError());
+		assertThat(tp.hasDownstreams()).as("hasDownstreams").isFalse();
+		assertThat(tp.isTerminated()).as("isTerminated").isTrue();
+		assertThat(tp.getError()).as("getError").isNull();
 	}
 
 	@Test
@@ -242,9 +244,9 @@ public class EmitterProcessorTest {
 		EmitterProcessor<Integer> tp = EmitterProcessor.create(100);
 		StepVerifier.create(tp, 0L)
 		            .then(() -> {
-			            Assert.assertTrue("No subscribers?", tp.hasDownstreams());
-			            Assert.assertFalse("Completed?", tp.isTerminated());
-			            Assert.assertNull("Has error?", tp.getError());
+			            assertThat(tp.hasDownstreams()).as("hasDownstreams").isTrue();
+			            assertThat(tp.isTerminated()).as("isTerminated").isFalse();
+			            assertThat(tp.getError()).as("getError").isNull();
 		            })
 		            .then(() -> {
 			            tp.onNext(1);
@@ -256,9 +258,9 @@ public class EmitterProcessorTest {
 		            .expectComplete()
 		            .verify();
 
-		Assert.assertFalse("Subscribers present?", tp.hasDownstreams());
-		Assert.assertTrue("Not completed?", tp.isTerminated());
-		Assert.assertNull("Has error?", tp.getError());
+		assertThat(tp.hasDownstreams()).as("hasDownstreams").isFalse();
+		assertThat(tp.isTerminated()).as("isTerminated").isTrue();
+		assertThat(tp.getError()).as("getError").isNull();
 	}
 
 	@Test
@@ -323,19 +325,22 @@ public class EmitterProcessorTest {
 	}
 
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void failNullBufferSize() {
-		EmitterProcessor.create(0);
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> EmitterProcessor.create(0));
 	}
 
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void failNullNext() {
-		EmitterProcessor.create().onNext(null);
+		assertThatNullPointerException()
+				.isThrownBy(() -> EmitterProcessor.create().onNext(null));
 	}
 
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void failNullError() {
-		EmitterProcessor.create().onError(null);
+		assertThatNullPointerException()
+				.isThrownBy(() -> EmitterProcessor.create().onError(null));
 	}
 
 	@Test
@@ -374,9 +379,10 @@ public class EmitterProcessorTest {
 		assertThat(ep.sink().isCancelled()).isTrue();
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void failNegativeBufferSize() {
-		EmitterProcessor.create(-1);
+		assertThatIllegalArgumentException()
+				.isThrownBy(() ->EmitterProcessor.create(-1));
 	}
 
 	static final List<String> DATA     = new ArrayList<>();
@@ -645,7 +651,7 @@ public class EmitterProcessorTest {
 			Throwable lastException = threads[j].getLastException();
 			if (lastException != null) {
 				lastException.printStackTrace();
-				Assert.fail();
+				fail("");
 			}
 		}
 
@@ -726,8 +732,8 @@ public class EmitterProcessorTest {
 		int expectedBufferSize = bufferSize != null ? bufferSize : Queues.SMALL_BUFFER_SIZE;
 		boolean expectedAutoCancel = autoCancel != null ? autoCancel : true;
 
-		assertEquals(expectedBufferSize, processor.prefetch);
-		assertEquals(expectedAutoCancel, processor.autoCancel);
+		assertThat(processor.prefetch).isEqualTo(expectedBufferSize);
+		assertThat(processor.autoCancel).isEqualTo(expectedAutoCancel);
 	}
 
 	/**

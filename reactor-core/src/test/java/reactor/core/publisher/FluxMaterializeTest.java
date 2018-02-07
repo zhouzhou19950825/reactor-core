@@ -19,7 +19,6 @@ package reactor.core.publisher;
 import java.util.Arrays;
 import java.util.List;
 
-import org.junit.Assert;
 import org.junit.Test;
 import org.reactivestreams.Subscription;
 import reactor.core.CoreSubscriber;
@@ -29,6 +28,7 @@ import reactor.test.publisher.FluxOperatorTest;
 import reactor.test.subscriber.AssertSubscriber;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 public class FluxMaterializeTest
 		extends FluxOperatorTest<String, Signal<String>> {
@@ -68,7 +68,7 @@ public class FluxMaterializeTest
 
 								                      try{
 									                      m.offer(null);
-									                      Assert.fail();
+									                      fail("");
 								                      }
 								                      catch (UnsupportedOperationException u){
 									                      //ignore
@@ -76,7 +76,7 @@ public class FluxMaterializeTest
 
 								                      try{
 									                      m.iterator();
-									                      Assert.fail();
+									                      fail("");
 								                      }
 								                      catch (UnsupportedOperationException u){
 									                      //ignore

@@ -23,20 +23,23 @@ import org.junit.Test;
 import reactor.test.StepVerifier;
 import reactor.test.subscriber.AssertSubscriber;
 
+import static org.assertj.core.api.Assertions.assertThatNullPointerException;
+
 public class FluxRetryPredicateTest {
 
 	final Flux<Integer> source = Flux.concat(Flux.range(1, 5),
 			Flux.error(new RuntimeException("forced failure 0")));
 
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void sourceNull() {
-		new FluxRetryPredicate<>(null, e -> true);
+		assertThatNullPointerException()
+				.isThrownBy(() -> new FluxRetryPredicate<>(null, e -> true));
 	}
 
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void predicateNull() {
-		Flux.never()
-		    .retry(null);
+		assertThatNullPointerException()
+				.isThrownBy(() -> Flux.never().retry(null));
 	}
 
 	@Test

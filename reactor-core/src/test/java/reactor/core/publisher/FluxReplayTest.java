@@ -36,8 +36,7 @@ import reactor.test.publisher.FluxOperatorTest;
 import reactor.test.scheduler.VirtualTimeScheduler;
 import reactor.util.function.Tuple2;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.*;
 
 public class FluxReplayTest extends FluxOperatorTest<String, String> {
 
@@ -63,16 +62,18 @@ public class FluxReplayTest extends FluxOperatorTest<String, String> {
 		);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void failPrefetch(){
-		Flux.never()
-		    .replay( -1);
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> Flux.never()
+				                      .replay( -1));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void failTime(){
-		Flux.never()
-		    .replay( Duration.ofDays(-1));
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> Flux.never()
+				                      .replay( Duration.ofDays(-1)));
 	}
 
 	VirtualTimeScheduler vts;

@@ -17,8 +17,9 @@ package reactor.core.publisher;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.junit.Assert;
 import org.junit.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class MonoDeferTest {
 
@@ -29,8 +30,8 @@ public class MonoDeferTest {
 		Mono<Integer> source =
 				Mono.defer(() -> Mono.just(i.incrementAndGet()));
 
-		Assert.assertEquals(source.block().intValue(), 1);
-		Assert.assertEquals(source.block().intValue(), 2);
-		Assert.assertEquals(source.block().intValue(), 3);
+		assertThat(source.block()).as("first block").isEqualTo(1);
+		assertThat(source.block()).as("second block").isEqualTo(2);
+		assertThat(source.block()).as("third block").isEqualTo(3);
 	}
 }

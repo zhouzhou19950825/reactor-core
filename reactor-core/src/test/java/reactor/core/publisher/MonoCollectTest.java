@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.junit.Assert;
 import org.junit.Test;
 import org.reactivestreams.Subscription;
 import reactor.core.CoreSubscriber;
@@ -28,23 +27,26 @@ import reactor.core.Scannable;
 import reactor.test.subscriber.AssertSubscriber;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatNullPointerException;
 
 public class MonoCollectTest {
 
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void nullSource() {
-		new MonoCollect<>(null, () -> 1, (a, b) -> {
-		});
+		assertThatNullPointerException()
+				.isThrownBy(() -> new MonoCollect<>(null, () -> 1, (a, b) -> { }));
 	}
 
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void nullSupplier() {
-		Flux.never().collect(null, (a, b) -> {});
+		assertThatNullPointerException()
+				.isThrownBy(() -> Flux.never().collect(null, (a, b) -> {}));
 	}
 
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void nullAction() {
-		Flux.never().collect(() -> 1, null);
+		assertThatNullPointerException()
+				.isThrownBy(() -> Flux.never().collect(() -> 1, null));
 	}
 
 	@Test
@@ -86,7 +88,7 @@ public class MonoCollectTest {
 
 		ts.assertNoValues()
 		  .assertError(RuntimeException.class)
-		  .assertErrorWith( e -> Assert.assertTrue(e.getMessage().contains("forced failure")))
+		  .assertErrorWith( e -> assertThat(e).hasMessageContaining("forced failure"))
 		  .assertNotComplete();
 
 	}
@@ -113,7 +115,7 @@ public class MonoCollectTest {
 
 		ts.assertNoValues()
 		  .assertError(RuntimeException.class)
-		  .assertErrorWith( e -> Assert.assertTrue(e.getMessage().contains("forced failure")))
+		  .assertErrorWith( e -> assertThat(e).hasMessageContaining("forced failure"))
 		  .assertNotComplete();
 	}
 

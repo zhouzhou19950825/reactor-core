@@ -18,17 +18,21 @@ package reactor.core.publisher;
 import org.junit.Test;
 import reactor.test.subscriber.AssertSubscriber;
 
+import static org.assertj.core.api.Assertions.assertThatNullPointerException;
+
 public class FluxSwitchIfEmptyTest {
 
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void sourceNull() {
-		new FluxSwitchIfEmpty<>(null, Flux.never());
+		assertThatNullPointerException()
+				.isThrownBy(() -> new FluxSwitchIfEmpty<>(null, Flux.never()));
 	}
 
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void otherNull() {
-		Flux.never()
-		    .switchIfEmpty(null);
+		assertThatNullPointerException()
+				.isThrownBy(() -> Flux.never()
+				                      .switchIfEmpty(null));
 	}
 
 	@Test

@@ -34,6 +34,7 @@ import reactor.test.publisher.FluxOperatorTest;
 import reactor.test.subscriber.AssertSubscriber;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatNullPointerException;
 
 public class FluxMapTest extends FluxOperatorTest<String, String> {
 
@@ -63,14 +64,16 @@ public class FluxMapTest extends FluxOperatorTest<String, String> {
 
 	Flux<Integer> just = Flux.just(1);
 
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void nullSource() {
-		new FluxMap<Integer, Integer>(null, v -> v);
+		assertThatNullPointerException()
+				.isThrownBy(() -> new FluxMap<Integer, Integer>(null, v -> v));
 	}
 
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void nullMapper() {
-		just.map(null);
+		assertThatNullPointerException()
+				.isThrownBy(() -> just.map(null));
 	}
 
 	@Test

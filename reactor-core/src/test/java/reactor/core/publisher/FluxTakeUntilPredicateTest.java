@@ -22,17 +22,21 @@ import reactor.core.CoreSubscriber;
 import reactor.core.Scannable;
 import reactor.test.subscriber.AssertSubscriber;
 
+import static org.assertj.core.api.Assertions.assertThatNullPointerException;
+
 public class FluxTakeUntilPredicateTest {
 
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void sourceNull() {
-		new FluxTakeUntil<>(null, v -> true);
+		assertThatNullPointerException()
+				.isThrownBy(() -> new FluxTakeUntil<>(null, v -> true));
 	}
 
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void predicateNull() {
-		Flux.never()
-		    .takeUntil(null);
+		assertThatNullPointerException()
+				.isThrownBy(() -> Flux.never()
+				                      .takeUntil(null));
 	}
 
 	@Test

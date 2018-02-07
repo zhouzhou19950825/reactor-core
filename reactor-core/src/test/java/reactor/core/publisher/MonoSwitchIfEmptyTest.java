@@ -18,17 +18,21 @@ package reactor.core.publisher;
 import org.junit.Test;
 import reactor.test.subscriber.AssertSubscriber;
 
+import static org.assertj.core.api.Assertions.assertThatNullPointerException;
+
 public class MonoSwitchIfEmptyTest {
 
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void sourceNull() {
-		new MonoSwitchIfEmpty<>(null, Mono.never());
+		assertThatNullPointerException()
+				.isThrownBy(() -> new MonoSwitchIfEmpty<>(null, Mono.never()));
 	}
 
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void otherNull() {
-		Mono.never()
-		    .switchIfEmpty(null);
+		assertThatNullPointerException()
+				.isThrownBy(() -> Mono.never()
+				                      .switchIfEmpty(null));
 	}
 
 	@Test

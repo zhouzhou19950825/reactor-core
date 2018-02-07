@@ -19,7 +19,6 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.TimeUnit;
 
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import reactor.core.Disposable;
@@ -71,7 +70,7 @@ public abstract class AbstractSchedulerTest {
 						latch.countDown();
 						if (latch2 != null && !latch2.await(10,
 								TimeUnit.SECONDS) && shouldCheckInterrupted()) {
-							Assert.fail("Should have interrupted");
+							fail("Should have interrupted");
 						}
 					}
 					catch (InterruptedException e) {
@@ -146,7 +145,7 @@ public abstract class AbstractSchedulerTest {
 						latch.countDown();
 						if(latch2 != null && !latch2.await(10, TimeUnit.SECONDS) &&
 								shouldCheckInterrupted()){
-							Assert.fail("Should have interrupted");
+							fail("Should have interrupted");
 						}
 					}
 					catch (InterruptedException e){

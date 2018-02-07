@@ -16,7 +16,6 @@
 
 package reactor.core.publisher;
 
-import org.junit.Assert;
 import org.junit.Test;
 import org.reactivestreams.Subscription;
 import reactor.core.CoreSubscriber;
@@ -26,22 +25,26 @@ import reactor.test.publisher.TestPublisher;
 import reactor.test.subscriber.AssertSubscriber;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatNullPointerException;
 
 public class MonoAnyTest {
 
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void sourceNull() {
-		new MonoAny<>(null, v -> true);
+		assertThatNullPointerException()
+				.isThrownBy(() -> new MonoAny<>(null, v -> true));
 	}
 
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void predicateNull() {
-		new MonoAny<>(null, null);
+		assertThatNullPointerException()
+				.isThrownBy(() -> new MonoAny<>(null, null));
 	}
 
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void elementNull() {
-		Flux.never().hasElement(null);
+		assertThatNullPointerException()
+				.isThrownBy(() -> Flux.never().hasElement(null));
 	}
 
 	@Test
@@ -154,7 +157,7 @@ public class MonoAnyTest {
 		  .assertError(RuntimeException.class)
 		  .assertErrorWith( e -> {
 			  e.printStackTrace();
-			  Assert.assertTrue(e.getMessage().contains("forced failure"));
+			  assertThat(e).hasMessageContaining("forced failure");
 		  });
 	}
 

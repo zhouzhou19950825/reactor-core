@@ -27,12 +27,14 @@ import reactor.test.publisher.FluxOperatorTest;
 import reactor.test.subscriber.AssertSubscriber;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 public class FluxMapSignalTest extends FluxOperatorTest<String, String> {
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void allNull(){
-		Flux.never().flatMap(null, null, null);
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> Flux.never().flatMap(null, null, null));
 	}
 
 	@Override

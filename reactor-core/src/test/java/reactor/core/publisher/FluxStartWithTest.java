@@ -16,7 +16,6 @@
 package reactor.core.publisher;
 
 import org.junit.Test;
-
 import reactor.test.subscriber.AssertSubscriber;
 
 public class FluxStartWithTest {

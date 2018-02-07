@@ -28,7 +28,6 @@ import java.util.concurrent.atomic.LongAdder;
 import java.util.concurrent.locks.LockSupport;
 
 import org.assertj.core.api.Assertions;
-import org.junit.Assert;
 import org.junit.Test;
 import reactor.core.Fuseable;
 import reactor.core.publisher.DirectProcessor;
@@ -1698,12 +1697,12 @@ public class StepVerifierTests {
 	@Test(timeout = 1000L)
 	public void consumeNextWithLowRequestShortcircuits() {
 		StepVerifier.Step<String> validSoFar = StepVerifier.create(Flux.just("foo", "bar"), 1)
-				                         .expectNext("foo");
+		                                                   .expectNext("foo");
 
 		assertThatExceptionOfType(IllegalArgumentException.class)
 				.isThrownBy(() -> validSoFar.consumeNextWith(s -> {}))
-	            .withMessageStartingWith("The scenario will hang at consumeNextWith due to too little request being performed for the expectations to finish")
-	            .withMessageEndingWith("request remaining since last step: 0, expected: 1");
+				.withMessageStartingWith("The scenario will hang at consumeNextWith due to too little request being performed for the expectations to finish")
+				.withMessageEndingWith("request remaining since last step: 0, expected: 1");
 	}
 
 	@Test(timeout = 1000L)
@@ -1734,7 +1733,7 @@ public class StepVerifierTests {
 				.isThrownBy(() -> StepVerifier.create(Flux.just("foo", "bar"), 1)
 				                              .expectNextCount(2)
 				)
-	            .withMessageStartingWith("The scenario will hang at expectNextCount(2) due to too little request being performed for the expectations to finish; ")
+				.withMessageStartingWith("The scenario will hang at expectNextCount(2) due to too little request being performed for the expectations to finish; ")
 				.withMessageEndingWith("request remaining since last step: 1, expected: 2");
 	}
 
@@ -1768,7 +1767,7 @@ public class StepVerifierTests {
 		assertThatExceptionOfType(IllegalArgumentException.class)
 				.isThrownBy(() -> validSoFar.thenConsumeWhile(s -> s == 1))
 				.withMessageStartingWith("The scenario will hang at thenConsumeWhile due to too little request being performed for the expectations to finish; ")
-	            .withMessageEndingWith("request remaining since last step: 0, expected: at least 1 (best effort estimation)");
+				.withMessageEndingWith("request remaining since last step: 0, expected: at least 1 (best effort estimation)");
 	}
 
 	@Test(timeout = 1000L)
@@ -1830,7 +1829,7 @@ public class StepVerifierTests {
 		                                       .take(100000)
 		                                       .collectList())
 		            .thenAwait(Duration.ofHours(1000))
-		            .consumeNextWith(list -> Assert.assertTrue(list.size() == 100000))
+		            .consumeNextWith(list -> assertThat(list).hasSize(100000))
 		            .verifyComplete();
 	}
 

@@ -19,18 +19,22 @@ package reactor.core.publisher;
 import org.junit.Test;
 import reactor.test.StepVerifier;
 
+import static org.assertj.core.api.Assertions.assertThatNullPointerException;
+
 public class MonoCastTest {
 
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void sourceNull() {
-		Mono.just(1)
-		    .cast(null);
+		assertThatNullPointerException()
+				.isThrownBy(() -> Mono.just(1)
+				                      .cast(null));
 	}
 
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void sourceNull2() {
-		Mono.just(1)
-		    .ofType(null);
+		assertThatNullPointerException()
+				.isThrownBy(() -> Mono.just(1)
+				                      .ofType(null));
 	}
 
 	@Test

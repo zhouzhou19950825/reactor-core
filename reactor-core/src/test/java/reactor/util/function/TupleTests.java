@@ -19,7 +19,6 @@ package reactor.util.function;
 import java.util.function.Function;
 
 import org.junit.Test;
-import java.lang.Object;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;

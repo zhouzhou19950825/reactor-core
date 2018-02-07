@@ -16,14 +16,13 @@
 
 package reactor.core.publisher;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.junit.Assert;
 import org.junit.Test;
 import reactor.test.StepVerifier;
 import reactor.test.subscriber.AssertSubscriber;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class MonoPublishMulticastTest {
 
@@ -67,11 +66,11 @@ public class MonoPublishMulticastTest {
 		sp.publish(o -> Mono.<Integer>never())
 		  .subscribe(ts);
 
-		Assert.assertTrue("Not subscribed?", sp.downstreamCount() != 0);
+		assertThat(sp.downstreamCount()).withFailMessage("Not subscribed?").isNotZero();
 
 		ts.cancel();
 
-		Assert.assertFalse("Still subscribed?", sp.isCancelled());
+		assertThat(sp.isCancelled()).withFailMessage("Still subscribed?").isFalse();
 	}
 
 	@Test
@@ -83,7 +82,7 @@ public class MonoPublishMulticastTest {
 		sp.publish(o -> Mono.<Integer>empty())
 		  .subscribe(ts);
 
-		Assert.assertFalse("Still subscribed?", sp.isCancelled());
+		assertThat(sp.isCancelled()).withFailMessage("Still subscribed?").isFalse();
 	}
 
 

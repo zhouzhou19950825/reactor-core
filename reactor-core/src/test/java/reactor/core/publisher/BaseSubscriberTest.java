@@ -27,8 +27,7 @@ import org.reactivestreams.Subscription;
 import reactor.core.Disposable;
 import reactor.core.Exceptions;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.*;
 
 public class BaseSubscriberTest {
 
@@ -47,8 +46,9 @@ public class BaseSubscriberTest {
 
 			@Override
 			public void hookOnNext(Integer integer) {
-				assertTrue("unexpected previous value for " + integer,
-						lastValue.compareAndSet(integer - 1, integer));
+				assertThat(lastValue.compareAndSet(integer - 1, integer))
+						.withFailMessage("unexpected previous value for " + integer)
+						.isTrue();
 				if (integer < 10) {
 					request(1);
 				}
@@ -70,12 +70,12 @@ public class BaseSubscriberTest {
 			@Override
 			protected void hookFinally(SignalType type) {
 				latch.countDown();
-				assertThat(type, is(SignalType.CANCEL));
+				assertThat(type).isEqualTo(SignalType.CANCEL);
 			}
 		});
 
 		latch.await(500, TimeUnit.MILLISECONDS);
-		assertThat(lastValue.get(), is(10));
+		assertThat(lastValue.get()).isEqualTo(10);
 	}
 
 	@Test
@@ -98,8 +98,8 @@ public class BaseSubscriberTest {
 		}
 		catch (UnsupportedOperationException e) {
 			assertThat(e.getClass()
-			            .getSimpleName(), is("ErrorCallbackNotImplemented"));
-			assertThat(e.getCause(), is(instanceOf(IllegalStateException.class)));
+			            .getSimpleName()).isEqualTo("ErrorCallbackNotImplemented");
+			assertThat(e).hasCauseInstanceOf(IllegalStateException.class);
 		}
 	}
 
@@ -130,39 +130,41 @@ public class BaseSubscriberTest {
 				checkFinally.set(type);
 			}
 		});
-		assertThat(checkFinally.get(), is(SignalType.ON_ERROR));
-		assertThat(error.get(), is(instanceOf(IllegalStateException.class)));
+		assertThat(checkFinally.get()).isEqualTo(SignalType.ON_ERROR);
+		assertThat(error.get()).isInstanceOf(IllegalStateException.class);
 	}
 
-	@Test(expected = OutOfMemoryError.class)
+	@Test
 	public void onSubscribeFatalThrown() {
 		Flux<String> flux = Flux.just("foo");
 		AtomicReference<Throwable> error = new AtomicReference<>();
 		AtomicReference<SignalType> checkFinally = new AtomicReference<>();
 
-		flux.subscribe(new BaseSubscriber<String>() {
-			@Override
-			protected void hookOnSubscribe(Subscription subscription) {
-				throw new OutOfMemoryError("boom");
-			}
+		assertThatExceptionOfType(OutOfMemoryError.class)
+				.isThrownBy(() -> flux.subscribe(new BaseSubscriber<String>() {
+					@Override
+					protected void hookOnSubscribe(Subscription subscription) {
+						throw new OutOfMemoryError("boom");
+					}
 
-			@Override
-			protected void hookOnNext(String value) {
-				//NO-OP
-			}
+					@Override
+					protected void hookOnNext(String value) {
+						//NO-OP
+					}
 
-			@Override
-			protected void hookOnError(Throwable throwable) {
-				error.set(throwable);
-			}
+					@Override
+					protected void hookOnError(Throwable throwable) {
+						error.set(throwable);
+					}
 
-			@Override
-			protected void hookFinally(SignalType type) {
-				checkFinally.set(type);
-			}
-		});
-		assertThat(checkFinally.get(), is(SignalType.ON_ERROR));
-		assertThat(error.get(), is(nullValue()));
+					@Override
+					protected void hookFinally(SignalType type) {
+						checkFinally.set(type);
+					}
+				}));
+		//callbacks are never reached due to OOM in subscription
+		assertThat(checkFinally.get()).isNull();
+		assertThat(error.get()).isNull();
 	}
 
 	@Test
@@ -192,8 +194,8 @@ public class BaseSubscriberTest {
 				checkFinally.set(type);
 			}
 		});
-		assertThat(checkFinally.get(), is(SignalType.ON_ERROR));
-		assertThat(error.get(), is(instanceOf(IllegalArgumentException.class)));
+		assertThat(checkFinally.get()).isEqualTo(SignalType.ON_ERROR);
+		assertThat(error.get()).isInstanceOf(IllegalArgumentException.class);
 	}
 
 	@Test
@@ -228,8 +230,8 @@ public class BaseSubscriberTest {
 				checkFinally.set(type);
 			}
 		});
-		assertThat(checkFinally.get(), is(SignalType.ON_COMPLETE));
-		assertThat(error.get(), is(instanceOf(IllegalArgumentException.class)));
+		assertThat(checkFinally.get()).isEqualTo(SignalType.ON_COMPLETE);
+		assertThat(error.get()).isInstanceOf(IllegalArgumentException.class);
 	}
 
 	@Test
@@ -265,8 +267,8 @@ public class BaseSubscriberTest {
 			    }
 		    });
 
-		assertThat(checkFinally.get(), is(SignalType.ON_COMPLETE));
-		assertThat(error.get(), is(err));
+		assertThat(checkFinally.get()).isEqualTo(SignalType.ON_COMPLETE);
+		assertThat(error.get()).isEqualTo(err);
 	}
 
 	@Test
@@ -299,9 +301,9 @@ public class BaseSubscriberTest {
 			fail("expected " + err);
 		}
 		catch (Throwable e) {
-			assertThat(Exceptions.unwrap(e), is(err));
+			assertThat(Exceptions.unwrap(e)).isEqualTo(err);
 		}
-		assertThat(checkFinally.get(), is(SignalType.ON_ERROR));
+		assertThat(checkFinally.get()).isEqualTo(SignalType.ON_ERROR);
 	}
 
 	@Test
@@ -337,8 +339,8 @@ public class BaseSubscriberTest {
 			    }
 		    });
 
-		assertThat(checkFinally.get(), is(SignalType.CANCEL));
-		assertThat(error.get(), is(err));
+		assertThat(checkFinally.get()).isEqualTo(SignalType.CANCEL);
+		assertThat(error.get()).isEqualTo(err);
 	}
 
 	@Test
@@ -369,7 +371,9 @@ public class BaseSubscriberTest {
 		                   .subscribeWith(sub);
 		d.dispose();
 
-		assertTrue("delay not skipped by cancel", latch.await(1500, TimeUnit.MILLISECONDS));
-		assertThat(onFinally.get(), is(SignalType.CANCEL));
+		assertThat(latch.await(1500, TimeUnit.MILLISECONDS))
+				.withFailMessage("delay not skipped by cancel")
+				.isTrue();
+		assertThat(onFinally.get()).isEqualTo(SignalType.CANCEL);
 	}
 }

@@ -16,14 +16,13 @@
 
 package reactor.core;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
@@ -32,7 +31,6 @@ import static org.mockito.Mockito.*;
 /**
  * @author David Karnok
  */
-@RunWith(MockitoJUnitRunner.class)
 public class SwapDisposableTest {
 
 	private Disposables.SwapDisposable sequentialDisposable;

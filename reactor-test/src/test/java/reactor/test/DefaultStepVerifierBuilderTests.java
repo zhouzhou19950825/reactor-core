@@ -70,13 +70,13 @@ public class DefaultStepVerifierBuilderTests {
 
 			DefaultVerifySubscriber<String> s =
 					new DefaultStepVerifierBuilder<String>(StepVerifierOptions.create()
-							.initialRequest(Long.MAX_VALUE)
-							.virtualTimeSchedulerSupplier(() -> vts),
-					null)//important to avoid triggering of vts capture-and-enable
-					.thenAwait(Duration.ofSeconds(1))
-					.expectNext("foo")
-					.expectComplete()
-					.toSubscriber();
+					                                                          .initialRequest(Long.MAX_VALUE)
+					                                                          .virtualTimeSchedulerSupplier(() -> vts),
+							null)//important to avoid triggering of vts capture-and-enable
+					             .thenAwait(Duration.ofSeconds(1))
+					             .expectNext("foo")
+					             .expectComplete()
+					             .toSubscriber();
 
 			flux.subscribe(s);
 			vts.advanceTimeBy(Duration.ofSeconds(3));

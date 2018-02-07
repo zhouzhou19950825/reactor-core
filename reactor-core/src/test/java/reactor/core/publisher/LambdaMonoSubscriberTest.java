@@ -23,10 +23,12 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.reactivestreams.Subscription;
+import reactor.core.Disposable;
+import reactor.core.Exceptions;
 import reactor.core.Scannable;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 public class LambdaMonoSubscriberTest {
 
@@ -45,12 +47,9 @@ public class LambdaMonoSubscriberTest {
 		//the error is expected to be propagated through onError
 		tested.onSubscribe(testSubscription);
 
-		assertThat("unexpected exception in onError",
-				errorHolder.get(), is(instanceOf(IllegalArgumentException.class)));
-		assertThat("subscription has not been cancelled",
-				testSubscription.isCancelled, is(true));
-		assertThat("unexpected request",
-				testSubscription.requested, is(equalTo(-1L)));
+		assertThat(errorHolder.get()).isInstanceOf(IllegalArgumentException.class);
+		assertThat(testSubscription.isCancelled).withFailMessage("subscription has not been cancelled").isTrue();
+		assertThat(testSubscription.requested).as("requested").isEqualTo(-1L);
 	}
 
 	@Test
@@ -74,11 +73,9 @@ public class LambdaMonoSubscriberTest {
 			//expected
 		}
 
-		assertThat("unexpected onError", errorHolder.get(), is(nullValue()));
-		assertThat("subscription has been cancelled despite fatal exception",
-				testSubscription.isCancelled, is(not(true)));
-		assertThat("unexpected request",
-				testSubscription.requested, is(equalTo(-1L)));
+		assertThat(errorHolder.get()).isNull();
+		assertThat(testSubscription.isCancelled).withFailMessage("subscription been cancelled despite fatal exception").isFalse();
+		assertThat(testSubscription.requested).as("requested").isEqualTo(-1L);
 	}
 
 	@Test
@@ -97,13 +94,11 @@ public class LambdaMonoSubscriberTest {
 
 		tested.onSubscribe(testSubscription);
 
-		assertThat("unexpected onError", errorHolder.get(), is(nullValue()));
-		assertThat("subscription has been cancelled",
-				testSubscription.isCancelled, is(not(true)));
-		assertThat("didn't consume the subscription",
-				subscriptionHolder.get(), is(equalTo(testSubscription)));
-		assertThat("didn't request the subscription",
-				testSubscription.requested, is(equalTo(32L)));
+		assertThat(errorHolder.get()).isNull();
+		assertThat(testSubscription.isCancelled).withFailMessage("subscription has been cancelled").isFalse();
+		assertThat(subscriptionHolder.get()).withFailMessage("didn't consume the subscription")
+		                                    .isEqualTo(testSubscription);
+		assertThat(testSubscription.requested).as("requested").isEqualTo(32L);
 	}
 
 	@Test
@@ -118,13 +113,11 @@ public class LambdaMonoSubscriberTest {
 
 		tested.onSubscribe(testSubscription);
 
-		assertThat("unexpected onError", errorHolder.get(), is(nullValue()));
-		assertThat("subscription has been cancelled",
-				testSubscription.isCancelled, is(not(true)));
-		assertThat("didn't request the subscription",
-				testSubscription.requested, is(not(equalTo(-1L))));
-		assertThat("didn't request max",
-				testSubscription.requested, is(equalTo(Long.MAX_VALUE)));
+		assertThat(errorHolder.get()).isNull();
+		assertThat(testSubscription.isCancelled).withFailMessage("subscription has been cancelled").isFalse();
+		assertThat(testSubscription.requested)
+				.as("requested some").isNotEqualTo(-1L)
+				.as("requested max").isEqualTo(Long.MAX_VALUE);
 	}
 
 	@Test
@@ -146,16 +139,12 @@ public class LambdaMonoSubscriberTest {
 			tested.onNext("foo");
 			fail("Expected a bubbling Exception");
 		} catch (RuntimeException e) {
-			assertThat("Expected a bubbling Exception", e.getClass().getName(),
-					containsString("BubblingException"));
-			assertThat("Expected cause to be the IllegalArgumentException", e.getCause(),
-					is(instanceOf(IllegalArgumentException.class)));
+			assertThat(e).matches(Exceptions::isBubbling, "Expected a bubbling Exception")
+			             .hasCauseInstanceOf(IllegalArgumentException.class);
 		}
 
-		assertThat("unexpected exception in onError",
-				errorHolder.get(), is(nullValue()));
-		assertThat("subscription has been cancelled",
-				testSubscription.isCancelled, is(false));
+		assertThat(errorHolder.get()).isNull();
+		assertThat(testSubscription.isCancelled).withFailMessage("subscription has been cancelled").isFalse();
 	}
 
 	@Test
@@ -180,41 +169,49 @@ public class LambdaMonoSubscriberTest {
 			//expected
 		}
 
-		assertThat("unexpected onError", errorHolder.get(), is(nullValue()));
-		assertThat("subscription has been cancelled", testSubscription.isCancelled, is(false));
+		assertThat(errorHolder.get()).isNull();
+		assertThat(testSubscription.isCancelled)
+				.withFailMessage("subscription has been cancelled")
+				.isFalse();
 	}
 
 	@Test
-	public void emptyMonoState(){
-		assertTrue(Mono.fromDirect(s -> {
-			assertTrue(s instanceof LambdaMonoSubscriber);
-			LambdaMonoSubscriber<?> bfs = (LambdaMonoSubscriber<?>)s;
-			assertTrue(bfs.scan(Scannable.Attr.PREFETCH) == Integer.MAX_VALUE);
-			assertFalse(bfs.scan(Scannable.Attr.TERMINATED));
+	public void emptyMonoState() {
+		Mono<Object> monoDirect = Mono.fromDirect(s -> {
+			assertThat(s).isInstanceOf(LambdaMonoSubscriber.class);
+			LambdaMonoSubscriber<?> bfs = (LambdaMonoSubscriber<?>) s;
+			assertThat(bfs.scan(Scannable.Attr.PREFETCH)).as("scan PREFETCH").isEqualTo(Integer.MAX_VALUE);
+			assertThat(bfs.scan(Scannable.Attr.TERMINATED)).as("scan TERMINATED").isFalse();
 			bfs.onSubscribe(Operators.emptySubscription());
 			bfs.onSubscribe(Operators.emptySubscription()); // noop
 			s.onComplete();
-			assertTrue(bfs.scan(Scannable.Attr.TERMINATED));
+			assertThat(bfs.scan(Scannable.Attr.TERMINATED)).as("scan TERMINATED after complete").isTrue();
 			bfs.dispose();
 			bfs.dispose();
-		}).subscribe(s -> {}, null, () -> {}).isDisposed());
+		});
 
-		assertFalse(Mono.never().subscribe(null, null, () -> {}).isDisposed());
+		Disposable sub = monoDirect.subscribe(s -> { }, null, () -> { });
+
+		assertThat(sub.isDisposed()).as("subscription disposed").isTrue();
+
+		assertThat(Mono.never().subscribe(null, null, () -> {}).isDisposed())
+				.as("never() subscription disposed")
+				.isFalse();
 	}
 
 	@Test
 	public void errorMonoState(){
-		Hooks.onErrorDropped(e -> assertTrue(e.getMessage().equals("test2")));
-		Hooks.onNextDropped(d -> assertTrue(d.equals("test2")));
+		Hooks.onErrorDropped(e -> assertThat(e).as("onErrorDropped").hasMessage("test2"));
+		Hooks.onNextDropped(d -> assertThat(d).as("onNextDropped").isEqualTo("test2"));
 		try {
 			Mono.fromDirect(s -> {
-				assertTrue(s instanceof LambdaMonoSubscriber);
+				assertThat(s).isInstanceOf(LambdaMonoSubscriber.class);
 				LambdaMonoSubscriber<?> bfs = (LambdaMonoSubscriber<?>) s;
 				Operators.error(s, new Exception("test"));
 				s.onComplete();
 				s.onError(new Exception("test2"));
 				s.onNext("test2");
-				assertTrue(bfs.scan(Scannable.Attr.TERMINATED));
+				assertThat(bfs.scan(Scannable.Attr.TERMINATED)).as("scan TERMINATED").isTrue();
 				bfs.dispose();
 			})
 			          .subscribe(s -> {
@@ -230,7 +227,7 @@ public class LambdaMonoSubscriberTest {
 
 	@Test
 	public void completeHookErrorDropped() {
-		Hooks.onErrorDropped(e -> assertTrue(e.getMessage().equals("complete")));
+		Hooks.onErrorDropped(e -> assertThat(e).as("onErrorDropped").hasMessage("complete"));
 		try {
 			Mono.just("foo")
 		        .subscribe(v -> {},
@@ -258,7 +255,7 @@ public class LambdaMonoSubscriberTest {
 		    .doOnCancel(cancelCount::incrementAndGet)
 		    .subscribe(v -> {})
 		    .dispose();
-		Assertions.assertThat(cancelCount.get()).isEqualTo(1);
+		assertThat(cancelCount.get()).isEqualTo(1);
 	}
 
 	@Test
@@ -267,16 +264,16 @@ public class LambdaMonoSubscriberTest {
 		Subscription parent = Operators.emptySubscription();
 		test.onSubscribe(parent);
 
-		Assertions.assertThat(test.scan(Scannable.Attr.PARENT)).isSameAs(parent);
-		Assertions.assertThat(test.scan(Scannable.Attr.PREFETCH)).isEqualTo(Integer.MAX_VALUE);
+		assertThat(test.scan(Scannable.Attr.PARENT)).isSameAs(parent);
+		assertThat(test.scan(Scannable.Attr.PREFETCH)).isEqualTo(Integer.MAX_VALUE);
 
-		Assertions.assertThat(test.scan(Scannable.Attr.TERMINATED)).isFalse();
-		Assertions.assertThat(test.scan(Scannable.Attr.CANCELLED)).isFalse();
+		assertThat(test.scan(Scannable.Attr.TERMINATED)).isFalse();
+		assertThat(test.scan(Scannable.Attr.CANCELLED)).isFalse();
 
 		test.dispose();
 
-		Assertions.assertThat(test.scan(Scannable.Attr.TERMINATED)).isTrue();
-		Assertions.assertThat(test.scan(Scannable.Attr.CANCELLED)).isTrue();
+		assertThat(test.scan(Scannable.Attr.TERMINATED)).isTrue();
+		assertThat(test.scan(Scannable.Attr.CANCELLED)).isTrue();
 	}
 
 	private static class TestSubscription implements Subscription {

@@ -33,7 +33,7 @@ import reactor.test.publisher.FluxOperatorTest;
 import reactor.test.subscriber.AssertSubscriber;
 import reactor.util.concurrent.Queues;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
 public class FluxWindowTest extends FluxOperatorTest<String, Flux<String>> {
@@ -77,47 +77,55 @@ public class FluxWindowTest extends FluxOperatorTest<String, Flux<String>> {
 	final Supplier<Queue<Integer>>                   pqs = ConcurrentLinkedQueue::new;
 	final Supplier<Queue<UnicastProcessor<Integer>>> oqs = ConcurrentLinkedQueue::new;
 
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void source1Null() {
-		new FluxWindow<>(null, 1, pqs);
+		assertThatNullPointerException()
+				.isThrownBy(() -> new FluxWindow<>(null, 1, pqs));
 	}
 
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void source2Null() {
-		new FluxWindow<>(null, 1, 2, pqs, oqs);
+		assertThatNullPointerException()
+				.isThrownBy(() -> new FluxWindow<>(null, 1, 2, pqs, oqs));
 	}
 
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void processorQueue1Null() {
-		new FluxWindow<>(Flux.never(), 1, null);
+		assertThatNullPointerException()
+				.isThrownBy(() -> new FluxWindow<>(Flux.never(), 1, null));
 	}
 
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void processorQueue2Null() {
-		new FluxWindow<>(Flux.never(), 1, 1, null, oqs);
+		assertThatNullPointerException()
+				.isThrownBy(() -> new FluxWindow<>(Flux.never(), 1, 1, null, oqs));
 	}
 
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void overflowQueueNull() {
-		new FluxWindow<>(Flux.never(), 1, 1, pqs, null);
+		assertThatNullPointerException()
+				.isThrownBy(() -> new FluxWindow<>(Flux.never(), 1, 1, pqs, null));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void size1Invalid() {
-		Flux.never()
-		    .window(0);
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> Flux.never()
+				                      .window(0));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void size2Invalid() {
-		Flux.never()
-		    .window(0, 2);
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> Flux.never()
+				                      .window(0, 2));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void skipInvalid() {
-		Flux.never()
-		    .window(1, 0);
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> Flux.never()
+				                      .window(1, 0));
 	}
 
 	static <T> AssertSubscriber<T> toList(Publisher<T> windows) {

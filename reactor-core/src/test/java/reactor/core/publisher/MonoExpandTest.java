@@ -273,7 +273,7 @@ public class MonoExpandTest {
 		);
 	}
 
-	@Test(timeout = 5000)
+	@Test
 	public void depthFirst() {
 		FluxExpandTest.Node root = createTest();
 
@@ -288,7 +288,8 @@ public class MonoExpandTest {
 				            "4", "41", "42", "421", "43", "431", "432", "4321",
 				            "44", "441", "442", "4421", "443", "4431", "4432"
 		            )
-		            .verifyComplete();
+		            .expectComplete()
+		            .verify(Duration.ofSeconds(5));
 	}
 
 	@Test
@@ -311,7 +312,7 @@ public class MonoExpandTest {
 		            .verify(Duration.ofSeconds(5));
 	}
 
-	@Test(timeout = 5000)
+	@Test
 	public void breadthFirst() {
 		FluxExpandTest.Node root = createTest();
 
@@ -325,7 +326,8 @@ public class MonoExpandTest {
 				            "221", "321", "331", "332", "421", "431", "432", "441", "442", "443",
 				            "3321", "4321", "4421", "4431", "4432"
 		            )
-		            .verifyComplete();
+		            .expectComplete()
+		            .verify(Duration.ofSeconds(5));
 	}
 
 	@Test

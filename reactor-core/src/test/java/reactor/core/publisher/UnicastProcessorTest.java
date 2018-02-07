@@ -24,7 +24,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.function.Consumer;
 
 import org.junit.Test;
-import reactor.core.CoreSubscriber;
 import reactor.core.Disposable;
 import reactor.test.StepVerifier;
 import reactor.test.subscriber.AssertSubscriber;
@@ -32,7 +31,6 @@ import reactor.util.annotation.Nullable;
 import reactor.util.concurrent.Queues;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
 
 public class UnicastProcessorTest {
 
@@ -111,10 +109,10 @@ public class UnicastProcessorTest {
 			@Nullable Disposable onTerminate) {
 		Queue<Integer> expectedQueue = queue != null ? queue : Queues.<Integer>unbounded().get();
 		Disposable expectedOnTerminate = onTerminate;
-		assertEquals(expectedQueue.getClass(), processor.queue.getClass());
-		assertEquals(expectedOnTerminate, processor.onTerminate);
+		assertThat(processor.queue).as("queue").hasSameClassAs(expectedQueue);
+		assertThat(processor.onTerminate).as("onTerminate").isEqualTo(expectedOnTerminate);
 		if (onOverflow != null)
-			assertEquals(onOverflow, processor.onOverflow);
+			assertThat(processor.onOverflow).as("onOverflow").isEqualTo(onOverflow);
 	}
 
 	@Test

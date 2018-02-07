@@ -20,17 +20,15 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.LongAccumulator;
-import java.util.logging.Level;
 
+import org.junit.Test;
 import org.junit.Before;
 import org.junit.Ignore;
-import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxSink;
-import reactor.core.publisher.SignalType;
 import reactor.core.publisher.WorkQueueProcessor;
 
-import static org.testng.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Michael Lex
@@ -75,7 +73,7 @@ public class BurstyWorkQueueProcessorTests {
 
 		System.out.println("\n\nMax ringbuffer pending: " + maxRingBufferPending.get());
 
-		assertEquals(getDroppedMessagesCount(), 0, "Expect zero dropped messages");
+		assertThat(getDroppedMessagesCount()).as("dropped message count").isZero();
 	}
 
 

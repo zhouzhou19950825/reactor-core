@@ -22,12 +22,14 @@ import org.junit.Test;
 import reactor.test.StepVerifier;
 import reactor.test.subscriber.AssertSubscriber;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+
 public class FluxRepeatTest {
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void timesInvalid() {
-		Flux.never()
-		    .repeat(-1);
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> Flux.never().repeat(-1));
 	}
 
 	@Test

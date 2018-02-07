@@ -40,7 +40,7 @@ import reactor.util.concurrent.Queues;
 import reactor.util.concurrent.WaitStrategy;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
  * @author Stephane Maldini
@@ -71,11 +71,15 @@ public class TopicProcessorTest {
 
 		processor.shutdown();
 
-		assertFalse(processor.awaitAndShutdown(Duration.ofMillis(250)));
+		assertThat(processor.awaitAndShutdown(Duration.ofMillis(250)))
+				.as("first awaitAndShutdown")
+				.isFalse();
 
 		subscriber.request(4);
 
-		assertTrue(processor.awaitAndShutdown(Duration.ofMillis(250)));
+		assertThat(processor.awaitAndShutdown(Duration.ofMillis(250)))
+				.as("second awaitAndShutdown")
+				.isTrue();
 	}
 
 	@Test
@@ -93,7 +97,8 @@ public class TopicProcessorTest {
 
 		processor.forceShutdown();
 
-		assertTrue(processor.awaitAndShutdown(Duration.ofSeconds(1)));
+		assertThat(processor.awaitAndShutdown(Duration.ofSeconds(1)))
+				.as("awaitAndShutdown").isTrue();
 	}
 
 	@Test
@@ -107,7 +112,8 @@ public class TopicProcessorTest {
 
 		processor.forceShutdown();
 
-		assertTrue(processor.awaitAndShutdown(Duration.ofSeconds(5)));
+		assertThat(processor.awaitAndShutdown(Duration.ofSeconds(5)))
+				.as("awaitAndShutdown").isTrue();
 	}
 
 
@@ -165,7 +171,8 @@ public class TopicProcessorTest {
 
 		processor.forceShutdown();
 
-		assertTrue(processor.awaitAndShutdown(Duration.ofSeconds(5)));
+		assertThat(processor.awaitAndShutdown(Duration.ofSeconds(5)))
+				.as("awaitAndShutdown").isTrue();
 	}
 
 	@Test
@@ -183,11 +190,13 @@ public class TopicProcessorTest {
 
 		processor.shutdown();
 
-		assertFalse(processor.awaitAndShutdown(Duration.ofMillis(400)));
+		assertThat(processor.awaitAndShutdown(Duration.ofMillis(400)))
+				.as("first awaitAndShutdown").isFalse();
 
 		processor.forceShutdown();
 
-		assertTrue(processor.awaitAndShutdown(Duration.ofMillis(400)));
+		assertThat(processor.awaitAndShutdown(Duration.ofMillis(400)))
+				.as("second awaitAndShutdown").isTrue();
 	}
 
 	@Test
@@ -255,7 +264,8 @@ public class TopicProcessorTest {
 			    .map(s -> "hello " + s)
 			    .subscribe(bc);
 
-			assertTrue(latch.await(5000, TimeUnit.MILLISECONDS));
+			assertThat(latch.await(5000, TimeUnit.MILLISECONDS))
+					.as("latch").isTrue();
 		}
 		finally {
 			es.shutdown();
@@ -268,25 +278,28 @@ public class TopicProcessorTest {
 		final int TEST_BUFFER_SIZE = 16;
 		TopicProcessor<Object> processor = TopicProcessor.builder().name("testProcessor").bufferSize(TEST_BUFFER_SIZE).build();
 
-		assertEquals(TEST_BUFFER_SIZE, processor.getAvailableCapacity());
+		assertThat(processor.getAvailableCapacity()).isEqualTo(TEST_BUFFER_SIZE);
 
 		processor.awaitAndShutdown();
 
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void failNullBufferSize() {
-		TopicProcessor.builder().name("test").bufferSize(0);
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> TopicProcessor.builder().name("test").bufferSize(0));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void failNonPowerOfTwo() {
-		TopicProcessor.builder().name("test").bufferSize(3);
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> TopicProcessor.builder().name("test").bufferSize(3));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void failNegativeBufferSize() {
-		TopicProcessor.builder().name("test").bufferSize(-1);
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> TopicProcessor.builder().name("test").bufferSize(-1));
 	}
 
 	//see https://github.com/reactor/reactor-core/issues/445
@@ -834,15 +847,15 @@ public class TopicProcessorTest {
 		WaitStrategy expectedWaitStrategy = waitStrategy != null ? waitStrategy : WaitStrategy.phasedOffLiteLock(200, 100, TimeUnit.MILLISECONDS);
 		Class<?> sequencerClass = shared ? MultiProducerRingBuffer.class : SingleProducerSequencer.class;
 
-		assertEquals(expectedName, processor.name);
-		assertEquals(expectedBufferSize, processor.getBufferSize());
-		assertEquals(expectedAutoCancel, processor.autoCancel);
-		assertEquals(expectedWaitStrategy.getClass(), processor.ringBuffer.getSequencer().waitStrategy.getClass());
-		assertEquals(sequencerClass, processor.ringBuffer.getSequencer().getClass());
+		assertThat(processor.name).isEqualTo(expectedName);
+		assertThat(processor.getBufferSize()).as("buffer size").isEqualTo(expectedBufferSize);
+		assertThat(processor.autoCancel).as("auto cancel").isEqualTo(expectedAutoCancel);
+		assertThat(processor.ringBuffer.getSequencer().waitStrategy).as("wait strategy").hasSameClassAs(expectedWaitStrategy);
+		assertThat(processor.ringBuffer.getSequencer()).as("sequencer").isInstanceOf(sequencerClass);
 		if (executor != null)
-			assertEquals(executor, processor.executor);
+			assertThat(processor.executor).as("executor").isEqualTo(executor);
 		if (requestTaskExecutor != null)
-			assertEquals(requestTaskExecutor, processor.requestTaskExecutor);
+			assertThat(processor.requestTaskExecutor).as("requestTaskExecutor").isEqualTo(requestTaskExecutor);
 	}
 
 	@Test

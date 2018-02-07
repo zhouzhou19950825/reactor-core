@@ -23,7 +23,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.Condition;
-import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.reactivestreams.Subscription;
@@ -36,6 +35,7 @@ import reactor.test.publisher.FluxOperatorTest;
 import reactor.test.subscriber.AssertSubscriber;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatNullPointerException;
 
 public class FluxUsingTest extends FluxOperatorTest<String, String> {
 
@@ -89,21 +89,22 @@ public class FluxUsingTest extends FluxOperatorTest<String, String> {
 		);
 	}
 
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void resourceSupplierNull() {
-		Flux.using(null, r -> Flux.empty(), r -> {
-		}, false);
+		assertThatNullPointerException()
+				.isThrownBy(() -> Flux.using(null, r -> Flux.empty(), r -> { }, false));
 	}
 
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void sourceFactoryNull() {
-		Flux.using(() -> 1, null, r -> {
-		}, false);
+		assertThatNullPointerException()
+				.isThrownBy(() -> Flux.using(() -> 1, null, r -> { }, false));
 	}
 
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void resourceCleanupNull() {
-		Flux.using(() -> 1, r -> Flux.empty(), null, false);
+		assertThatNullPointerException()
+				.isThrownBy(() -> Flux.using(() -> 1, r -> Flux.empty(), null, false));
 	}
 
 	@Test
@@ -119,7 +120,7 @@ public class FluxUsingTest extends FluxOperatorTest<String, String> {
 		  .assertComplete()
 		  .assertNoError();
 
-		Assert.assertEquals(1, cleanup.get());
+		assertThat(cleanup.get()).isEqualTo(1);
 	}
 
 	@Test
@@ -135,7 +136,7 @@ public class FluxUsingTest extends FluxOperatorTest<String, String> {
 		  .assertComplete()
 		  .assertNoError();
 
-		Assert.assertEquals(1, cleanup.get());
+		assertThat(cleanup.get()).isEqualTo(1);
 	}
 
 	void checkCleanupExecutionTime(boolean eager, boolean fail) {
@@ -176,8 +177,8 @@ public class FluxUsingTest extends FluxOperatorTest<String, String> {
 			  .assertNoError();
 		}
 
-		Assert.assertEquals(1, cleanup.get());
-		Assert.assertEquals(eager, before.get());
+		assertThat(cleanup.get()).as("cleanup").isEqualTo(1);
+		assertThat(before.get()).as("before").isEqualTo(eager);
 	}
 
 	@Test
@@ -216,7 +217,8 @@ public class FluxUsingTest extends FluxOperatorTest<String, String> {
 		  .assertError(RuntimeException.class)
 		  .assertErrorMessage("forced failure");
 
-		Assert.assertEquals(0, cleanup.get());
+		assertThat(cleanup.get()).isEqualTo(0);
+
 	}
 
 	@Test
@@ -235,7 +237,7 @@ public class FluxUsingTest extends FluxOperatorTest<String, String> {
 		  .assertError(RuntimeException.class)
 		  .assertErrorMessage("forced failure");
 
-		Assert.assertEquals(1, cleanup.get());
+		assertThat(cleanup.get()).isEqualTo(1);
 	}
 
 	@Test
@@ -253,7 +255,7 @@ public class FluxUsingTest extends FluxOperatorTest<String, String> {
 		  .assertNotComplete()
 		  .assertError(NullPointerException.class);
 
-		Assert.assertEquals(1, cleanup.get());
+		assertThat(cleanup.get()).isEqualTo(1);
 	}
 
 	@Test
@@ -267,7 +269,7 @@ public class FluxUsingTest extends FluxOperatorTest<String, String> {
 		Flux.using(() -> 1, r -> tp, cleanup::set, true)
 		    .subscribe(ts);
 
-		Assert.assertTrue("No subscriber?", tp.hasDownstreams());
+		assertThat(tp.hasDownstreams()).as("hasDownstreams").isTrue();
 
 		tp.onNext(1);
 
@@ -283,9 +285,9 @@ public class FluxUsingTest extends FluxOperatorTest<String, String> {
 		  .assertNotComplete()
 		  .assertNoError();
 
-		Assert.assertFalse("Has subscriber?", tp.hasDownstreams());
+		assertThat(tp.hasDownstreams()).as("hasDownstreams").isFalse();
 
-		Assert.assertEquals(1, cleanup.get());
+		assertThat(cleanup.get()).isEqualTo(1);
 	}
 
 	@Test

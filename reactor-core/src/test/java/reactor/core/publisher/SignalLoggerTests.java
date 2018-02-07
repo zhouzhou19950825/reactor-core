@@ -19,10 +19,7 @@ package reactor.core.publisher;
 import java.util.Collection;
 import java.util.logging.Level;
 
-import org.assertj.core.api.Assertions;
-import org.hamcrest.CoreMatchers;
 import org.junit.Test;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.reactivestreams.Subscription;
 import reactor.core.Fuseable;
@@ -32,8 +29,7 @@ import reactor.test.StepVerifier;
 import reactor.util.Logger;
 import reactor.util.Loggers;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 public class SignalLoggerTests {
@@ -64,28 +60,28 @@ public class SignalLoggerTests {
 
 	@Test
 	public void nullSubscriptionAsString() {
-		assertThat(SignalLogger.subscriptionAsString(null), is("null subscription"));
+		assertThat(SignalLogger.subscriptionAsString(null)).isEqualTo("null subscription");
 	}
 
 	@Test
 	public void normalSubscriptionAsString() {
 		Subscription s = new FluxPeek.PeekSubscriber<>(null, null);
 
-		assertThat(SignalLogger.subscriptionAsString(s), is("FluxPeek.PeekSubscriber"));
+		assertThat(SignalLogger.subscriptionAsString(s)).isEqualTo("FluxPeek.PeekSubscriber");
 	}
 
 	@Test
 	public void synchronousSubscriptionAsString() {
 		SynchronousSubscription<Object> s = new FluxArray.ArraySubscription<>(null, null);
 
-		assertThat(SignalLogger.subscriptionAsString(s), is("[Synchronous Fuseable] FluxArray.ArraySubscription"));
+		assertThat(SignalLogger.subscriptionAsString(s)).isEqualTo("[Synchronous Fuseable] FluxArray.ArraySubscription");
 	}
 
 	@Test
 	public void queueSubscriptionAsString() {
 		Fuseable.QueueSubscription<Object> s = Operators.EmptySubscription.INSTANCE;
 
-		assertThat(SignalLogger.subscriptionAsString(s), is("[Fuseable] Operators.EmptySubscription"));
+		assertThat(SignalLogger.subscriptionAsString(s)).isEqualTo("[Fuseable] Operators.EmptySubscription");
 	}
 
 	@Test
@@ -98,7 +94,7 @@ public class SignalLoggerTests {
 			public void cancel() {}
 		};
 
-		assertThat(SignalLogger.subscriptionAsString(s), is("SignalLoggerTests$1"));
+		assertThat(SignalLogger.subscriptionAsString(s)).isEqualTo("SignalLoggerTests$1");
 	}
 
 	@Test
@@ -106,7 +102,7 @@ public class SignalLoggerTests {
 		Mono<String> source = Mono.just("").map(i -> i);
 		SignalLogger<String> sl = new SignalLogger<>(source, null, Level.INFO, false);
 
-		Assertions.assertThat(sl.scan(Scannable.Attr.PARENT)).isSameAs(source);
+		assertThat(sl.scan(Scannable.Attr.PARENT)).isSameAs(source);
 	}
 
 	@Test

@@ -22,6 +22,8 @@ import org.junit.Test;
 import reactor.test.publisher.MonoOperatorTest;
 import reactor.test.subscriber.AssertSubscriber;
 
+import static org.assertj.core.api.Assertions.assertThatNullPointerException;
+
 public class MonoMapTest extends MonoOperatorTest<String, String> {
 
 	@Override
@@ -40,14 +42,16 @@ public class MonoMapTest extends MonoOperatorTest<String, String> {
 
 	final Mono<Integer> just = Mono.just(1);
 
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void nullSource() {
-		new MonoMap<Integer, Integer>(null, v -> v);
+		assertThatNullPointerException()
+				.isThrownBy(() -> new MonoMap<Integer, Integer>(null, v -> v));
 	}
 
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void nullMapper() {
-		just.map(null);
+		assertThatNullPointerException()
+				.isThrownBy(() -> just.map(null));
 	}
 
 	@Test

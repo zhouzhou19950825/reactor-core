@@ -29,6 +29,9 @@ import reactor.test.StepVerifier;
 import reactor.test.publisher.FluxOperatorTest;
 import reactor.test.subscriber.AssertSubscriber;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.assertThatNullPointerException;
+
 public class FluxSkipUntilOtherTest extends FluxOperatorTest<String, String> {
 
 
@@ -69,15 +72,16 @@ public class FluxSkipUntilOtherTest extends FluxOperatorTest<String, String> {
 		);
 	}
 
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void nullSource() {
-		new FluxSkipUntilOther<>(null, Flux.never());
+		assertThatNullPointerException()
+				.isThrownBy(() -> new FluxSkipUntilOther<>(null, Flux.never()));
 	}
 
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void nullOther() {
-		Flux.never()
-		    .skipUntilOther(null);
+		assertThatNullPointerException()
+				.isThrownBy(() -> Flux.never().skipUntilOther(null));
 	}
 
 	@Test

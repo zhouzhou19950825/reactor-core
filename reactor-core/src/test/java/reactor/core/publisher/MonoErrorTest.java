@@ -18,6 +18,9 @@ package reactor.core.publisher;
 import org.junit.Test;
 import reactor.test.StepVerifier;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+
 public class MonoErrorTest {
 
 	@Test
@@ -26,9 +29,10 @@ public class MonoErrorTest {
 		            .verifyErrorMessage("test");
 	}
 
-	@Test(expected = Exception.class)
+	@Test
 	public void onMonoRejectedThrowOnBlock() {
-		Mono.error(new Exception("test"))
-		    .block();
+		assertThatExceptionOfType(RuntimeException.class)
+				.isThrownBy(() -> Mono.error(new Exception("test")).block())
+				.withCause(new Exception("test"));
 	}
 }

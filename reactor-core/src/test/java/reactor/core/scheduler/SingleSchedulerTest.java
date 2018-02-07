@@ -15,19 +15,20 @@
  */
 package reactor.core.scheduler;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import java.lang.management.ManagementFactory;
 import java.time.Duration;
-import java.util.concurrent.*;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.junit.*;
-
+import org.junit.Test;
 import reactor.core.Scannable;
-import reactor.core.publisher.*;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Scheduler.Worker;
 import reactor.test.StepVerifier;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Stephane Maldini
@@ -112,14 +113,14 @@ public class SingleSchedulerTest extends AbstractSchedulerTest {
     	            w.schedule(r);
     	        }
     	        
-    	        Assert.assertTrue(cdl.await(5, TimeUnit.SECONDS));
+    	        assertThat(cdl.await(5, TimeUnit.SECONDS)).as("cdl latch").isTrue();
 
     	        System.gc();
     	        Thread.sleep(200);
 
                 long after = ManagementFactory.getMemoryMXBean().getHeapMemoryUsage().getUsed();
 
-    	        Assert.assertTrue(String.format("%,d -> %,d", before, after), before + 20_000_000 > after);
+    	        assertThat(before + 20_000_000 > after).withFailMessage(String.format("%,d -> %,d", before, after)).isTrue();
 	        } finally {
 	            w.dispose();
 	        }

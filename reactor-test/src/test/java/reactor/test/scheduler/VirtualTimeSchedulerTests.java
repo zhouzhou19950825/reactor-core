@@ -19,7 +19,6 @@ package reactor.test.scheduler;
 import java.util.function.Supplier;
 
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Test;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Scheduler;
@@ -43,21 +42,21 @@ public class VirtualTimeSchedulerTests {
 
 	@Test
 	public void allEnabled() {
-		Assert.assertFalse(Schedulers.newParallel("") instanceof VirtualTimeScheduler);
-		Assert.assertFalse(Schedulers.newElastic("") instanceof VirtualTimeScheduler);
-		Assert.assertFalse(Schedulers.newSingle("") instanceof VirtualTimeScheduler);
+		assertThat(Schedulers.newParallel("")).isNotInstanceOf(VirtualTimeScheduler.class);
+		assertThat(Schedulers.newElastic("")).isNotInstanceOf(VirtualTimeScheduler.class);
+		assertThat(Schedulers.newSingle("")).isNotInstanceOf(VirtualTimeScheduler.class);
 
 		VirtualTimeScheduler.getOrSet();
 
-		Assert.assertTrue(Schedulers.newParallel("") instanceof VirtualTimeScheduler);
-		Assert.assertTrue(Schedulers.newElastic("") instanceof VirtualTimeScheduler);
-		Assert.assertTrue(Schedulers.newSingle("") instanceof VirtualTimeScheduler);
+		assertThat(Schedulers.newParallel("")).isInstanceOf(VirtualTimeScheduler.class);
+		assertThat(Schedulers.newElastic("")).isInstanceOf(VirtualTimeScheduler.class);
+		assertThat(Schedulers.newSingle("")).isInstanceOf(VirtualTimeScheduler.class);
 
 		VirtualTimeScheduler t = VirtualTimeScheduler.get();
 
-		Assert.assertSame(Schedulers.newParallel(""), t);
-		Assert.assertSame(Schedulers.newElastic(""), t);
-		Assert.assertSame(Schedulers.newSingle(""), t);
+		assertThat(Schedulers.newParallel("")).isSameAs(t);
+		assertThat(Schedulers.newElastic("")).isSameAs(t);
+		assertThat(Schedulers.newSingle("")).isSameAs(t);
 	}
 
 	@Test
@@ -66,14 +65,13 @@ public class VirtualTimeSchedulerTests {
 
 		VirtualTimeScheduler.getOrSet(vts);
 
-		Assert.assertSame(vts, uncache(Schedulers.single()));
-		Assert.assertFalse(vts.shutdown);
-
+		assertThat(vts).isSameAs(uncache(Schedulers.single()));
+		assertThat(vts.shutdown).as("initially not shutdown").isFalse();
 
 		VirtualTimeScheduler.getOrSet(vts);
 
-		Assert.assertSame(vts, uncache(Schedulers.single()));
-		Assert.assertFalse(vts.shutdown);
+		assertThat(vts).isSameAs(uncache(Schedulers.single()));
+		assertThat(vts.shutdown).as("still not shutdown").isFalse();
 	}
 
 	@Test
@@ -84,10 +82,10 @@ public class VirtualTimeSchedulerTests {
 		VirtualTimeScheduler firstEnableResult = VirtualTimeScheduler.getOrSet(vts1);
 		VirtualTimeScheduler secondEnableResult = VirtualTimeScheduler.getOrSet(vts2);
 
-		Assert.assertSame(vts1, firstEnableResult);
-		Assert.assertSame(vts1, secondEnableResult);
-		Assert.assertSame(vts1, uncache(Schedulers.single()));
-		Assert.assertFalse(vts1.shutdown);
+		assertThat(vts1).isSameAs(firstEnableResult);
+		assertThat(vts1).isSameAs(secondEnableResult);
+		assertThat(vts1).isSameAs(uncache(Schedulers.single()));
+		assertThat(vts1.shutdown).as("initially not shutdown").isFalse();
 	}
 
 	@Test

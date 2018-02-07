@@ -38,7 +38,6 @@ import java.util.function.Consumer;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.Condition;
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Test;
 import reactor.core.Disposable;
 import reactor.core.Disposables;
@@ -50,7 +49,6 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.junit.Assert.fail;
 
 public class SchedulersTest {
 
@@ -220,16 +218,16 @@ public class SchedulersTest {
 		TestSchedulers ts = new TestSchedulers(true);
 		Schedulers.setFactory(ts);
 
-		Assert.assertEquals(ts.single, Schedulers.newSingle("unused"));
-		Assert.assertEquals(ts.elastic, Schedulers.newElastic("unused"));
-		Assert.assertEquals(ts.parallel, Schedulers.newParallel("unused"));
+		assertThat(Schedulers.newSingle("unused")).as("single").isSameAs(ts.single);
+		assertThat(Schedulers.newElastic("unused")).as("elastic").isSameAs(ts.elastic);
+		assertThat(Schedulers.newParallel("unused")).as("parallel").isSameAs(ts.parallel);
 
 		Schedulers.resetFactory();
 
 		Scheduler s = Schedulers.newSingle("unused");
 		s.dispose();
 
-		Assert.assertNotSame(ts.single, s);
+		assertThat(s).as("s").isNotSameAs(ts.single);
 	}
 
 	@Test
@@ -240,23 +238,24 @@ public class SchedulersTest {
 		Scheduler cachedTimerOld = Schedulers.single();
 		Scheduler standaloneTimer = Schedulers.newSingle("standaloneTimer");
 
-
-		Assert.assertNotSame(cachedTimerOld, standaloneTimer);
-		Assert.assertNotNull(cachedTimerOld.schedule(() -> {}));
-		Assert.assertNotNull(standaloneTimer.schedule(() -> {}));
+		assertThat(standaloneTimer).as("standalone").isNotSameAs(cachedTimerOld);
+		assertThat(cachedTimerOld.schedule(() -> {})).as("cached scheduling").isNotNull();
+		assertThat(standaloneTimer.schedule(() -> {})).as("standalone scheduling").isNotNull();
 
 		Schedulers.setFactory(ts2);
 		Scheduler cachedTimerNew = Schedulers.newSingle("unused");
 
-		Assert.assertEquals(cachedTimerNew, Schedulers.newSingle("unused"));
-		Assert.assertNotSame(cachedTimerNew, cachedTimerOld);
+		assertThat(cachedTimerNew)
+				.as("cachedTimerNew")
+				.isSameAs(Schedulers.newSingle("unused"))
+				.isNotSameAs(cachedTimerOld);
 		//assert that the old factory"s cached scheduler was shut down
 		Assertions.assertThatExceptionOfType(RejectedExecutionException.class)
 		          .isThrownBy(() -> cachedTimerOld.schedule(() -> {}));
 		//independently created schedulers are still the programmer"s responsibility
-		Assert.assertNotNull(standaloneTimer.schedule(() -> {}));
+		assertThat(standaloneTimer.schedule(() -> {})).as("2nd standalone scheduling").isNotNull();
 		//new factory = new alive cached scheduler
-		Assert.assertNotNull(cachedTimerNew.schedule(() -> {}));
+		assertThat(cachedTimerNew.schedule(() -> {})).as("cachedTimerNew scheduling").isNotNull();
 	}
 
 	@Test
@@ -269,7 +268,7 @@ public class SchedulersTest {
 		} finally {
 			Schedulers.resetOnHandleError();
 		}
-		Assert.assertTrue("errorCallbackNotImplemented not handled", handled.get());
+		assertThat(handled.get()).withFailMessage("errorCallbackNotImplemented not handled").isTrue();
 	}
 
 	@Test
@@ -282,7 +281,7 @@ public class SchedulersTest {
 		} finally {
 			Schedulers.resetOnHandleError();
 		}
-		Assert.assertTrue("IllegalArgumentException not handled", handled.get());
+		assertThat(handled.get()).withFailMessage("IllegalArgumentException not handled").isTrue();
 	}
 
 	@Test
@@ -392,8 +391,8 @@ public class SchedulersTest {
 
 		serviceRB.dispose();
 
-		Assert.assertTrue("Event missed", latch.intValue() == 0);
-		Assert.assertTrue("Timeout too long", (end - start) >= 1000);
+		assertThat(latch.intValue()).withFailMessage("Event missed").isZero();
+		assertThat((end - start) >= 1000).withFailMessage("Timeout too long").isTrue();
 	}
 
 	@Test
@@ -419,9 +418,8 @@ public class SchedulersTest {
 		Thread.sleep(1200);
 		long end = System.currentTimeMillis();
 
-
-		Assert.assertTrue("Task not skipped", latch.intValue() == 1);
-		Assert.assertTrue("Timeout too long", (end - start) >= 1000);
+		assertThat(latch.intValue()).withFailMessage("Task not skipped").isEqualTo(1);
+		assertThat((end - start) >= 1000).withFailMessage("Timeout too long").isTrue();
 	}
 
 	@Test
@@ -438,10 +436,10 @@ public class SchedulersTest {
 			dispatcher.schedule(() -> { t2[0] = Thread.currentThread(); cdl.countDown(); });
 
 			if (!cdl.await(5, TimeUnit.SECONDS)) {
-				Assert.fail("single timed out");
+				fail("single timed out");
 			}
 
-			Assert.assertNotSame(t1, t2[0]);
+			assertThat(t1).isNotSameAs(t2[0]);
 		} finally {
 			dispatcher.dispose();
 		}

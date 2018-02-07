@@ -28,8 +28,7 @@ import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
 import reactor.test.subscriber.AssertSubscriber;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class MonoSubscriberTest {
 
@@ -37,7 +36,7 @@ public class MonoSubscriberTest {
 	public void queueSubscriptionSyncRejected() {
 		MonoSubscriber<Integer, Integer> ds = new MonoSubscriber<>(new AssertSubscriber<>());
 
-		assertEquals(Fuseable.NONE, ds.requestFusion(Fuseable.SYNC));
+		assertThat(ds.requestFusion(Fuseable.SYNC)).isEqualTo(Fuseable.NONE);
 	}
 
 	@Test
@@ -48,8 +47,8 @@ public class MonoSubscriberTest {
 
 		ds.clear();
 
-		assertEquals(MonoSubscriber.FUSED_CONSUMED, ds.state);
-		assertNull(ds.value);
+		assertThat(ds.state).as("ds.state").isEqualTo(MonoSubscriber.FUSED_CONSUMED);
+		assertThat(ds.value).as("ds.value").isNull();
 	}
 
 	@Test

@@ -15,10 +15,10 @@
  */
 package reactor.core.publisher;
 
+import java.time.Duration;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.junit.Assert;
 import org.junit.Test;
 import org.reactivestreams.Subscription;
 import reactor.core.CoreSubscriber;
@@ -32,7 +32,6 @@ public class FluxCancelOnTest {
 
 	@Test(timeout = 3000L)
 	public void cancelOnDedicatedScheduler() throws Exception {
-
 		CountDownLatch latch = new CountDownLatch(1);
 		AtomicReference<Thread> threadHash = new AtomicReference<>(Thread.currentThread());
 
@@ -50,7 +49,7 @@ public class FluxCancelOnTest {
 		    .cancel();
 
 		latch.await();
-		Assert.assertNull(threadHash.get());
+		assertThat(threadHash.get()).isNull();
 	}
 
 	@Test

@@ -23,17 +23,22 @@ import org.junit.Test;
 import reactor.test.StepVerifier;
 import reactor.test.subscriber.AssertSubscriber;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.assertThatNullPointerException;
+
 public class FluxRetryTest {
 
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void sourceNull() {
-		new FluxRetry<>(null, 1);
+		assertThatNullPointerException()
+				.isThrownBy(() -> new FluxRetry<>(null, 1));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void timesInvalid() {
-		Flux.never()
-		    .retry(-1);
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> Flux.never()
+				                      .retry(-1));
 	}
 
 	@Test

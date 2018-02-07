@@ -26,17 +26,21 @@ import reactor.core.Scannable;
 import reactor.test.StepVerifier;
 import reactor.test.subscriber.AssertSubscriber;
 
+import static org.assertj.core.api.Assertions.assertThatNullPointerException;
+
 public class FluxTakeUntilOtherTest {
 
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void nullSource() {
-		new FluxTakeUntilOther<>(null, Flux.never());
+		assertThatNullPointerException()
+				.isThrownBy(() -> new FluxTakeUntilOther<>(null, Flux.never()));
 	}
 
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void nullOther() {
-		Flux.never()
-		    .takeUntilOther(null);
+		assertThatNullPointerException()
+				.isThrownBy(() -> Flux.never()
+				                      .takeUntilOther(null));
 	}
 
 	@Test

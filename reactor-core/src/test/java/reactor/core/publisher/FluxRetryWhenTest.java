@@ -35,6 +35,7 @@ import reactor.util.context.Context;
 import reactor.util.function.Tuples;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatNullPointerException;
 
 public class FluxRetryWhenTest {
 
@@ -44,15 +45,17 @@ public class FluxRetryWhenTest {
 	Flux<Integer> rangeError = Flux.concat(Flux.range(1, 2),
 			Flux.error(new RuntimeException("forced failure 0")));
 
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void sourceNull() {
-		new FluxRetryWhen<>(null, v -> v);
+		assertThatNullPointerException()
+				.isThrownBy(() -> new FluxRetryWhen<>(null, v -> v));
 	}
 
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void whenFactoryNull() {
-		Flux.never()
-		    .retryWhen(null);
+		assertThatNullPointerException()
+				.isThrownBy(() -> Flux.never()
+				                      .retryWhen(null));
 	}
 
 	@Test

@@ -23,12 +23,14 @@ import org.junit.Test;
 import reactor.test.StepVerifier;
 import reactor.test.subscriber.AssertSubscriber;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+
 public class MonoRepeatTest {
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void timesInvalid() {
-		Mono.never()
-		    .repeat(-1);
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> Mono.never().repeat(-1));
 	}
 
 	@Test
