@@ -807,7 +807,7 @@ final class DefaultStepVerifierBuilder<T>
 		@SuppressWarnings("unused")
 		volatile Throwable errors;
 
-		volatile boolean monitorSignal;
+		volatile long monitorSignal;
 
 		/** The constructor used for verification, where a VirtualTimeScheduler can be
 		 * passed */
@@ -836,7 +836,7 @@ final class DefaultStepVerifierBuilder<T>
 					break;
 				}
 			}
-			this.monitorSignal = taskEvents.peek() instanceof NoEvent;
+			this.monitorSignal = (taskEvents.peek() instanceof NoEvent) ? System.nanoTime() : -1L;
 			this.produced = 0L;
 			this.unasserted = 0L;
 			this.completeLatch = new CountDownLatch(1);
@@ -926,6 +926,9 @@ final class DefaultStepVerifierBuilder<T>
 
 		@Override
 		public void onComplete() {
+			if (checkNoEventFailure()) {
+				throw new AssertionError("unexpected end during a no-event expectation");
+			}
 			if (establishedFusionMode != Fuseable.ASYNC) {
 				onExpectation(Signal.complete());
 				this.completeLatch.countDown();
@@ -936,8 +939,23 @@ final class DefaultStepVerifierBuilder<T>
 			}
 		}
 
+		private boolean checkNoEventFailure() {
+			long noEventLimit = monitorSignal;
+			return noEventLimit > 0 && virtualOrRealNanoTime() < noEventLimit;
+		}
+
+		private long virtualOrRealNanoTime() {
+			if (virtualTimeScheduler != null) {
+				return virtualTimeScheduler.now(TimeUnit.NANOSECONDS);
+			}
+			return System.nanoTime();
+		}
+
 		@Override
 		public void onError(Throwable t) {
+			if (checkNoEventFailure()) {
+				throw new AssertionError("unexpected end during a no-event expectation");
+			}
 			onExpectation(Signal.error(t));
 			this.completeLatch.countDown();
 		}
@@ -1159,6 +1177,9 @@ final class DefaultStepVerifierBuilder<T>
 					qs.clear();
 				}
 			}
+			if (checkNoEventFailure()) {
+				throw new AssertionError("unexpected end during a no-event expectation");
+			}
 			return s;
 		}
 
@@ -1230,7 +1251,7 @@ final class DefaultStepVerifierBuilder<T>
 
 		@SuppressWarnings("unchecked")
 		final void onExpectation(Signal<T> actualSignal) {
-			if (monitorSignal) {
+			if (checkNoEventFailure()) {
 				setFailure(null, actualSignal, "expected no event: %s", actualSignal);
 				return;
 			}
@@ -2089,23 +2110,9 @@ final class DefaultStepVerifierBuilder<T>
 
 		@Override
 		void run(DefaultVerifySubscriber<T> parent) throws Exception {
-			if(parent.virtualTimeScheduler != null) {
-				parent.monitorSignal = true;
-				virtualOrRealWait(duration.minus(Duration.ofNanos(1)), parent);
-				parent.monitorSignal = false;
-				if(parent.isTerminated() && !parent.isCancelled()){
-					throw new AssertionError("unexpected end during a no-event expectation");
-				}
-				virtualOrRealWait(Duration.ofNanos(1), parent);
-			}
-			else{
-				parent.monitorSignal = true;
-				virtualOrRealWait(duration, parent);
-				parent.monitorSignal = false;
-				if(parent.isTerminated() && !parent.isCancelled()){
-					throw new AssertionError("unexpected end during a no-event expectation");
-				}
-			}
+			parent.monitorSignal = System.nanoTime() + duration.toNanos();
+			virtualOrRealWait(duration, parent);
+			parent.monitorSignal = -1L;
 		}
 	}
 

@@ -1930,4 +1930,16 @@ public class StepVerifierTests {
 			assertThatCode(ex2::get).as("execution 2 in iteration #" + i).doesNotThrowAnyException();
 		}
 	}
+
+	@Test
+	public void gh652() {
+		for (int i = 0; i < 1000; i++) {
+			System.out.println("iteration " + i);
+			StepVerifier.create(Mono.delay(Duration.ofMillis(800)))
+			            .expectSubscription()
+			            .expectNoEvent(Duration.ofMillis(800))
+			            .expectNext(0L)
+			            .verifyComplete();
+		}
+	}
 }
