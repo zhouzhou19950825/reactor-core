@@ -42,6 +42,8 @@ import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
 import reactor.test.publisher.TestPublisher;
 import reactor.test.scheduler.VirtualTimeScheduler;
+import reactor.util.Logger;
+import reactor.util.Loggers;
 import reactor.util.context.Context;
 
 import static java.util.Collections.emptyList;
@@ -55,6 +57,8 @@ import static reactor.test.publisher.TestPublisher.Violation.REQUEST_OVERFLOW;
  * @author Simon Basle
  */
 public class StepVerifierTests {
+
+	private static Logger LOGGER = Loggers.getLogger(StepVerifierTests.class);
 
 	@Test
 	public void expectNext() {
@@ -1932,12 +1936,12 @@ public class StepVerifierTests {
 	}
 
 	@Test
-	public void gh652() {
-		for (int i = 0; i < 1000; i++) {
-			System.out.println("iteration " + i);
-			StepVerifier.create(Mono.delay(Duration.ofMillis(800)))
+	public void expectNoEventWithRealTime_gh652() {
+		for (int i = 0; i < 50; i++) {
+			LOGGER.debug("gh652 iteration " + i);
+			StepVerifier.create(Mono.delay(Duration.ofMillis(100)))
 			            .expectSubscription()
-			            .expectNoEvent(Duration.ofMillis(800))
+			            .expectNoEvent(Duration.ofMillis(100))
 			            .expectNext(0L)
 			            .verifyComplete();
 		}
