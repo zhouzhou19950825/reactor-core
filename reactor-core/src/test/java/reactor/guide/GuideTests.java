@@ -45,13 +45,14 @@ import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscription;
 import reactor.core.Disposable;
 import reactor.core.Exceptions;
+import reactor.core.publisher.BalancedFluxProcessor;
 import reactor.core.publisher.BaseSubscriber;
 import reactor.core.publisher.ConnectableFlux;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Hooks;
 import reactor.core.publisher.Mono;
+import reactor.core.publisher.Processors;
 import reactor.core.publisher.SignalType;
-import reactor.core.publisher.UnicastProcessor;
 import reactor.core.scheduler.Schedulers;
 import reactor.test.StepVerifier;
 import reactor.test.publisher.PublisherProbe;
@@ -201,9 +202,10 @@ public class GuideTests {
 
 	@Test
 	public void advancedHot() {
-		UnicastProcessor<String> hotSource = UnicastProcessor.create();
+		BalancedFluxProcessor<String> hotSource = Processors.unicast();
 
-		Flux<String> hotFlux = hotSource.publish()
+		Flux<String> hotFlux = hotSource.asFlux()
+		                                .publish()
 		                                .autoConnect()
 		                                .map(String::toUpperCase);
 

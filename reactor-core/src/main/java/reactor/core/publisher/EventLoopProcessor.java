@@ -43,9 +43,11 @@ import reactor.util.context.Context;
  * A base processor used by executor backed processors to take care of their ExecutorService
  *
  * @author Stephane Maldini
+ * @deprecated will be simplified into {@link BalancedFluxProcessor} in 3.2.0
  */
+@Deprecated
 abstract class EventLoopProcessor<IN> extends FluxProcessor<IN, IN>
-		implements Runnable {
+		implements Runnable, BalancedFluxProcessor<IN> {
 
 	static <E> Flux<E> coldSource(RingBuffer<Slot<E>> ringBuffer,
 			@Nullable Throwable t,
@@ -248,6 +250,11 @@ abstract class EventLoopProcessor<IN> extends FluxProcessor<IN, IN>
 		}
 	}
 
+	@Override
+	public Flux<IN> asFlux() {
+		return this;
+	}
+
 	/**
 	 * Return the number of parked elements in the emitter backlog.
 	 *
@@ -259,6 +266,7 @@ abstract class EventLoopProcessor<IN> extends FluxProcessor<IN, IN>
 	@Nullable
 	public Object scanUnsafe(Attr key) {
 		if (key == Attr.PARENT) return upstreamSubscription;
+		if (key == Attr.LARGE_BUFFERED) return getPending();
 
 		return super.scanUnsafe(key);
 	}

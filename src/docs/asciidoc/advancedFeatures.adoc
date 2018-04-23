@@ -167,9 +167,10 @@ Compare the first example to the second example, shown in the following code:
 
 [source,java]
 ----
-UnicastProcessor<String> hotSource = UnicastProcessor.create();
+BalancedFluxProcessor<String> hotSource = Processors.unicast();
 
-Flux<String> hotFlux = hotSource.publish()
+Flux<String> hotFlux = hotSource.asFlux()
+                                .publish()
                                 .autoConnect()
                                 .map(String::toUpperCase);
 
