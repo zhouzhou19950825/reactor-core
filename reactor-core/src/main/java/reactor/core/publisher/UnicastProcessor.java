@@ -40,71 +40,11 @@ import reactor.util.context.Context;
  * The implementation keeps the order of signals.
  *
  * @param <T> the input and output type
- * @deprecated instantiate through {@link Processors#unicast()} builder and use as a {@link BalancedFluxProcessor}
  */
-@Deprecated
-public final class UnicastProcessor<T>
+final class UnicastProcessor<T>
 		extends FluxProcessor<T, T>
 		implements Fuseable.QueueSubscription<T>, Fuseable, InnerOperator<T, T>,
 		           BalancedFluxProcessor<T> {
-
-	/**
-	 * Create a new {@link UnicastProcessor} that will buffer on an internal queue in an
-	 * unbounded fashion.
-	 *
-	 * @param <E> the relayed type
-	 * @return a unicast {@link FluxProcessor}
-	 */
-	@Deprecated
-	public static <E> UnicastProcessor<E> create() {
-		return new UnicastProcessor<>(Queues.<E>unbounded().get());
-	}
-
-	/**
-	 * Create a new {@link UnicastProcessor} that will buffer on a provided queue in an
-	 * unbounded fashion.
-	 *
-	 * @param queue the buffering queue
-	 * @param <E> the relayed type
-	 * @return a unicast {@link FluxProcessor}
-	 */
-	@Deprecated
-	public static <E> UnicastProcessor<E> create(Queue<E> queue) {
-		return new UnicastProcessor<>(queue);
-	}
-
-	/**
-	 * Create a new {@link UnicastProcessor} that will buffer on a provided queue in an
-	 * unbounded fashion.
-	 *
-	 * @param queue the buffering queue
-	 * @param endcallback called on any terminal signal
-	 * @param <E> the relayed type
-	 * @return a unicast {@link FluxProcessor}
-	 */
-	@Deprecated
-	public static <E> UnicastProcessor<E> create(Queue<E> queue, Disposable endcallback) {
-		return new UnicastProcessor<>(queue, endcallback);
-	}
-
-	/**
-	 * Create a new {@link UnicastProcessor} that will buffer on a provided queue in an
-	 * unbounded fashion.
-	 *
-	 * @param queue the buffering queue
-	 * @param endcallback called on any terminal signal
-	 * @param onOverflow called when queue.offer return false and unicastProcessor is
-	 * about to emit onError.
-	 * @param <E> the relayed type
-	 *
-	 * @return a unicast {@link FluxProcessor}
-	 */
-	@Deprecated
-	public static <E> UnicastProcessor<E> create(Queue<E> queue,
-			Consumer<? super E> onOverflow,
-			Disposable endcallback) {
-		return new UnicastProcessor<>(queue, onOverflow, endcallback);
-	}
 
 	final Queue<T>            queue;
 	final Consumer<? super T> onOverflow;

@@ -66,10 +66,8 @@ import reactor.util.concurrent.WaitStrategy;
  * @param <E> Type of dispatched signal
  * @author Stephane Maldini
  * @author Anatoly Kadyshev
- * @deprecated instantiate through {@link Processors#fanOut()} and use as a {@link BalancedFluxProcessor}
  */
-@Deprecated
-public final class TopicProcessor<E> extends EventLoopProcessor<E>  {
+final class TopicProcessor<E> extends EventLoopProcessor<E>  {
 
 	/**
 	 * {@link TopicProcessor} builder that can be used to create new
@@ -79,10 +77,8 @@ public final class TopicProcessor<E> extends EventLoopProcessor<E>  {
 	 * {@code TopicProcessor<String> processor = TopicProcessor.<String>builder().build()}
 	 *
 	 * @param <T> Type of dispatched signal
-	 * @deprecated will be superseded by {@link reactor.core.publisher.Processors.FanOutProcessorBuilder} in 3.2.0
 	 */
-	@Deprecated
-	public final static class Builder<T> implements Processors.FanOutProcessorBuilder {
+	final static class Builder<T> implements Processors.FanOutProcessorBuilder {
 
 		String name;
 		ExecutorService executor;
@@ -220,61 +216,61 @@ public final class TopicProcessor<E> extends EventLoopProcessor<E>  {
 		}
 	}
 
-	/**
-	 * Create a new {@link TopicProcessor} {@link Builder} with default properties.
-	 * @return new TopicProcessor builder
-	 */
-	@Deprecated
-	public static <E> Builder<E> builder()  {
-		return new Builder<>();
-	}
-
-	/**
-	 * Create a new TopicProcessor using {@link Queues#SMALL_BUFFER_SIZE} backlog size,
-	 * blockingWait Strategy and auto-cancel. <p> A new Cached ThreadExecutorPool will be
-	 * implicitly created.
-	 * @param <E> Type of processed signals
-	 * @return a fresh processor
-	 */
-	@Deprecated
-	public static <E> TopicProcessor<E> create() {
-		return TopicProcessor.<E>builder().build();
-	}
-
-	/**
-	 * Create a new TopicProcessor using the provided backlog size, with a blockingWait Strategy
-	 * and auto-cancellation. <p> A new Cached ThreadExecutorPool will be implicitly created and will use the passed name to
-	 * qualify the created threads.
-	 * @param name Use a new Cached ExecutorService and assign this name to the created
-	 * threads
-	 * @param bufferSize A Backlog Size to mitigate slow subscribers
-	 * @param <E> Type of processed signals
-	 * @return the fresh TopicProcessor instance
-	 */
-	@Deprecated
-	public static <E> TopicProcessor<E> create(String name, int bufferSize) {
-		return TopicProcessor.<E>builder().name(name).bufferSize(bufferSize).build();
-	}
-
-	/**
-	 * Create a new shared TopicProcessor using the passed backlog size, with a blockingWait
-	 * Strategy and auto-cancellation.
-	 * <p>
-	 * A Shared Processor authorizes concurrent onNext calls and is suited for multi-threaded
-	 * publisher that will fan-in data.
-	 * <p>
-	 * A new Cached ThreadExecutorPool will be implicitly created and will use the passed
-	 * name to qualify the created threads.
-	 * @param name Use a new Cached ExecutorService and assign this name to the created
-	 * threads
-	 * @param bufferSize A Backlog Size to mitigate slow subscribers
-	 * @param <E> Type of processed signals
-	 * @return a fresh processor
-	 */
-	@Deprecated
-	public static <E> TopicProcessor<E> share(String name, int bufferSize) {
-		return TopicProcessor.<E>builder().share(true).name(name).bufferSize(bufferSize).build();
-	}
+//	/**
+//	 * Create a new {@link TopicProcessor} {@link Builder} with default properties.
+//	 * @return new TopicProcessor builder
+//	 */
+//	@Deprecated
+//	public static <E> Builder<E> builder()  {
+//		return new Builder<>();
+//	}
+//
+//	/**
+//	 * Create a new TopicProcessor using {@link Queues#SMALL_BUFFER_SIZE} backlog size,
+//	 * blockingWait Strategy and auto-cancel. <p> A new Cached ThreadExecutorPool will be
+//	 * implicitly created.
+//	 * @param <E> Type of processed signals
+//	 * @return a fresh processor
+//	 */
+//	@Deprecated
+//	public static <E> TopicProcessor<E> create() {
+//		return TopicProcessor.<E>builder().build();
+//	}
+//
+//	/**
+//	 * Create a new TopicProcessor using the provided backlog size, with a blockingWait Strategy
+//	 * and auto-cancellation. <p> A new Cached ThreadExecutorPool will be implicitly created and will use the passed name to
+//	 * qualify the created threads.
+//	 * @param name Use a new Cached ExecutorService and assign this name to the created
+//	 * threads
+//	 * @param bufferSize A Backlog Size to mitigate slow subscribers
+//	 * @param <E> Type of processed signals
+//	 * @return the fresh TopicProcessor instance
+//	 */
+//	@Deprecated
+//	public static <E> TopicProcessor<E> create(String name, int bufferSize) {
+//		return TopicProcessor.<E>builder().name(name).bufferSize(bufferSize).build();
+//	}
+//
+//	/**
+//	 * Create a new shared TopicProcessor using the passed backlog size, with a blockingWait
+//	 * Strategy and auto-cancellation.
+//	 * <p>
+//	 * A Shared Processor authorizes concurrent onNext calls and is suited for multi-threaded
+//	 * publisher that will fan-in data.
+//	 * <p>
+//	 * A new Cached ThreadExecutorPool will be implicitly created and will use the passed
+//	 * name to qualify the created threads.
+//	 * @param name Use a new Cached ExecutorService and assign this name to the created
+//	 * threads
+//	 * @param bufferSize A Backlog Size to mitigate slow subscribers
+//	 * @param <E> Type of processed signals
+//	 * @return a fresh processor
+//	 */
+//	@Deprecated
+//	public static <E> TopicProcessor<E> share(String name, int bufferSize) {
+//		return TopicProcessor.<E>builder().share(true).name(name).bufferSize(bufferSize).build();
+//	}
 
 	final RingBuffer.Reader barrier;
 

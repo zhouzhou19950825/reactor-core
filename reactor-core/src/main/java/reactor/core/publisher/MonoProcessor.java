@@ -44,41 +44,12 @@ import reactor.util.concurrent.WaitStrategy;
  * @param <O> the type of the value that will be made available
  *
  * @author Stephane Maldini
- * @deprecated instantiate through {@link Processors#first} and use as a {@link BalancedMonoProcessor}
  */
-@Deprecated
-public final class MonoProcessor<O> extends Mono<O>
+final class MonoProcessor<O> extends Mono<O>
 		implements CoreSubscriber<O>, Subscription,
 		           Scannable,
 		           LongSupplier,
 		           BalancedMonoProcessor<O> {
-
-	/**
-	 * Create a {@link MonoProcessor} that will eagerly request 1 on {@link #onSubscribe(Subscription)}, cache and emit
-	 * the eventual result for 1 or N subscribers.
-	 *
-	 * @param <T> type of the expected value
-	 *
-	 * @return A {@link MonoProcessor}.
-	 */
-	@Deprecated
-	public static <T> MonoProcessor<T> create() {
-		return new MonoProcessor<>(null);
-	}
-
-	/**
-	 * Create a {@link MonoProcessor} that will eagerly request 1 on {@link #onSubscribe(Subscription)}, cache and emit
-	 * the eventual result for 1 or N subscribers.
-	 *
-	 * @param waitStrategy a {@link WaitStrategy} for blocking {@link #block} strategy
-	 * @param <T> type of the expected value
-	 *
-	 * @return A {@link MonoProcessor}.
-	 */
-	@Deprecated
-	public static <T> MonoProcessor<T> create(WaitStrategy waitStrategy) {
-		return new MonoProcessor<>(null, waitStrategy);
-	}
 
 	final WaitStrategy       waitStrategy;
 

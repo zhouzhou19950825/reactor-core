@@ -66,7 +66,7 @@ import reactor.util.concurrent.WaitStrategy;
  * @deprecated prefer the {@link Processors#fanOut()} variant, will be removed in 3.2.0.
  */
 @Deprecated
-public final class WorkQueueProcessor<E> extends EventLoopProcessor<E> {
+final class WorkQueueProcessor<E> extends EventLoopProcessor<E> {
 
 	/**
 	 * {@link WorkQueueProcessor} builder that can be used to create new

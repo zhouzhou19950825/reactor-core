@@ -27,6 +27,7 @@ import reactor.core.CoreSubscriber;
 import reactor.core.Disposable;
 import reactor.core.Scannable;
 import reactor.util.annotation.Nullable;
+import reactor.util.concurrent.Queues;
 
 /**
  * A base processor that exposes {@link Flux} API for {@link Processor}.
@@ -57,7 +58,8 @@ public abstract class FluxProcessor<IN, OUT> extends Flux<OUT>
 	 * @return a {@link FluxProcessor} accepting publishers and producing T
 	 */
 	public static <T> FluxProcessor<Publisher<? extends T>, T> switchOnNext() {
-		UnicastProcessor<Publisher<? extends T>> emitter = UnicastProcessor.create();
+		UnicastProcessor<Publisher<? extends T>> emitter = new UnicastProcessor<>(Queues.<Publisher<? extends T>>unbounded().get());
+
 		FluxProcessor<Publisher<? extends T>, T> p = FluxProcessor.wrap(emitter, switchOnNext(emitter));
 		return p;
 	}

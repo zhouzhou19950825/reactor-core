@@ -51,51 +51,10 @@ import static reactor.core.publisher.FluxPublish.PublishSubscriber.TERMINATED;
  * @param <T> the input and output value type
  *
  * @author Stephane Maldini
- * @deprecated instantiate through {@link Processors#emitter()} and use as a {@link BalancedFluxProcessor}
  */
-@Deprecated
-public final class EmitterProcessor<T> extends FluxProcessor<T, T>
+final class EmitterProcessor<T> extends FluxProcessor<T, T>
 		implements BalancedFluxProcessor<T> {
 
-	/**
-	 * Create a new {@link EmitterProcessor} using {@link Queues#SMALL_BUFFER_SIZE}
-	 * backlog size and auto-cancel.
-	 *
-	 * @param <E> Type of processed signals
-	 *
-	 * @return a fresh processor
-	 */
-	@Deprecated
-	public static <E> EmitterProcessor<E> create() {
-		return create(Queues.SMALL_BUFFER_SIZE, true);
-	}
-
-	/**
-	 * Create a new {@link EmitterProcessor} using {@link Queues#SMALL_BUFFER_SIZE}
-	 * backlog size and the provided auto-cancel.
-	 *
-	 * @param <E> Type of processed signals
-	 * @param autoCancel automatically cancel
-	 *
-	 * @return a fresh processor
-	 */
-	@Deprecated
-	public static <E> EmitterProcessor<E> create(boolean autoCancel) {
-		return create(Queues.SMALL_BUFFER_SIZE, autoCancel);
-	}
-
-	/**
-	 * Create a new {@link EmitterProcessor} using the provided backlog size, with auto-cancel.
-	 *
-	 * @param <E> Type of processed signals
-	 * @param bufferSize the internal buffer size to hold signals
-	 *
-	 * @return a fresh processor
-	 */
-	@Deprecated
-	public static <E> EmitterProcessor<E> create(int bufferSize) {
-		return create(bufferSize, true);
-	}
 
 	/**
 	 * Create a new {@link EmitterProcessor} using the provided backlog size and auto-cancellation.
