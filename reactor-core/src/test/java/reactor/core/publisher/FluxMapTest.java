@@ -148,7 +148,7 @@ public class FluxMapTest extends FluxOperatorTest<String, String> {
 		AssertSubscriber<Object> ts = AssertSubscriber.create();
 
 		BalancedFluxProcessor<Integer> up =
-				Processors.<Integer>unicast().queue(new ConcurrentLinkedQueue<>()).build();
+				Processors.unicast(new ConcurrentLinkedQueue<Integer>()).build();
 
 		up.asFlux()
 		  .map(v -> v + 1)
@@ -169,7 +169,7 @@ public class FluxMapTest extends FluxOperatorTest<String, String> {
 		AssertSubscriber<Object> ts = AssertSubscriber.create(1);
 
 		BalancedFluxProcessor<Integer> up =
-				Processors.<Integer>unicast().queue(new ConcurrentLinkedQueue<>()).build();
+				Processors.unicast(new ConcurrentLinkedQueue<Integer>()).build();
 
 		Flux.just(1)
 		    .hide()

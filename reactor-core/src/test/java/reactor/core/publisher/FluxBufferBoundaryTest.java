@@ -325,10 +325,10 @@ public class FluxBufferBoundaryTest
 	@Test
 	public void bufferWillAcumulateMultipleListsOfValues() {
 		//given: "a source and a collected flux"
-		BalancedFluxProcessor<Integer> numbers = Processors.emitter().build();
+		BalancedFluxProcessor<Integer> numbers = Processors.emitter();
 
 		//non overlapping buffers
-		BalancedFluxProcessor<Integer> boundaryFlux = Processors.emitter().build();
+		BalancedFluxProcessor<Integer> boundaryFlux = Processors.emitter();
 
 		BalancedMonoProcessor<List<List<Integer>>> res = numbers.asFlux()
 		                                                        .buffer(boundaryFlux)

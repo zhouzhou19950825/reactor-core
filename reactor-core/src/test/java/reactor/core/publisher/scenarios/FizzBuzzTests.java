@@ -81,7 +81,7 @@ public class FizzBuzzTests extends AbstractReactorTest {
 		// .createSubscriber()
 		BalancedFluxProcessor<String> ring = Processors.<String>fanOut().name("test").bufferSize(1024).build();
 
-//        EmitterProcessor<String> ring = Processors.emitter().build();
+//        EmitterProcessor<String> ring = Processors.emitter();
 
 
 		Flux<String> stream2 = ring.asFlux()

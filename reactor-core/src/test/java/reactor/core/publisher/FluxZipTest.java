@@ -436,8 +436,8 @@ public class FluxZipTest extends FluxOperatorTest<String, String> {
 	public void multipleStreamValuesCanBeZipped() {
 //		"Multiple Stream"s values can be zipped"
 //		given: "source composables to merge, buffer and tap"
-		BalancedFluxProcessor<Integer> source1 = Processors.<Integer>emitter().build();
-		BalancedFluxProcessor<Integer> source2 = Processors.<Integer>emitter().build();
+		BalancedFluxProcessor<Integer> source1 = Processors.emitter();
+		BalancedFluxProcessor<Integer> source2 = Processors.emitter();
 		Flux<Integer> zippedFlux = Flux.zip(source1, source2, (t1, t2) -> t1 + t2);
 		AtomicReference<Integer> tap = new AtomicReference<>();
 		zippedFlux.subscribe(it -> tap.set(it));

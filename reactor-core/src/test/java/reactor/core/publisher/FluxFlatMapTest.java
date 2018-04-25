@@ -331,8 +331,8 @@ public class FluxFlatMapTest {
 
 		Flux<Integer> source = Flux.range(1, 2).doOnNext(v -> emission.getAndIncrement());
 
-		BalancedFluxProcessor<Integer> source1 = Processors.emitter().build();
-		BalancedFluxProcessor<Integer> source2 = Processors.emitter().build();
+		BalancedFluxProcessor<Integer> source1 = Processors.emitter();
+		BalancedFluxProcessor<Integer> source2 = Processors.emitter();
 
 		source.flatMap(v -> v == 1 ? source1 : source2, 1, 32).subscribe(ts);
 
@@ -366,8 +366,8 @@ public class FluxFlatMapTest {
 
 		Flux<Integer> source = Flux.range(1, 1000).doOnNext(v -> emission.getAndIncrement());
 
-		BalancedFluxProcessor<Integer> source1 = Processors.emitter().build();
-		BalancedFluxProcessor<Integer> source2 = Processors.emitter().build();
+		BalancedFluxProcessor<Integer> source1 = Processors.emitter();
+		BalancedFluxProcessor<Integer> source2 = Processors.emitter();
 
 		source.flatMap(v -> v == 1 ? source1 : source2, Integer.MAX_VALUE, 32).subscribe(ts);
 
@@ -1029,7 +1029,7 @@ public class FluxFlatMapTest {
 
 		fmm.onSubscribe(Operators.emptySubscription());
 
-		BalancedFluxProcessor<Integer> ps = Processors.emitter().build();
+		BalancedFluxProcessor<Integer> ps = Processors.emitter();
 
 		fmm.onNext(ps);
 

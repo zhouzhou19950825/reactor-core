@@ -155,7 +155,7 @@ public class FluxOnErrorResumeTest {
 
 	@Test
 	public void someFirst() {
-		BalancedFluxProcessor<Integer> tp = Processors.<Integer>emitter().build();
+		BalancedFluxProcessor<Integer> tp = Processors.emitter();
 
 		AssertSubscriber<Integer> ts = AssertSubscriber.create();
 
@@ -177,7 +177,7 @@ public class FluxOnErrorResumeTest {
 
 	@Test
 	public void someFirstBackpressured() {
-		BalancedFluxProcessor<Integer> tp = Processors.<Integer>emitter().build();
+		BalancedFluxProcessor<Integer> tp = Processors.emitter();
 
 		AssertSubscriber<Integer> ts = AssertSubscriber.create(10);
 

@@ -68,7 +68,7 @@ public class MonoTimeoutTest {
 	public void timeoutRequested() {
 		AssertSubscriber<Integer> ts = AssertSubscriber.create();
 
-		BalancedMonoProcessor<Integer> source = Processors.<Integer>first().build();
+		BalancedMonoProcessor<Integer> source = Processors.first();
 
 		BalancedFluxProcessor<Integer> tp = Processors.direct();
 

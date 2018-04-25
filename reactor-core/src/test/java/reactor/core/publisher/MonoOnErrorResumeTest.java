@@ -196,7 +196,7 @@ public class MonoOnErrorResumeTest {
 
 	@Test
 	public void mapError() {
-		BalancedMonoProcessor<Integer> mp = Processors.<Integer>first().build();
+		BalancedMonoProcessor<Integer> mp = Processors.first();
 		StepVerifier.create(Mono.<Integer>error(new TestException())
 				.onErrorMap(TestException.class, e -> new Exception("test"))
 				.subscribeWith(mp))
@@ -208,7 +208,7 @@ public class MonoOnErrorResumeTest {
 
 	@Test
 	public void otherwiseErrorFilter() {
-		BalancedMonoProcessor<Integer> mp = Processors.<Integer>first().build();
+		BalancedMonoProcessor<Integer> mp = Processors.first();
 		StepVerifier.create(Mono.<Integer>error(new TestException())
 				.onErrorResume(TestException.class, e -> Mono.just(1))
 				.subscribeWith(mp))
@@ -221,7 +221,7 @@ public class MonoOnErrorResumeTest {
 
 	@Test
 	public void otherwiseErrorUnfilter() {
-		BalancedMonoProcessor<Integer> mp = Processors.<Integer>first().build();
+		BalancedMonoProcessor<Integer> mp = Processors.first();
 		StepVerifier.create(Mono.<Integer>error(new TestException())
 				.onErrorResume(RuntimeException.class, e -> Mono.just(1))
 				.subscribeWith(mp))
@@ -233,7 +233,7 @@ public class MonoOnErrorResumeTest {
 
 	@Test
 	public void otherwiseReturnErrorFilter() {
-		BalancedMonoProcessor<Integer> mp = Processors.<Integer>first().build();
+		BalancedMonoProcessor<Integer> mp = Processors.first();
 		StepVerifier.create(Mono.<Integer>error(new TestException())
 				.onErrorReturn(TestException.class, 1)
 				.subscribeWith(mp))
@@ -247,7 +247,7 @@ public class MonoOnErrorResumeTest {
 
 	@Test
 	public void otherwiseReturnErrorFilter2() {
-		BalancedMonoProcessor<Integer> mp = Processors.<Integer>first().build();
+		BalancedMonoProcessor<Integer> mp = Processors.first();
 		StepVerifier.create(Mono.<Integer>error(new TestException())
 				.onErrorReturn(TestException.class::isInstance, 1)
 				.subscribeWith(mp))
@@ -260,7 +260,7 @@ public class MonoOnErrorResumeTest {
 
 	@Test
 	public void otherwiseReturnErrorUnfilter() {
-		BalancedMonoProcessor<Integer> mp = Processors.<Integer>first().build();
+		BalancedMonoProcessor<Integer> mp = Processors.first();
 		StepVerifier.create(Mono.<Integer>error(new TestException())
 				.onErrorReturn(RuntimeException.class, 1)
 				.subscribeWith(mp))
@@ -272,7 +272,7 @@ public class MonoOnErrorResumeTest {
 
 	@Test
 	public void otherwiseReturnErrorUnfilter2() {
-		BalancedMonoProcessor<Integer> mp = Processors.<Integer>first().build();
+		BalancedMonoProcessor<Integer> mp = Processors.first();
 		StepVerifier.create(Mono.<Integer>error(new TestException())
 				.onErrorReturn(RuntimeException.class::isInstance, 1)
 				.subscribeWith(mp))

@@ -365,7 +365,7 @@ public abstract class BaseOperatorTest<I, PI extends Publisher<? extends I>, O, 
 
 	final Flux<I> fluxFuseableAsync(OperatorScenario<I, PI, O, PO> scenario) {
 		int p = scenario.producerCount();
-		BalancedFluxProcessor<I> rp = Processors.<I>replay().build();
+		BalancedFluxProcessor<I> rp = Processors.replay();
 
 		switch (p) {
 			case -1:
@@ -553,7 +553,7 @@ public abstract class BaseOperatorTest<I, PI extends Publisher<? extends I>, O, 
 	}
 
 	final StepVerifier.Step<O> inputFusedAsyncOutputFusedAsync(OperatorScenario<I, PI, O, PO> scenario) {
-		BalancedFluxProcessor<I> up = Processors.<I>unicast().build();
+		BalancedFluxProcessor<I> up = Processors.unicast();
 		return StepVerifier.create(scenario.body()
 		                                   .apply(withFluxSource(up.asFlux())))
 		                   .expectFusion(Fuseable.ASYNC)
@@ -561,7 +561,7 @@ public abstract class BaseOperatorTest<I, PI extends Publisher<? extends I>, O, 
 	}
 
 	final StepVerifier.Step<O> inputFusedAsyncOutputFusedAsyncConditional(OperatorScenario<I, PI, O, PO> scenario) {
-		BalancedFluxProcessor<I> up = Processors.<I>unicast().build();
+		BalancedFluxProcessor<I> up = Processors.unicast();
 		return StepVerifier.create(scenario.body()
 		                                   .andThen(this::conditional)
 		                                   .apply(withFluxSource(up.asFlux())))
@@ -572,7 +572,7 @@ public abstract class BaseOperatorTest<I, PI extends Publisher<? extends I>, O, 
 	@SuppressWarnings("unchecked")
 	final void inputFusedAsyncOutputFusedAsyncCancel(OperatorScenario<I, PI, O, PO> scenario) {
 		if ((scenario.fusionMode() & Fuseable.ASYNC) != 0) {
-			BalancedFluxProcessor<I> up = Processors.<I>unicast().build();
+			BalancedFluxProcessor<I> up = Processors.unicast();
 			assertThat(up).isInstanceOf(Queue.class);
 			Queue<I> upAsQueue = (Queue<I>) up;
 
@@ -617,7 +617,7 @@ public abstract class BaseOperatorTest<I, PI extends Publisher<? extends I>, O, 
 			            .thenCancel()
 			            .verify();
 
-			BalancedFluxProcessor<I> up2 = Processors.<I>unicast().build();
+			BalancedFluxProcessor<I> up2 = Processors.unicast();
 			StepVerifier.create(scenario.body()
 			                            .apply(withFluxSource(up2.asFlux())), 0)
 			            .consumeSubscriptionWith(s -> {
@@ -635,7 +635,7 @@ public abstract class BaseOperatorTest<I, PI extends Publisher<? extends I>, O, 
 	@SuppressWarnings("unchecked")
 	final void inputFusedAsyncOutputFusedAsyncConditionalCancel(OperatorScenario<I, PI, O, PO> scenario) {
 		if ((scenario.fusionMode() & Fuseable.ASYNC) != 0) {
-			BalancedFluxProcessor<I> up = Processors.<I>unicast().build();
+			BalancedFluxProcessor<I> up = Processors.unicast();
 			assertThat(up).isInstanceOf(Queue.class);
 			Queue<I> upAsQueue = (Queue<I>) up;
 			testUnicastSource(scenario, up);
@@ -675,7 +675,7 @@ public abstract class BaseOperatorTest<I, PI extends Publisher<? extends I>, O, 
 			            .thenCancel()
 			            .verify();
 
-			BalancedFluxProcessor<I> up2 = Processors.<I>unicast().build();
+			BalancedFluxProcessor<I> up2 = Processors.unicast();
 			StepVerifier.create(scenario.body()
 			                            .andThen(f -> doOnSubscribe(f, s -> {
 				                            if (s instanceof Fuseable.QueueSubscription) {
@@ -826,7 +826,7 @@ public abstract class BaseOperatorTest<I, PI extends Publisher<? extends I>, O, 
 
 	@SuppressWarnings("unchecked")
 	final StepVerifier.Step<O> inputFusedError(OperatorScenario<I, PI, O, PO> scenario) {
-		BalancedFluxProcessor<I> up = Processors.<I>unicast().build();
+		BalancedFluxProcessor<I> up = Processors.unicast();
 		assertThat(up).isInstanceOf(Scannable.class);
 		return StepVerifier.create(scenario.body()
 		                                   .apply(up.asFlux().as(f -> withFluxSource(new FluxFuseableExceptionOnPoll<>(
@@ -886,7 +886,7 @@ public abstract class BaseOperatorTest<I, PI extends Publisher<? extends I>, O, 
 	}
 
 	final StepVerifier.Step<O> inputFusedAsyncErrorOutputFusedAsync(OperatorScenario<I, PI, O, PO> scenario) {
-		BalancedFluxProcessor<I> up = Processors.<I>unicast().build();
+		BalancedFluxProcessor<I> up = Processors.unicast();
 		up.onNext(item(0));
 		return StepVerifier.create(scenario.body()
 		                                   .apply(up.asFlux().as(f -> withFluxSource(new FluxFuseableExceptionOnPoll<>(
@@ -897,7 +897,7 @@ public abstract class BaseOperatorTest<I, PI extends Publisher<? extends I>, O, 
 
 	@SuppressWarnings("unchecked")
 	final StepVerifier.Step<O> inputFusedErrorOutputFusedConditional(OperatorScenario<I, PI, O, PO> scenario) {
-		BalancedFluxProcessor<I> up = Processors.<I>unicast().build();
+		BalancedFluxProcessor<I> up = Processors.unicast();
 		assertThat(up).isInstanceOf(Scannable.class);
 		return StepVerifier.create(scenario.body()
 		                                   .andThen(this::conditional)

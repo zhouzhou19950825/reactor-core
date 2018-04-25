@@ -31,7 +31,7 @@ public class EmitterProcessorVerification extends AbstractProcessorVerification 
 
 	@Override
 	public Processor<Long, Long> createIdentityProcessor(int bufferSize) {
-		BalancedFluxProcessor<Long> p = Processors.<Long>emitter().bufferSize(bufferSize).build();
+		BalancedFluxProcessor<Long> p = Processors.emitter(bufferSize).build();
 		return FluxProcessor.wrap(p, p.asFlux().log("EmitterProcessorVerification", Level.FINE));
 	}
 

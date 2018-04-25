@@ -575,7 +575,7 @@ public class FluxConcatMapTest extends FluxOperatorTest<String, String> {
 	public void asyncFusionMapToNull() {
 		AssertSubscriber<Integer> ts = AssertSubscriber.create();
 
-		BalancedFluxProcessor<Integer> up = Processors.<Integer>unicast().queue(Queues.<Integer>get(2).get()).build();
+		BalancedFluxProcessor<Integer> up = Processors.unicast(Queues.<Integer>get(2).get()).build();
 		up.onNext(1);
 		up.onNext(2);
 		up.onComplete();
@@ -595,7 +595,7 @@ public class FluxConcatMapTest extends FluxOperatorTest<String, String> {
 		AssertSubscriber<Integer> ts = AssertSubscriber.create();
 
 		BalancedFluxProcessor<Integer> up =
-				Processors.<Integer>unicast().queue(Queues.<Integer>get(2).get()).build();
+				Processors.unicast(Queues.<Integer>get(2).get()).build();
 		up.onNext(1);
 		up.onNext(2);
 		up.onComplete();

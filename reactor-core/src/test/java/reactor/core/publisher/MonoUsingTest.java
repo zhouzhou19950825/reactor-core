@@ -204,7 +204,7 @@ public class MonoUsingTest {
 
 		AtomicInteger cleanup = new AtomicInteger();
 
-		BalancedMonoProcessor<Integer> tp = Processors.<Integer>first().build();
+		BalancedMonoProcessor<Integer> tp = Processors.first();
 
 		Mono.using(() -> 1, r -> tp.asMono(), cleanup::set, true)
 		    .subscribe(ts);

@@ -187,7 +187,7 @@ chain or for different subscribers.
 
 [source,java]
 ----
-BalancedFluxProcessor<Integer> processor = Processors.emitter().build();
+BalancedFluxProcessor<Integer> processor = Processors.emitter();
 processor.publishOn(scheduler1)
          .map(i -> transform(i))
          .publishOn(scheduler2)

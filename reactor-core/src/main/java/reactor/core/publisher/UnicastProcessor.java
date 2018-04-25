@@ -46,6 +46,11 @@ final class UnicastProcessor<T>
 		implements Fuseable.QueueSubscription<T>, Fuseable, InnerOperator<T, T>,
 		           BalancedFluxProcessor<T> {
 
+	//for internal simplified instantiation of the unbounded case
+	static <T> UnicastProcessor<T> create() {
+		return new UnicastProcessor<>(Queues.<T>unbounded().get());
+	}
+
 	final Queue<T>            queue;
 	final Consumer<? super T> onOverflow;
 

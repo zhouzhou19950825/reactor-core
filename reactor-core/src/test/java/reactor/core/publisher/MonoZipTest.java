@@ -200,7 +200,7 @@ public class MonoZipTest {
 
 	@Test
 	public void whenMonoJust() {
-		BalancedMonoProcessor<Tuple2<Integer, Integer>> mp = Processors.first().build();
+		BalancedMonoProcessor<Tuple2<Integer, Integer>> mp = Processors.first();
 		StepVerifier.create(Mono.zip(Mono.just(1), Mono.just(2))
 		                        .subscribeWith(mp))
 		            .then(() -> assertThat(mp.isError()).isFalse())
@@ -212,7 +212,7 @@ public class MonoZipTest {
 
 	@Test
 	public void whenMonoJust3() {
-		BalancedMonoProcessor<Tuple3<Integer, Integer, Integer>> mp = Processors.first().build();
+		BalancedMonoProcessor<Tuple3<Integer, Integer, Integer>> mp = Processors.first();
 		StepVerifier.create(Mono.zip(Mono.just(1), Mono.just(2), Mono.just(3))
 		                        .subscribeWith(mp))
 		            .then(() -> assertThat(mp.isError()).isFalse())
@@ -225,7 +225,7 @@ public class MonoZipTest {
 	@Test
 	public void whenMonoJust4() {
 		BalancedMonoProcessor<Tuple4<Integer, Integer, Integer, Integer>> mp =
-				Processors.first().build();
+				Processors.first();
 		StepVerifier.create(Mono.zip(Mono.just(1),
 				Mono.just(2),
 				Mono.just(3),
@@ -241,7 +241,7 @@ public class MonoZipTest {
 	@Test
 	public void whenMonoJust5() {
 		BalancedMonoProcessor<Tuple5<Integer, Integer, Integer, Integer, Integer>> mp =
-				Processors.first().build();
+				Processors.first();
 		StepVerifier.create(Mono.zip(Mono.just(1),
 				Mono.just(2),
 				Mono.just(3),
@@ -258,7 +258,7 @@ public class MonoZipTest {
 	@Test
 	public void whenMonoJust6() {
 		BalancedMonoProcessor<Tuple6<Integer, Integer, Integer, Integer, Integer, Integer>> mp =
-				Processors.first().build();
+				Processors.first();
 		StepVerifier.create(Mono.zip(Mono.just(1),
 				Mono.just(2),
 				Mono.just(3),
@@ -275,7 +275,7 @@ public class MonoZipTest {
 
 	@Test
 	public void whenMonoError() {
-		BalancedMonoProcessor<Tuple2<Integer, Integer>> mp = Processors.first().build();
+		BalancedMonoProcessor<Tuple2<Integer, Integer>> mp = Processors.first();
 		StepVerifier.create(Mono.zip(Mono.<Integer>error(new Exception("test1")),
 				Mono.<Integer>error(new Exception("test2")))
 		                        .subscribeWith(mp))
@@ -287,7 +287,7 @@ public class MonoZipTest {
 
 	@Test
 	public void whenMonoCallable() {
-		BalancedMonoProcessor<Tuple2<Integer, Integer>> mp = Processors.first().build();
+		BalancedMonoProcessor<Tuple2<Integer, Integer>> mp = Processors.first();
 		StepVerifier.create(Mono.zip(Mono.fromCallable(() -> 1),
 				Mono.fromCallable(() -> 2))
 		                        .subscribeWith(mp))
@@ -300,7 +300,7 @@ public class MonoZipTest {
 
 	@Test
 	public void whenDelayJustMono() {
-		BalancedMonoProcessor<Tuple2<Integer, Integer>> mp = Processors.first().build();
+		BalancedMonoProcessor<Tuple2<Integer, Integer>> mp = Processors.first();
 		StepVerifier.create(Mono.zipDelayError(Mono.just(1), Mono.just(2))
 		                        .subscribeWith(mp))
 		            .then(() -> assertThat(mp.isError()).isFalse())
@@ -312,7 +312,7 @@ public class MonoZipTest {
 
 	@Test
 	public void whenDelayJustMono3() {
-		BalancedMonoProcessor<Tuple3<Integer, Integer, Integer>> mp = Processors.first().build();
+		BalancedMonoProcessor<Tuple3<Integer, Integer, Integer>> mp = Processors.first();
 		StepVerifier.create(Mono.zipDelayError(Mono.just(1), Mono.just(2), Mono.just(3))
 		                        .subscribeWith(mp))
 		            .then(() -> assertThat(mp.isError()).isFalse())
@@ -325,7 +325,7 @@ public class MonoZipTest {
 	@Test
 	public void whenDelayMonoJust4() {
 		BalancedMonoProcessor<Tuple4<Integer, Integer, Integer, Integer>> mp =
-				Processors.first().build();
+				Processors.first();
 		StepVerifier.create(Mono.zipDelayError(Mono.just(1),
 				Mono.just(2),
 				Mono.just(3),
@@ -341,7 +341,7 @@ public class MonoZipTest {
 	@Test
 	public void whenDelayMonoJust5() {
 		BalancedMonoProcessor<Tuple5<Integer, Integer, Integer, Integer, Integer>> mp =
-				Processors.first().build();
+				Processors.first();
 		StepVerifier.create(Mono.zipDelayError(Mono.just(1),
 				Mono.just(2),
 				Mono.just(3),
@@ -358,7 +358,7 @@ public class MonoZipTest {
 	@Test
 	public void whenDelayMonoJust6() {
 		BalancedMonoProcessor<Tuple6<Integer, Integer, Integer, Integer, Integer, Integer>> mp =
-				Processors.first().build();
+				Processors.first();
 		StepVerifier.create(Mono.zipDelayError(Mono.just(1),
 				Mono.just(2),
 				Mono.just(3),

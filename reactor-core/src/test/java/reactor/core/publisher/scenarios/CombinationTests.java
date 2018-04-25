@@ -194,7 +194,7 @@ public class CombinationTests {
 	public void sampleZipTest3() throws Exception {
 		int elements = 1;
 		CountDownLatch latch = new CountDownLatch(elements + 1);
-		BalancedFluxProcessor<SensorData> sensorDataProcessor = Processors.<SensorData>emitter().build();
+		BalancedFluxProcessor<SensorData> sensorDataProcessor = Processors.emitter();
 		Scheduler scheduler = Schedulers.single();
 
 		sensorDataProcessor.asFlux()
@@ -301,8 +301,8 @@ public class CombinationTests {
 	@Before
 	public void anotherBefore() {
 		ts = AssertSubscriber.create();
-		emitter1 = Processors.<Long>replay().build();
-		emitter2 = Processors.<Long>replay().build();
+		emitter1 = Processors.replay();
+		emitter2 = Processors.replay();
 	}
 
 	private void emitValues() {

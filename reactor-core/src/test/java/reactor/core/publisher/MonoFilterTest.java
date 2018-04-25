@@ -128,7 +128,7 @@ public class MonoFilterTest {
 	public void asyncFusion() {
 		AssertSubscriber<Object> ts = AssertSubscriber.create();
 
-		BalancedMonoProcessor<Integer> up = Processors.<Integer>first().build();
+		BalancedMonoProcessor<Integer> up = Processors.first();
 
 		up.asMono()
 		  .filter(v -> (v & 1) == 0)
@@ -145,7 +145,7 @@ public class MonoFilterTest {
 	public void asyncFusionBackpressured() {
 		AssertSubscriber<Object> ts = AssertSubscriber.create(1);
 
-		BalancedMonoProcessor<Integer> up = Processors.<Integer>first().build();
+		BalancedMonoProcessor<Integer> up = Processors.first();
 
 		Mono.just(1)
 		    .hide()
@@ -172,7 +172,7 @@ public class MonoFilterTest {
 
 	@Test
 	public void filterMono() {
-		BalancedMonoProcessor<Integer> mp = Processors.<Integer>first().build();
+		BalancedMonoProcessor<Integer> mp = Processors.first();
 		Queue mpAsQueue = (Queue) mp;
 		StepVerifier.create(Mono.just(2).filter(s -> s % 2 == 0).subscribeWith(mp))
 		            .then(() -> assertThat(mp.isError()).isFalse())
@@ -186,7 +186,7 @@ public class MonoFilterTest {
 
 	@Test
 	public void filterMonoNot() {
-		BalancedMonoProcessor<Integer> mp = Processors.<Integer>first().build();
+		BalancedMonoProcessor<Integer> mp = Processors.first();
 		Queue mpAsQueue = (Queue) mp;
 		StepVerifier.create(Mono.just(1).filter(s -> s % 2 == 0).subscribeWith(mp))
 		            .then(() -> assertThat(mp.isError()).isFalse())

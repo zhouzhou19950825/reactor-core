@@ -247,7 +247,7 @@ public class MonoFilterWhenTest {
 
 	@Test
 	public void cancel() {
-		final BalancedFluxProcessor<Boolean> pp = Processors.emitter().build();
+		final BalancedFluxProcessor<Boolean> pp = Processors.emitter();
 
 		StepVerifier.create(Mono.just(1)
 		                        .filterWhen(v -> pp))

@@ -81,7 +81,7 @@ public class FluxRefCountTest {
 
 	@Test
 	public void normal() {
-		BalancedFluxProcessor<Integer> e = Processors.emitter().build();
+		BalancedFluxProcessor<Integer> e = Processors.emitter();
 
 		Flux<Integer> p = e.asFlux()
 		                   .publish().refCount();
@@ -122,7 +122,7 @@ public class FluxRefCountTest {
 
 	@Test
 	public void normalTwoSubscribers() {
-		BalancedFluxProcessor<Integer> e = Processors.emitter().build();
+		BalancedFluxProcessor<Integer> e = Processors.emitter();
 
 		Flux<Integer> p = e.asFlux()
 		                   .publish().refCount(2);

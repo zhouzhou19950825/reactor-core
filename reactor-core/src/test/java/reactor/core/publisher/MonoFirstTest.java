@@ -106,7 +106,7 @@ public class MonoFirstTest {
 
 	@Test
 	public void firstMonoJust() {
-		BalancedMonoProcessor<Integer> mp = Processors.<Integer>first().build();
+		BalancedMonoProcessor<Integer> mp = Processors.first();
 		StepVerifier.create(Mono.first(Mono.just(1), Mono.just(2))
 		                        .subscribeWith(mp))
 		            .then(() -> assertThat(mp.isError()).isFalse())

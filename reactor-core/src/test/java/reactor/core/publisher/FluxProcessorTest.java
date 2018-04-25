@@ -115,7 +115,7 @@ public class FluxProcessorTest {
 
 	@Test
 	public void testSubmitSession() throws Exception {
-		BalancedFluxProcessor<Integer> processor = Processors.emitter().build();
+		BalancedFluxProcessor<Integer> processor = Processors.emitter();
 		AtomicInteger count = new AtomicInteger();
 		CountDownLatch latch = new CountDownLatch(1);
 		Scheduler scheduler = Schedulers.parallel();
@@ -140,7 +140,7 @@ public class FluxProcessorTest {
 
 	@Test
 	public void testEmitter() throws Throwable {
-		BalancedFluxProcessor<Integer> processor = Processors.emitter().build();
+		BalancedFluxProcessor<Integer> processor = Processors.emitter();
 
 		int n = 100_000;
 		int subs = 4;
@@ -168,7 +168,7 @@ public class FluxProcessorTest {
 	}
 	@Test
 	public void testEmitter2() throws Throwable {
-		BalancedFluxProcessor<Integer> processor = Processors.emitter().build();
+		BalancedFluxProcessor<Integer> processor = Processors.emitter();
 
 		int n = 100_000;
 		int subs = 4;

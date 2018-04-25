@@ -182,7 +182,7 @@ public class FluxFilterTest extends FluxOperatorTest<String, String> {
 		AssertSubscriber<Object> ts = AssertSubscriber.create();
 
 		BalancedFluxProcessor<Integer> up =
-				Processors.<Integer>unicast().queue(new ConcurrentLinkedQueue<>()).build();
+				Processors.unicast(new ConcurrentLinkedQueue<Integer>()).build();
 
 		up.asFlux()
 		  .filter(v -> (v & 1) == 0)
@@ -203,7 +203,7 @@ public class FluxFilterTest extends FluxOperatorTest<String, String> {
 		AssertSubscriber<Object> ts = AssertSubscriber.create(1);
 
 		BalancedFluxProcessor<Integer> up =
-				Processors.<Integer>unicast().queue(new ConcurrentLinkedQueue<>()).build();
+				Processors.unicast(new ConcurrentLinkedQueue<Integer>()).build();
 
 		Flux.just(1)
 		    .hide()
@@ -229,7 +229,7 @@ public class FluxFilterTest extends FluxOperatorTest<String, String> {
 		AssertSubscriber<Object> ts = AssertSubscriber.create(1);
 
 		BalancedFluxProcessor<Integer> up =
-				Processors.<Integer>unicast().queue(new ConcurrentLinkedQueue<>()).build();
+				Processors.unicast(new ConcurrentLinkedQueue<Integer>()).build();
 
 		Flux.just(1)
 		    .hide()

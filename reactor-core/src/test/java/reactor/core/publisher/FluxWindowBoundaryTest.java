@@ -227,10 +227,10 @@ public class FluxWindowBoundaryTest {
 	@Test
 	public void windowWillAcumulateMultipleListsOfValues() {
 		//given: "a source and a collected flux"
-		BalancedFluxProcessor<Integer> numbers = Processors.<Integer>emitter().build();
+		BalancedFluxProcessor<Integer> numbers = Processors.emitter();
 
 		//non overlapping buffers
-		BalancedFluxProcessor<Integer> boundaryFlux = Processors.<Integer>emitter().build();
+		BalancedFluxProcessor<Integer> boundaryFlux = Processors.emitter();
 
 		BalancedMonoProcessor<List<List<Integer>>> res = numbers.asFlux()
 		                                                        .window(boundaryFlux)

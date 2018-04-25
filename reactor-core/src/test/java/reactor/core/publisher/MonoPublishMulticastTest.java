@@ -62,7 +62,7 @@ public class MonoPublishMulticastTest {
 	public void cancelComposes() {
 		AssertSubscriber<Integer> ts = AssertSubscriber.create();
 
-		BalancedMonoProcessor<Integer> sp = Processors.<Integer>first().build();
+		BalancedMonoProcessor<Integer> sp = Processors.first();
 
 		sp.asMono()
 		  .publish(o -> Mono.<Integer>never())
@@ -79,7 +79,7 @@ public class MonoPublishMulticastTest {
 	public void cancelComposes2() {
 		AssertSubscriber<Integer> ts = AssertSubscriber.create();
 
-		BalancedMonoProcessor<Integer> sp = Processors.<Integer>first().build();
+		BalancedMonoProcessor<Integer> sp = Processors.first();
 
 		sp.asMono()
 		  .publish(o -> Mono.<Integer>empty())

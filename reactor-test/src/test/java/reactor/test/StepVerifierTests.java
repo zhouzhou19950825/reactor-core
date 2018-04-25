@@ -1820,7 +1820,7 @@ public class StepVerifierTests {
 
 	@Test
 	public void takeAsyncFusedBackpressured() {
-		BalancedFluxProcessor<String> up = Processors.<String>unicast().build();
+		BalancedFluxProcessor<String> up = Processors.unicast();
 		StepVerifier.create(up.asFlux().take(3), 0)
 		            .expectFusion()
 		            .then(() -> up.onNext("test"))
@@ -1835,7 +1835,7 @@ public class StepVerifierTests {
 
 	@Test
 	public void cancelAsyncFusion() {
-		BalancedFluxProcessor<String> up = Processors.<String>unicast().build();
+		BalancedFluxProcessor<String> up = Processors.unicast();
 		StepVerifier.create(up.asFlux().take(3), 0)
 		            .expectFusion()
 		            .then(() -> up.onNext("test"))

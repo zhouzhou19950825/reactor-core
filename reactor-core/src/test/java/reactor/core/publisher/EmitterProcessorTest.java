@@ -60,7 +60,7 @@ public class EmitterProcessorTest {
 		final int elements = 10;
 		CountDownLatch latch = new CountDownLatch(elements + 1);
 
-		Processor<Integer, Integer> processor = Processors.emitter().bufferSize(16).build();
+		Processor<Integer, Integer> processor = Processors.emitter(16).build();
 
 		List<Integer> list = new ArrayList<>();
 
@@ -122,7 +122,7 @@ public class EmitterProcessorTest {
 		final int elements = 10000;
 		CountDownLatch latch = new CountDownLatch(elements);
 
-		Processor<Integer, Integer> processor = Processors.emitter().bufferSize(1024).build();
+		Processor<Integer, Integer> processor = Processors.emitter(1024).build();
 
 		EmitterProcessor<Integer> stream = new EmitterProcessor<>(true, Queues.SMALL_BUFFER_SIZE);
 		FluxSink<Integer> session = stream.sink();

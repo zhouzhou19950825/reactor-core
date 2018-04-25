@@ -265,11 +265,11 @@ public class FluxWindowWhenTest {
 	@Test
 	public void windowWillAcumulateMultipleListsOfValuesOverlap() {
 		//given: "a source and a collected flux"
-		BalancedFluxProcessor<Integer> numbers = Processors.<Integer>emitter().build();
-		BalancedFluxProcessor<Integer> bucketOpening = Processors.<Integer>emitter().build();
+		BalancedFluxProcessor<Integer> numbers = Processors.emitter();
+		BalancedFluxProcessor<Integer> bucketOpening = Processors.emitter();
 
 		//"overlapping buffers"
-		BalancedFluxProcessor<Integer> boundaryFlux = Processors.<Integer>emitter().build();
+		BalancedFluxProcessor<Integer> boundaryFlux = Processors.emitter();
 
 		BalancedMonoProcessor<List<List<Integer>>> res = numbers.asFlux().windowWhen(bucketOpening, u -> boundaryFlux )
 		                                       .flatMap(Flux::buffer)

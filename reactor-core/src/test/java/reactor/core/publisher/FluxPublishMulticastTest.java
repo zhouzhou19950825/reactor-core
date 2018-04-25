@@ -156,7 +156,7 @@ public class FluxPublishMulticastTest extends FluxOperatorTest<String, String> {
 		AssertSubscriber<Integer> ts = AssertSubscriber.create();
 
 		BalancedFluxProcessor<Integer> up =
-				Processors.<Integer>unicast().queue(Queues.<Integer>get(16).get()).build();
+				Processors.unicast(Queues.<Integer>get(16).get()).build();
 
 		up.asFlux()
 		  .publish(o -> zip((Object[] a) -> (Integer) a[0] + (Integer) a[1], o, o.skip(1)))
@@ -178,7 +178,7 @@ public class FluxPublishMulticastTest extends FluxOperatorTest<String, String> {
 	public void cancelComposes() {
 		AssertSubscriber<Integer> ts = AssertSubscriber.create();
 
-		BalancedFluxProcessor<Integer> sp = Processors.<Integer>emitter().build();
+		BalancedFluxProcessor<Integer> sp = Processors.emitter();
 
 		sp.asFlux()
 		  .publish(o -> Flux.<Integer>never())
@@ -195,7 +195,7 @@ public class FluxPublishMulticastTest extends FluxOperatorTest<String, String> {
 	public void cancelComposes2() {
 		AssertSubscriber<Integer> ts = AssertSubscriber.create();
 
-		BalancedFluxProcessor<Integer> sp = Processors.<Integer>emitter().build();
+		BalancedFluxProcessor<Integer> sp = Processors.emitter();
 
 		sp.asFlux()
 		  .publish(o -> Flux.<Integer>empty())

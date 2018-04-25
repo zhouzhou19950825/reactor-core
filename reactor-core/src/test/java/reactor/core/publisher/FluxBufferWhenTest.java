@@ -257,11 +257,11 @@ public class FluxBufferWhenTest {
 	@Test
 	public void bufferWillAcumulateMultipleListsOfValuesOverlap() {
 		//given: "a source and a collected flux"
-		BalancedFluxProcessor<Integer> numbers = Processors.emitter().build();
-		BalancedFluxProcessor<Integer> bucketOpening = Processors.emitter().build();
+		BalancedFluxProcessor<Integer> numbers = Processors.emitter();
+		BalancedFluxProcessor<Integer> bucketOpening = Processors.emitter();
 
 		//"overlapping buffers"
-		BalancedFluxProcessor<Integer> boundaryFlux = Processors.emitter().build();
+		BalancedFluxProcessor<Integer> boundaryFlux = Processors.emitter();
 
 		BalancedMonoProcessor<List<List<Integer>>> res = numbers
 				.asFlux()

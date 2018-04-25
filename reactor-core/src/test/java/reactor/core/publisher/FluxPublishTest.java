@@ -58,7 +58,7 @@ public class FluxPublishTest extends FluxOperatorTest<String, String> {
 
 	@Test
 	public void prematureOnComplete() {
-		BalancedFluxProcessor<Flux<String>> incomingProcessor = Processors.emitter().noAutoCancel().build();
+		BalancedFluxProcessor<Flux<String>> incomingProcessor = Processors.emitter(Queues.SMALL_BUFFER_SIZE).noAutoCancel().build();
 
 		Flux.just("ALPHA", "BRAVO", "CHARLIE", "DELTA", "ALPHA", "BRAVO", "CHARLIE", "DELTA", "ALPHA", "BRAVO", "CHARLIE", "DELTA")
 		    .log("stream.incoming")
@@ -206,7 +206,7 @@ public class FluxPublishTest extends FluxOperatorTest<String, String> {
 		AssertSubscriber<Integer> ts1 = AssertSubscriber.create();
 		AssertSubscriber<Integer> ts2 = AssertSubscriber.create();
 
-		BalancedFluxProcessor<Integer> up = Processors.<Integer>unicast().queue(Queues.<Integer>get(8).get()).build();
+		BalancedFluxProcessor<Integer> up = Processors.unicast(Queues.<Integer>get(8).get()).build();
 		up.onNext(1);
 		up.onNext(2);
 		up.onNext(3);
@@ -245,7 +245,7 @@ public class FluxPublishTest extends FluxOperatorTest<String, String> {
 		AssertSubscriber<Integer> ts1 = AssertSubscriber.create(0);
 		AssertSubscriber<Integer> ts2 = AssertSubscriber.create(0);
 
-		BalancedFluxProcessor<Integer> up = Processors.<Integer>unicast().queue(Queues.<Integer>get(8).get()).build();
+		BalancedFluxProcessor<Integer> up = Processors.unicast(Queues.<Integer>get(8).get()).build();
 		up.onNext(1);
 		up.onNext(2);
 		up.onNext(3);
@@ -393,7 +393,7 @@ public class FluxPublishTest extends FluxOperatorTest<String, String> {
 	public void disconnect() {
 		AssertSubscriber<Integer> ts = AssertSubscriber.create();
 
-		BalancedFluxProcessor<Integer> e = Processors.<Integer>emitter().build();
+		BalancedFluxProcessor<Integer> e = Processors.emitter();
 
 		ConnectableFlux<Integer> p = e.asFlux().publish();
 
@@ -417,7 +417,7 @@ public class FluxPublishTest extends FluxOperatorTest<String, String> {
 	public void disconnectBackpressured() {
 		AssertSubscriber<Integer> ts = AssertSubscriber.create(0);
 
-		BalancedFluxProcessor<Integer> e = Processors.<Integer>emitter().build();
+		BalancedFluxProcessor<Integer> e = Processors.emitter();
 
 		ConnectableFlux<Integer> p = e.asFlux().publish();
 
@@ -438,7 +438,7 @@ public class FluxPublishTest extends FluxOperatorTest<String, String> {
 	public void error() {
 		AssertSubscriber<Integer> ts = AssertSubscriber.create();
 
-		BalancedFluxProcessor<Integer> e = Processors.<Integer>emitter().build();
+		BalancedFluxProcessor<Integer> e = Processors.emitter();
 
 		ConnectableFlux<Integer> p = e.asFlux().publish();
 

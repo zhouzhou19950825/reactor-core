@@ -172,7 +172,7 @@ public class MonoTests {
 
 	@Test
 	public void testMono() throws Exception {
-		BalancedMonoProcessor<String> promise = Processors.<String>first().build();
+		BalancedMonoProcessor<String> promise = Processors.first();
 		promise.onNext("test");
 		final CountDownLatch successCountDownLatch = new CountDownLatch(1);
 		promise.asMono().subscribe(v -> successCountDownLatch.countDown());

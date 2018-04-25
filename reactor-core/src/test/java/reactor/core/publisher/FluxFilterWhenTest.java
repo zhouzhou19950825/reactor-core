@@ -253,7 +253,7 @@ public class FluxFilterWhenTest {
 
 	@Test
 	public void cancel() {
-		final BalancedFluxProcessor<Boolean> pp = Processors.emitter().build();
+		final BalancedFluxProcessor<Boolean> pp = Processors.emitter();
 
 		StepVerifier.create(Flux.range(1, 5)
 		                        .filterWhen(v -> pp, 16))
