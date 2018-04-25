@@ -89,6 +89,16 @@ public interface BalancedMonoProcessor<T> extends Processor<T, T>, CoreSubscribe
 	 */
 	boolean isSerialized();
 
+	/**
+	 * Returns the value that completed this {@link MonoProcessor}. Returns {@code null} if the {@link MonoProcessor} has not been completed. If the
+	 * {@link MonoProcessor} is completed with an error a RuntimeException that wraps the error is thrown.
+	 *
+	 * @return the value that completed the {@link MonoProcessor}, or {@code null} if it has not been completed
+	 *
+	 * @throws RuntimeException if the {@link MonoProcessor} was completed with an error
+	 */
+	@Nullable
+	T peek();
 
 	/**
 	 * Expose a {@link Mono} API on top of the {@link BalancedMonoProcessor}'s output,
