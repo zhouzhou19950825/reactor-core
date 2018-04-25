@@ -23,9 +23,10 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import org.junit.Assert;
 import org.junit.Test;
+import reactor.core.publisher.BalancedFluxProcessor;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.core.publisher.TopicProcessor;
+import reactor.core.publisher.Processors;
 
 /**
  * https://github.com/reactor/reactor/issues/500
@@ -78,12 +79,12 @@ public class FizzBuzzTests extends AbstractReactorTest {
 
 		//this line causes an java.lang.ArrayIndexOutOfBoundsException unless there is a break point in ZipAction
 		// .createSubscriber()
-		TopicProcessor<String> ring = TopicProcessor.<String>builder().name("test").bufferSize(1024).build();
+		BalancedFluxProcessor<String> ring = Processors.<String>fanOut().name("test").bufferSize(1024).build();
 
-//        EmitterProcessor<String> ring = EmitterProcessor.create();
+//        EmitterProcessor<String> ring = Processors.emitter().build();
 
 
-		Flux<String> stream2 = ring
+		Flux<String> stream2 = ring.asFlux()
 				.zipWith(Mono.fromCallable(System::currentTimeMillis).repeat(), (t1, t2) ->
 				String.format("%s : %s", t1, t2));
 

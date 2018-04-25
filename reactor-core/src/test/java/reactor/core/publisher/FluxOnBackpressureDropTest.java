@@ -89,13 +89,14 @@ public class FluxOnBackpressureDropTest {
 
 	@Test
 	public void someDrops() {
-		DirectProcessor<Integer> tp = DirectProcessor.create();
+		BalancedFluxProcessor<Integer> tp = Processors.direct();
 
 		AssertSubscriber<Integer> ts = AssertSubscriber.create(0);
 
 		List<Integer> drops = new ArrayList<>();
 
-		tp.onBackpressureDrop(drops::add)
+		tp.asFlux()
+		  .onBackpressureDrop(drops::add)
 		  .subscribe(ts);
 
 		tp.onNext(1);

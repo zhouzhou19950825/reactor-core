@@ -51,13 +51,13 @@ public class TopicProcessorTest {
 	public void createSmokeTest() {
 		//this build sequence has been reported as throwing an exception
 		// with JDK9 (see https://github.com/reactor/reactor-core/issues/881)
-		TopicProcessor.builder().share(true).build();
+		new TopicProcessor.Builder<>().share(true).build();
 	}
 
 
 	@Test
 	public void testShutdownSuccessfullAfterAllDataIsRequested() throws InterruptedException {
-		TopicProcessor<String> processor = TopicProcessor.<String>builder().name("processor").bufferSize(4).build();
+		TopicProcessor<String> processor = new TopicProcessor.Builder<String>().name("processor").bufferSize(4).build();
 		Publisher<String>
 				publisher = Flux.fromArray(new String[] { "1", "2", "3", "4", "5" });
 		publisher.subscribe(processor);
@@ -80,7 +80,7 @@ public class TopicProcessorTest {
 
 	@Test
 	public void testForceShutdownWhileWaitingForRequest() throws InterruptedException {
-		TopicProcessor<String> processor = TopicProcessor.<String>builder().name("processor").bufferSize(4).build();
+		TopicProcessor<String> processor = new TopicProcessor.Builder<String>().name("processor").bufferSize(4).build();
 		Publisher<String> publisher = Flux.fromArray(new String[] { "1", "2", "3", "4", "5" });
 		publisher.subscribe(processor);
 
@@ -98,7 +98,7 @@ public class TopicProcessorTest {
 
 	@Test
 	public void testForceShutdownWhileWaitingForInitialRequest() throws InterruptedException {
-		TopicProcessor<String> processor = TopicProcessor.<String>builder().name("processor").bufferSize(4).build();
+		TopicProcessor<String> processor = new TopicProcessor.Builder<String>().name("processor").bufferSize(4).build();
 		Publisher<String> publisher = new CappedPublisher(2);
 		publisher.subscribe(processor);
 
@@ -152,7 +152,7 @@ public class TopicProcessorTest {
 
 	@Test
 	public void testForceShutdownWhileWaitingForMoreData() throws InterruptedException {
-		TopicProcessor<String> processor = TopicProcessor.<String>builder().name("processor").bufferSize(4).build();
+		TopicProcessor<String> processor = new TopicProcessor.Builder<String>().name("processor").bufferSize(4).build();
 		Publisher<String> publisher = new CappedPublisher(2);
 		publisher.subscribe(processor);
 
@@ -170,7 +170,7 @@ public class TopicProcessorTest {
 
 	@Test
 	public void testForceShutdownAfterShutdown() throws InterruptedException {
-		TopicProcessor<String> processor = TopicProcessor.<String>builder().name("processor").bufferSize(4).build();
+		TopicProcessor<String> processor = new TopicProcessor.Builder<String>().name("processor").bufferSize(4).build();
 		Publisher<String> publisher = Flux.fromArray(new String[] { "1", "2", "3", "4", "5" });
 		publisher.subscribe(processor);
 
@@ -193,7 +193,7 @@ public class TopicProcessorTest {
 	@Test
 	public void testShutdown() {
 		for (int i = 0; i < 1000; i++) {
-			TopicProcessor<?> dispatcher = TopicProcessor.<String>builder().name("rb-test-dispose").bufferSize(16).build();
+			TopicProcessor<?> dispatcher = new TopicProcessor.Builder<String>().name("rb-test-dispose").bufferSize(16).build();
 			dispatcher.awaitAndShutdown();
 		}
 	}
@@ -202,7 +202,7 @@ public class TopicProcessorTest {
 
 	@Test
 	public void drainTest() throws Exception {
-		final TopicProcessor<Integer> sink = TopicProcessor.<Integer>builder().name("topic").build();
+		final TopicProcessor<Integer> sink = new TopicProcessor.Builder<Integer>().name("topic").build();
 		sink.onNext(1);
 		sink.onNext(2);
 		sink.onNext(3);
@@ -245,7 +245,7 @@ public class TopicProcessorTest {
 	public void chainedTopicProcessor() throws Exception{
 		ExecutorService es = Executors.newFixedThreadPool(2);
 		try {
-			TopicProcessor<String> bc = TopicProcessor.<String>builder().executor(es).bufferSize(16).build();
+			TopicProcessor<String> bc = new TopicProcessor.Builder<String>().executor(es).bufferSize(16).build();
 
 			int elems = 100;
 			CountDownLatch latch = new CountDownLatch(elems);
@@ -266,7 +266,7 @@ public class TopicProcessorTest {
 	public void testTopicProcessorGetters() {
 
 		final int TEST_BUFFER_SIZE = 16;
-		TopicProcessor<Object> processor = TopicProcessor.builder().name("testProcessor").bufferSize(TEST_BUFFER_SIZE).build();
+		TopicProcessor<Object> processor = new TopicProcessor.Builder<>().name("testProcessor").bufferSize(TEST_BUFFER_SIZE).build();
 
 		assertEquals(TEST_BUFFER_SIZE, processor.getAvailableCapacity());
 
@@ -276,23 +276,23 @@ public class TopicProcessorTest {
 
 	@Test(expected = IllegalArgumentException.class)
 	public void failNullBufferSize() {
-		TopicProcessor.builder().name("test").bufferSize(0);
+		new TopicProcessor.Builder<>().name("test").bufferSize(0);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void failNonPowerOfTwo() {
-		TopicProcessor.builder().name("test").bufferSize(3);
+		new TopicProcessor.Builder<>().name("test").bufferSize(3);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void failNegativeBufferSize() {
-		TopicProcessor.builder().name("test").bufferSize(-1);
+		new TopicProcessor.Builder<>().name("test").bufferSize(-1);
 	}
 
 	//see https://github.com/reactor/reactor-core/issues/445
 	@Test(timeout = 5_000)
 	public void testBufferSize1Shared() throws Exception {
-		TopicProcessor<String> broadcast = TopicProcessor.<String>builder()
+		TopicProcessor<String> broadcast = new TopicProcessor.Builder<String>()
 				.name("share-name")
 				.bufferSize(1)
 				.autoCancel(true)
@@ -321,7 +321,7 @@ public class TopicProcessorTest {
 	//see https://github.com/reactor/reactor-core/issues/445
 	@Test(timeout = 5_000)
 	public void testBufferSize1Created() throws Exception {
-		TopicProcessor<String> broadcast = TopicProcessor.<String>builder().name("share-name").bufferSize(1).autoCancel(true).build();
+		TopicProcessor<String> broadcast = new TopicProcessor.Builder<String>().name("share-name").bufferSize(1).autoCancel(true).build();
 
 		int simultaneousSubscribers = 3000;
 		CountDownLatch latch = new CountDownLatch(simultaneousSubscribers);
@@ -348,7 +348,7 @@ public class TopicProcessorTest {
 		String mainName = "topicProcessorRequestTask";
 		String expectedName = mainName + "[request-task]";
 
-		TopicProcessor<Object> processor = TopicProcessor.builder().name(mainName).bufferSize(8).build();
+		TopicProcessor<Object> processor = new TopicProcessor.Builder<>().name(mainName).bufferSize(8).build();
 
 		processor.requestTask(Operators.cancelledSubscription());
 
@@ -372,7 +372,7 @@ public class TopicProcessorTest {
 		String expectedName = "topicProcessorRequestTaskCreate";
 		//NOTE: the below single executor should not be used usually as requestTask assumes it immediately gets executed
 		ExecutorService customTaskExecutor = Executors.newSingleThreadExecutor(r -> new Thread(r, expectedName));
-		TopicProcessor<Object> processor = TopicProcessor.builder()
+		TopicProcessor<Object> processor = new TopicProcessor.Builder<>()
 				.executor(Executors.newCachedThreadPool())
 				.requestTaskExecutor(customTaskExecutor)
 				.bufferSize(8)
@@ -403,7 +403,7 @@ public class TopicProcessorTest {
 		//NOTE: the below single executor should not be used usually as requestTask assumes it immediately gets executed
 		ExecutorService customTaskExecutor = Executors.newSingleThreadExecutor(r -> new Thread(r, expectedName));
 
-		TopicProcessor<Object> processor = TopicProcessor.builder().share(true)
+		TopicProcessor<Object> processor = new TopicProcessor.Builder<>().share(true)
 				.executor(Executors.newCachedThreadPool())
 				.requestTaskExecutor(customTaskExecutor)
 				.bufferSize(8)
@@ -445,21 +445,21 @@ public class TopicProcessorTest {
 
 	@Test
 	public void createDefault() {
-		TopicProcessor<Integer> processor = TopicProcessor.create();
+		TopicProcessor<Integer> processor = new TopicProcessor.Builder<Integer>().build();
 		assertProcessor(processor, false, null, null, null, null, null, null);
 	}
 
 	@Test
 	public void createOverrideAutoCancel() {
 		boolean autoCancel = false;
-		TopicProcessor<Integer> processor = TopicProcessor.<Integer>builder().autoCancel(autoCancel).build();
+		TopicProcessor<Integer> processor = new TopicProcessor.Builder<Integer>().autoCancel(autoCancel).build();
 		assertProcessor(processor, false, null, null, null, autoCancel, null, null);
 	}
 
 	@Test
 	public void createOverrideName() {
 		String name = "nameOverride";
-		TopicProcessor<Integer> processor = TopicProcessor.<Integer>builder().name(name).build();
+		TopicProcessor<Integer> processor = new TopicProcessor.Builder<Integer>().name(name).build();
 		assertProcessor(processor, false, name, null, null, null, null, null);
 	}
 
@@ -467,7 +467,7 @@ public class TopicProcessorTest {
 	public void createOverrideNameBufferSize() {
 		String name = "nameOverride";
 		int bufferSize = 1024;
-		TopicProcessor<Integer> processor = TopicProcessor.<Integer>builder().name(name).bufferSize(bufferSize).build();
+		TopicProcessor<Integer> processor = new TopicProcessor.Builder<Integer>().name(name).bufferSize(bufferSize).build();
 		assertProcessor(processor, false, name, bufferSize, null, null, null, null);
 	}
 
@@ -476,7 +476,7 @@ public class TopicProcessorTest {
 		String name = "nameOverride";
 		int bufferSize = 1024;
 		boolean autoCancel = false;
-		TopicProcessor<Integer> processor = TopicProcessor.<Integer>builder()
+		TopicProcessor<Integer> processor = new TopicProcessor.Builder<Integer>()
 				.name(name)
 				.bufferSize(bufferSize)
 				.autoCancel(autoCancel)
@@ -489,7 +489,7 @@ public class TopicProcessorTest {
 		String name = "nameOverride";
 		int bufferSize = 1024;
 		WaitStrategy waitStrategy = WaitStrategy.busySpin();
-		TopicProcessor<Integer> processor = TopicProcessor.<Integer>builder()
+		TopicProcessor<Integer> processor = new TopicProcessor.Builder<Integer>()
 				.name(name)
 				.bufferSize(bufferSize)
 				.waitStrategy(waitStrategy)
@@ -503,7 +503,7 @@ public class TopicProcessorTest {
 		int bufferSize = 1024;
 		WaitStrategy waitStrategy = WaitStrategy.busySpin();
 		boolean autoCancel = false;
-		TopicProcessor<Integer> processor = TopicProcessor.<Integer>builder()
+		TopicProcessor<Integer> processor = new TopicProcessor.Builder<Integer>()
 				.name(name)
 				.bufferSize(bufferSize)
 				.waitStrategy(waitStrategy)
@@ -515,7 +515,7 @@ public class TopicProcessorTest {
 	@Test
 	public void createOverrideExecutor() {
 		ExecutorService executor = Executors.newSingleThreadExecutor();
-		TopicProcessor<Integer> processor = TopicProcessor.<Integer>builder()
+		TopicProcessor<Integer> processor = new TopicProcessor.Builder<Integer>()
 				.executor(executor)
 				.build();
 		assertProcessor(processor, false, null, null, null, null, executor, null);
@@ -525,7 +525,7 @@ public class TopicProcessorTest {
 	public void createOverrideExecutorAutoCancel() {
 		ExecutorService executor = Executors.newSingleThreadExecutor();
 		boolean autoCancel = false;
-		TopicProcessor<Integer> processor = TopicProcessor.<Integer>builder()
+		TopicProcessor<Integer> processor = new TopicProcessor.Builder<Integer>()
 				.executor(executor)
 				.autoCancel(autoCancel)
 				.build();
@@ -536,7 +536,7 @@ public class TopicProcessorTest {
 	public void createOverrideExecutorBufferSize() {
 		ExecutorService executor = Executors.newSingleThreadExecutor();
 		int bufferSize = 1024;
-		TopicProcessor<Integer> processor = TopicProcessor.<Integer>builder()
+		TopicProcessor<Integer> processor = new TopicProcessor.Builder<Integer>()
 				.executor(executor)
 				.bufferSize(bufferSize)
 				.build();
@@ -548,7 +548,7 @@ public class TopicProcessorTest {
 		ExecutorService executor = Executors.newSingleThreadExecutor();
 		int bufferSize = 1024;
 		boolean autoCancel = false;
-		TopicProcessor<Integer> processor = TopicProcessor.<Integer>builder()
+		TopicProcessor<Integer> processor = new TopicProcessor.Builder<Integer>()
 				.executor(executor)
 				.bufferSize(bufferSize)
 				.autoCancel(autoCancel)
@@ -561,7 +561,7 @@ public class TopicProcessorTest {
 		ExecutorService executor = Executors.newSingleThreadExecutor();
 		int bufferSize = 1024;
 		WaitStrategy waitStrategy = WaitStrategy.busySpin();
-		TopicProcessor<Integer> processor = TopicProcessor.<Integer>builder()
+		TopicProcessor<Integer> processor = new TopicProcessor.Builder<Integer>()
 				.executor(executor)
 				.bufferSize(bufferSize)
 				.waitStrategy(waitStrategy)
@@ -575,7 +575,7 @@ public class TopicProcessorTest {
 		int bufferSize = 1024;
 		WaitStrategy waitStrategy = WaitStrategy.busySpin();
 		boolean autoCancel = false;
-		TopicProcessor<Integer> processor = TopicProcessor.<Integer>builder()
+		TopicProcessor<Integer> processor = new TopicProcessor.Builder<Integer>()
 				.executor(executor)
 				.bufferSize(bufferSize)
 				.waitStrategy(waitStrategy)
@@ -591,7 +591,7 @@ public class TopicProcessorTest {
 		int bufferSize = 1024;
 		WaitStrategy waitStrategy = WaitStrategy.busySpin();
 		boolean autoCancel = false;
-		TopicProcessor<Integer> processor = TopicProcessor.<Integer>builder()
+		TopicProcessor<Integer> processor = new TopicProcessor.Builder<Integer>()
 				.executor(executor)
 				.requestTaskExecutor(requestTaskExecutor)
 				.bufferSize(bufferSize)
@@ -604,7 +604,7 @@ public class TopicProcessorTest {
 	@Test
 	public void shareOverrideAutoCancel() {
 		boolean autoCancel = false;
-		TopicProcessor<Integer> processor = TopicProcessor.<Integer>builder()
+		TopicProcessor<Integer> processor = new TopicProcessor.Builder<Integer>()
 				.share(true)
 				.autoCancel(autoCancel)
 				.build();
@@ -615,7 +615,7 @@ public class TopicProcessorTest {
 	public void shareOverrideNameBufferSize() {
 		String name = "nameOverride";
 		int bufferSize = 1024;
-		TopicProcessor<Integer> processor = TopicProcessor.<Integer>builder()
+		TopicProcessor<Integer> processor = new TopicProcessor.Builder<Integer>()
 				.share(true)
 				.name(name)
 				.bufferSize(bufferSize)
@@ -628,7 +628,7 @@ public class TopicProcessorTest {
 		String name = "nameOverride";
 		int bufferSize = 1024;
 		WaitStrategy waitStrategy = WaitStrategy.busySpin();
-		TopicProcessor<Integer> processor = TopicProcessor.<Integer>builder()
+		TopicProcessor<Integer> processor = new TopicProcessor.Builder<Integer>()
 				.share(true)
 				.name(name)
 				.bufferSize(bufferSize)
@@ -643,7 +643,7 @@ public class TopicProcessorTest {
 		int bufferSize = 1024;
 		WaitStrategy waitStrategy = WaitStrategy.busySpin();
 		boolean autoCancel = false;
-		TopicProcessor<Integer> processor = TopicProcessor.<Integer>builder()
+		TopicProcessor<Integer> processor = new TopicProcessor.Builder<Integer>()
 				.share(true)
 				.name(name)
 				.bufferSize(bufferSize)
@@ -656,7 +656,7 @@ public class TopicProcessorTest {
 	@Test
 	public void shareOverrideExecutor() {
 		ExecutorService executor = Executors.newSingleThreadExecutor();
-		TopicProcessor<Integer> processor = TopicProcessor.<Integer>builder()
+		TopicProcessor<Integer> processor = new TopicProcessor.Builder<Integer>()
 				.share(true)
 				.executor(executor)
 				.build();
@@ -667,7 +667,7 @@ public class TopicProcessorTest {
 	public void shareOverrideExecutorAutoCancel() {
 		ExecutorService executor = Executors.newSingleThreadExecutor();
 		boolean autoCancel = false;
-		TopicProcessor<Integer> processor = TopicProcessor.<Integer>builder()
+		TopicProcessor<Integer> processor = new TopicProcessor.Builder<Integer>()
 				.share(true)
 				.executor(executor)
 				.autoCancel(autoCancel)
@@ -679,7 +679,7 @@ public class TopicProcessorTest {
 	public void shareOverrideExecutorBufferSize() {
 		ExecutorService executor = Executors.newSingleThreadExecutor();
 		int bufferSize = 1024;
-		TopicProcessor<Integer> processor = TopicProcessor.<Integer>builder()
+		TopicProcessor<Integer> processor = new TopicProcessor.Builder<Integer>()
 				.share(true)
 				.executor(executor)
 				.bufferSize(bufferSize)
@@ -692,7 +692,7 @@ public class TopicProcessorTest {
 		ExecutorService executor = Executors.newSingleThreadExecutor();
 		int bufferSize = 1024;
 		boolean autoCancel = false;
-		TopicProcessor<Integer> processor = TopicProcessor.<Integer>builder()
+		TopicProcessor<Integer> processor = new TopicProcessor.Builder<Integer>()
 				.share(true)
 				.executor(executor)
 				.bufferSize(bufferSize)
@@ -706,7 +706,7 @@ public class TopicProcessorTest {
 		ExecutorService executor = Executors.newSingleThreadExecutor();
 		int bufferSize = 1024;
 		WaitStrategy waitStrategy = WaitStrategy.busySpin();
-		TopicProcessor<Integer> processor = TopicProcessor.<Integer>builder()
+		TopicProcessor<Integer> processor = new TopicProcessor.Builder<Integer>()
 				.share(true)
 				.executor(executor)
 				.bufferSize(bufferSize)
@@ -721,7 +721,7 @@ public class TopicProcessorTest {
 		int bufferSize = 1024;
 		WaitStrategy waitStrategy = WaitStrategy.busySpin();
 		boolean autoCancel = false;
-		TopicProcessor<Integer> processor = TopicProcessor.<Integer>builder()
+		TopicProcessor<Integer> processor = new TopicProcessor.Builder<Integer>()
 				.share(true)
 				.executor(executor)
 				.bufferSize(bufferSize)
@@ -738,7 +738,7 @@ public class TopicProcessorTest {
 		int bufferSize = 1024;
 		WaitStrategy waitStrategy = WaitStrategy.busySpin();
 		boolean autoCancel = false;
-		TopicProcessor<Integer> processor = TopicProcessor.<Integer>builder()
+		TopicProcessor<Integer> processor = new TopicProcessor.Builder<Integer>()
 				.share(true)
 				.executor(executor)
 				.requestTaskExecutor(requestTaskExecutor)
@@ -751,7 +751,7 @@ public class TopicProcessorTest {
 
 	@Test
 	public void scanProcessor() {
-		TopicProcessor<String> test = TopicProcessor.create("name", 16);
+		TopicProcessor<String> test = new TopicProcessor.Builder<String>().name("name").bufferSize(16).build();
 		Subscription subscription = Operators.emptySubscription();
 		test.onSubscribe(subscription);
 
@@ -767,7 +767,7 @@ public class TopicProcessorTest {
 
 	@Test
 	public void scanInner() {
-		TopicProcessor<String> main = TopicProcessor.create("name", 16);
+		TopicProcessor<String> main = new TopicProcessor.Builder<String>().name("name").bufferSize(16).build();
 		RingBuffer.Sequence sequence = RingBuffer.newSequence(123);
 		CoreSubscriber<String> activated = new LambdaSubscriber<>(null, e -> {}, null, null);
 
@@ -793,7 +793,7 @@ public class TopicProcessorTest {
 
 	@Test
 	public void scanInnerBufferedSmallHasIntRealValue() {
-		TopicProcessor<String> main = TopicProcessor.create("name", 16);
+		TopicProcessor<String> main = new TopicProcessor.Builder<String>().name("name").bufferSize(16).build();
 		RingBuffer.Sequence sequence = RingBuffer.newSequence(123);
 		CoreSubscriber<String> sub = new LambdaSubscriber<>(null, e -> {}, null, null);
 		TopicProcessor.TopicInner<String> test = new TopicProcessor.TopicInner<>(main, sequence, sub);
@@ -807,7 +807,7 @@ public class TopicProcessorTest {
 
 	@Test
 	public void scanInnerBufferedLargeHasIntMinValue() {
-		TopicProcessor<String> main = TopicProcessor.create("name", 16);
+		TopicProcessor<String> main = new TopicProcessor.Builder<String>().name("name").bufferSize(16).build();
 		RingBuffer.Sequence sequence = RingBuffer.newSequence(123);
 		CoreSubscriber<String> sub = new LambdaSubscriber<>(null, e -> {}, null, null);
 		TopicProcessor.TopicInner<String> test = new TopicProcessor.TopicInner<>(main, sequence, sub);
@@ -847,7 +847,7 @@ public class TopicProcessorTest {
 
 	@Test
 	public void serializedSinkSingleProducer() throws Exception {
-		TopicProcessor<Integer> processor = TopicProcessor.<Integer>builder()
+		TopicProcessor<Integer> processor = new TopicProcessor.Builder<Integer>()
 				.share(false)
 				.build();
 		FluxSink<Integer> sink = processor.sink();
@@ -860,7 +860,7 @@ public class TopicProcessorTest {
 
 	@Test
 	public void nonSerializedSinkMultiProducer() throws Exception {
-		TopicProcessor<Integer> processor = TopicProcessor.<Integer>builder()
+		TopicProcessor<Integer> processor = new TopicProcessor.Builder<Integer>()
 				.share(true)
 				.build();
 		FluxSink<Integer> sink = processor.sink();
@@ -870,7 +870,7 @@ public class TopicProcessorTest {
 
 	@Test
 	public void serializedSinkMultiProducerWithOnRequest() throws Exception {
-		TopicProcessor<Integer> processor = TopicProcessor.<Integer>builder()
+		TopicProcessor<Integer> processor = new TopicProcessor.Builder<Integer>()
 				.share(true)
 				.build();
 		FluxSink<Integer> sink = processor.sink();

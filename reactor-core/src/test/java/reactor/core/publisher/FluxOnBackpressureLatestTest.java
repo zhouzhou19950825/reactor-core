@@ -44,11 +44,12 @@ public class FluxOnBackpressureLatestTest {
 
 	@Test
 	public void backpressured() {
-		DirectProcessor<Integer> tp = DirectProcessor.create();
+		BalancedFluxProcessor<Integer> tp = Processors.direct();
 
 		AssertSubscriber<Integer> ts = AssertSubscriber.create(0);
 
-		tp.onBackpressureLatest().subscribe(ts);
+		tp.asFlux()
+		  .onBackpressureLatest().subscribe(ts);
 
 		tp.onNext(1);
 
@@ -83,11 +84,12 @@ public class FluxOnBackpressureLatestTest {
 
 	@Test
 	public void error() {
-		DirectProcessor<Integer> tp = DirectProcessor.create();
+		BalancedFluxProcessor<Integer> tp = Processors.direct();
 
 		AssertSubscriber<Integer> ts = AssertSubscriber.create(0);
 
-		tp.onBackpressureLatest().subscribe(ts);
+		tp.asFlux()
+		  .onBackpressureLatest().subscribe(ts);
 
 		tp.onError(new RuntimeException("forced failure"));
 
@@ -99,7 +101,7 @@ public class FluxOnBackpressureLatestTest {
 
 	@Test
 	public void backpressureWithDrop() {
-		DirectProcessor<Integer> tp = DirectProcessor.create();
+		BalancedFluxProcessor<Integer> tp = Processors.direct();
 
 		AssertSubscriber<Integer> ts = new AssertSubscriber<Integer>(0) {
 			@Override
@@ -111,7 +113,8 @@ public class FluxOnBackpressureLatestTest {
 			}
 		};
 
-		tp.onBackpressureLatest()
+		tp.asFlux()
+		  .onBackpressureLatest()
 		  .subscribe(ts);
 
 		tp.onNext(1);

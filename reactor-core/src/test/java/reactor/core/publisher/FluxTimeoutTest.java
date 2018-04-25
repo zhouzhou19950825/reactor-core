@@ -98,13 +98,14 @@ public class FluxTimeoutTest {
 
 	@Test
 	public void oldTimeoutHasNoEffect() {
-		DirectProcessor<Integer> source = DirectProcessor.create();
+		BalancedFluxProcessor<Integer> source = Processors.direct();
 
-		DirectProcessor<Integer> tp = DirectProcessor.create();
+		BalancedFluxProcessor<Integer> tp = Processors.direct();
 
 		AssertSubscriber<Integer> ts = AssertSubscriber.create();
 
-		source.timeout(tp, v -> Flux.never(), Flux.range(1, 10))
+		source.asFlux()
+		      .timeout(tp, v -> Flux.never(), Flux.range(1, 10))
 		      .subscribe(ts);
 
 		source.onNext(0);
@@ -122,13 +123,14 @@ public class FluxTimeoutTest {
 
 	@Test
 	public void oldTimeoutCompleteHasNoEffect() {
-		DirectProcessor<Integer> source = DirectProcessor.create();
+		BalancedFluxProcessor<Integer> source = Processors.direct();
 
-		DirectProcessor<Integer> tp = DirectProcessor.create();
+		BalancedFluxProcessor<Integer> tp = Processors.direct();
 
 		AssertSubscriber<Integer> ts = AssertSubscriber.create();
 
-		source.timeout(tp, v -> Flux.never(), Flux.range(1, 10))
+		source.asFlux()
+		      .timeout(tp, v -> Flux.never(), Flux.range(1, 10))
 		      .subscribe(ts);
 
 		source.onNext(0);
@@ -146,13 +148,14 @@ public class FluxTimeoutTest {
 
 	@Test
 	public void oldTimeoutErrorHasNoEffect() {
-		DirectProcessor<Integer> source = DirectProcessor.create();
+		BalancedFluxProcessor<Integer> source = Processors.direct();
 
-		DirectProcessor<Integer> tp = DirectProcessor.create();
+		BalancedFluxProcessor<Integer> tp = Processors.direct();
 
 		AssertSubscriber<Integer> ts = AssertSubscriber.create();
 
-		source.timeout(tp, v -> Flux.never(), Flux.range(1, 10))
+		source.asFlux()
+		      .timeout(tp, v -> Flux.never(), Flux.range(1, 10))
 		      .subscribe(ts);
 
 		source.onNext(0);
@@ -231,11 +234,12 @@ public class FluxTimeoutTest {
 	public void timeoutRequested() {
 		AssertSubscriber<Integer> ts = AssertSubscriber.create();
 
-		DirectProcessor<Integer> source = DirectProcessor.create();
+		BalancedFluxProcessor<Integer> source = Processors.direct();
 
-		DirectProcessor<Integer> tp = DirectProcessor.create();
+		BalancedFluxProcessor<Integer> tp = Processors.direct();
 
-		source.timeout(tp, v -> tp)
+		source.asFlux()
+		      .timeout(tp, v -> tp)
 		      .subscribe(ts);
 
 		tp.onNext(1);

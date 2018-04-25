@@ -33,11 +33,12 @@ public class FluxSampleFirstTest {
 	public void normal() {
 		AssertSubscriber<Integer> ts = AssertSubscriber.create();
 
-		DirectProcessor<Integer> sp1 = DirectProcessor.create();
-		DirectProcessor<Integer> sp2 = DirectProcessor.create();
-		DirectProcessor<Integer> sp3 = DirectProcessor.create();
+		BalancedFluxProcessor<Integer> sp1 = Processors.direct();
+		BalancedFluxProcessor<Integer> sp2 = Processors.direct();
+		BalancedFluxProcessor<Integer> sp3 = Processors.direct();
 
-		sp1.sampleFirst(v -> v == 1 ? sp2 : sp3)
+		sp1.asFlux()
+		   .sampleFirst(v -> v == 1 ? sp2 : sp3)
 		   .subscribe(ts);
 
 		sp1.onNext(1);
@@ -79,11 +80,12 @@ public class FluxSampleFirstTest {
 	public void mainError() {
 		AssertSubscriber<Integer> ts = AssertSubscriber.create();
 
-		DirectProcessor<Integer> sp1 = DirectProcessor.create();
-		DirectProcessor<Integer> sp2 = DirectProcessor.create();
-		DirectProcessor<Integer> sp3 = DirectProcessor.create();
+		BalancedFluxProcessor<Integer> sp1 = Processors.direct();
+		BalancedFluxProcessor<Integer> sp2 = Processors.direct();
+		BalancedFluxProcessor<Integer> sp3 = Processors.direct();
 
-		sp1.sampleFirst(v -> v == 1 ? sp2 : sp3)
+		sp1.asFlux()
+		   .sampleFirst(v -> v == 1 ? sp2 : sp3)
 		   .subscribe(ts);
 
 		sp1.onNext(1);
@@ -103,11 +105,12 @@ public class FluxSampleFirstTest {
 	public void throttlerError() {
 		AssertSubscriber<Integer> ts = AssertSubscriber.create();
 
-		DirectProcessor<Integer> sp1 = DirectProcessor.create();
-		DirectProcessor<Integer> sp2 = DirectProcessor.create();
-		DirectProcessor<Integer> sp3 = DirectProcessor.create();
+		BalancedFluxProcessor<Integer> sp1 = Processors.direct();
+		BalancedFluxProcessor<Integer> sp2 = Processors.direct();
+		BalancedFluxProcessor<Integer> sp3 = Processors.direct();
 
-		sp1.sampleFirst(v -> v == 1 ? sp2 : sp3)
+		sp1.asFlux()
+		   .sampleFirst(v -> v == 1 ? sp2 : sp3)
 		   .subscribe(ts);
 
 		sp1.onNext(1);
@@ -127,9 +130,10 @@ public class FluxSampleFirstTest {
 	public void throttlerThrows() {
 		AssertSubscriber<Integer> ts = AssertSubscriber.create();
 
-		DirectProcessor<Integer> sp1 = DirectProcessor.create();
+		BalancedFluxProcessor<Integer> sp1 = Processors.direct();
 
-		sp1.sampleFirst(v -> {
+		sp1.asFlux()
+		   .sampleFirst(v -> {
 			throw new RuntimeException("forced failure");
 		})
 		   .subscribe(ts);
@@ -148,9 +152,10 @@ public class FluxSampleFirstTest {
 	public void throttlerReturnsNull() {
 		AssertSubscriber<Integer> ts = AssertSubscriber.create();
 
-		DirectProcessor<Integer> sp1 = DirectProcessor.create();
+		BalancedFluxProcessor<Integer> sp1 = Processors.direct();
 
-		sp1.sampleFirst(v -> null)
+		sp1.asFlux()
+		   .sampleFirst(v -> null)
 		   .subscribe(ts);
 
 		sp1.onNext(1);

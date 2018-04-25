@@ -56,7 +56,7 @@ final class MonoProcessor<O> extends Mono<O>
 	Publisher<? extends O>   source;
 	Subscription             subscription;
 
-	volatile FluxProcessor<O, O> processor; //deliberately initially null, don't use NOOP_PROCESSOR
+	volatile BalancedFluxProcessor<O> processor; //deliberately initially null, don't use NOOP_PROCESSOR
 	volatile O               value;
 	volatile Throwable       error;
 	volatile int             state;
@@ -97,7 +97,6 @@ final class MonoProcessor<O> extends Mono<O>
 	@Override
 	public void dispose() {
 		cancel();
-
 	}
 
 	/**
@@ -455,7 +454,7 @@ final class MonoProcessor<O> extends Mono<O>
 			Subscription subscription = this.subscription;
 
 			if (subscription != null && state == STATE_CANCELLED) {
-				FluxProcessor<O,O> p = PROCESSOR.getAndSet(this, NOOP_PROCESSOR);
+				BalancedFluxProcessor<O> p = PROCESSOR.getAndSet(this, NOOP_PROCESSOR);
 				if (p != NOOP_PROCESSOR) {
 					this.subscription = null;
 					this.source = null;
@@ -483,8 +482,8 @@ final class MonoProcessor<O> extends Mono<O>
 	}
 
 	@SuppressWarnings("unchecked")
-	FluxProcessor<O, O> getOrStart(){
-		FluxProcessor<O, O> out = processor;
+	BalancedFluxProcessor<O> getOrStart(){
+		BalancedFluxProcessor<O> out = processor;
 		if (out == null) {
 			out = ReplayProcessor.cacheLastOrDefault(value);
 			if (PROCESSOR.compareAndSet(this, null, out)) {
@@ -503,7 +502,7 @@ final class MonoProcessor<O> extends Mono<O>
 	}
 
 	@SuppressWarnings({"rawtypes", "unchecked"})
-    final static class NoopProcessor extends FluxProcessor {
+    final static class NoopProcessor extends FluxProcessor implements BalancedFluxProcessor {
 
 		@Override
 		public void onComplete() {
@@ -529,6 +528,11 @@ final class MonoProcessor<O> extends Mono<O>
 		public void subscribe(CoreSubscriber actual) {
 
 		}
+
+		@Override
+		public Flux asFlux() {
+			return this;
+		}
 	}
 
 	final static NoopProcessor NOOP_PROCESSOR = new NoopProcessor();
@@ -542,8 +546,8 @@ final class MonoProcessor<O> extends Mono<O>
 	final static AtomicIntegerFieldUpdater<MonoProcessor>              CONNECTED       =
 			AtomicIntegerFieldUpdater.newUpdater(MonoProcessor.class, "connected");
 	@SuppressWarnings("rawtypes")
-	final static AtomicReferenceFieldUpdater<MonoProcessor, FluxProcessor> PROCESSOR =
-		    AtomicReferenceFieldUpdater.newUpdater(MonoProcessor.class, FluxProcessor.class,
+	final static AtomicReferenceFieldUpdater<MonoProcessor, BalancedFluxProcessor> PROCESSOR =
+		    AtomicReferenceFieldUpdater.newUpdater(MonoProcessor.class, BalancedFluxProcessor.class,
 				    "processor");
 	final static int       STATE_CANCELLED         = -1;
 	final static int       STATE_READY             = 0;

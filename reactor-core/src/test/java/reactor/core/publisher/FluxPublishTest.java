@@ -58,7 +58,7 @@ public class FluxPublishTest extends FluxOperatorTest<String, String> {
 
 	@Test
 	public void prematureOnComplete() {
-		EmitterProcessor<Flux<String>> incomingProcessor = EmitterProcessor.create(false);
+		BalancedFluxProcessor<Flux<String>> incomingProcessor = Processors.emitter().noAutoCancel().build();
 
 		Flux.just("ALPHA", "BRAVO", "CHARLIE", "DELTA", "ALPHA", "BRAVO", "CHARLIE", "DELTA", "ALPHA", "BRAVO", "CHARLIE", "DELTA")
 		    .log("stream.incoming")
@@ -70,6 +70,7 @@ public class FluxPublishTest extends FluxOperatorTest<String, String> {
 
 		System.out.println("ZERO");
 		incomingProcessor
+				.asFlux()
 				.next()
 				.flatMapMany(flux -> flux
 						.takeWhile(s -> !"CHARLIE".equals(s))
@@ -80,7 +81,9 @@ public class FluxPublishTest extends FluxOperatorTest<String, String> {
 				.verifyComplete();
 
 		System.out.println("ONE");
-		incomingProcessor.next()
+		incomingProcessor
+		                 .asFlux()
+		                 .next()
 		                 .flatMapMany(flux -> flux
 				                 .takeWhile(s -> !"CHARLIE".equals(s))
 				                 .log(String.format("stream.window.%d", windowIndex.getAndIncrement())))
@@ -90,7 +93,8 @@ public class FluxPublishTest extends FluxOperatorTest<String, String> {
 		                 .verifyComplete();
 
 		System.out.println("TWO");
-		incomingProcessor.next()
+		incomingProcessor.asFlux()
+		                 .next()
 		                 .flatMapMany(flux -> flux
 				                 .takeWhile(s -> !"CHARLIE".equals(s))
 				                 .log(String.format("stream.window.%d", windowIndex.getAndIncrement())))
@@ -202,7 +206,7 @@ public class FluxPublishTest extends FluxOperatorTest<String, String> {
 		AssertSubscriber<Integer> ts1 = AssertSubscriber.create();
 		AssertSubscriber<Integer> ts2 = AssertSubscriber.create();
 
-		UnicastProcessor<Integer> up = UnicastProcessor.create(Queues.<Integer>get(8).get());
+		BalancedFluxProcessor<Integer> up = Processors.<Integer>unicast().queue(Queues.<Integer>get(8).get()).build();
 		up.onNext(1);
 		up.onNext(2);
 		up.onNext(3);
@@ -210,7 +214,7 @@ public class FluxPublishTest extends FluxOperatorTest<String, String> {
 		up.onNext(5);
 		up.onComplete();
 
-		ConnectableFlux<Integer> p = up.publish();
+		ConnectableFlux<Integer> p = up.asFlux().publish();
 
 		p.subscribe(ts1);
 		p.subscribe(ts2);
@@ -241,7 +245,7 @@ public class FluxPublishTest extends FluxOperatorTest<String, String> {
 		AssertSubscriber<Integer> ts1 = AssertSubscriber.create(0);
 		AssertSubscriber<Integer> ts2 = AssertSubscriber.create(0);
 
-		UnicastProcessor<Integer> up = UnicastProcessor.create(Queues.<Integer>get(8).get());
+		BalancedFluxProcessor<Integer> up = Processors.<Integer>unicast().queue(Queues.<Integer>get(8).get()).build();
 		up.onNext(1);
 		up.onNext(2);
 		up.onNext(3);
@@ -249,7 +253,7 @@ public class FluxPublishTest extends FluxOperatorTest<String, String> {
 		up.onNext(5);
 		up.onComplete();
 
-		ConnectableFlux<Integer> p = up.publish();
+		ConnectableFlux<Integer> p = up.asFlux().publish();
 
 		p.subscribe(ts1);
 		p.subscribe(ts2);
@@ -389,9 +393,9 @@ public class FluxPublishTest extends FluxOperatorTest<String, String> {
 	public void disconnect() {
 		AssertSubscriber<Integer> ts = AssertSubscriber.create();
 
-		EmitterProcessor<Integer> e = EmitterProcessor.create();
+		BalancedFluxProcessor<Integer> e = Processors.<Integer>emitter().build();
 
-		ConnectableFlux<Integer> p = e.publish();
+		ConnectableFlux<Integer> p = e.asFlux().publish();
 
 		p.subscribe(ts);
 
@@ -413,9 +417,9 @@ public class FluxPublishTest extends FluxOperatorTest<String, String> {
 	public void disconnectBackpressured() {
 		AssertSubscriber<Integer> ts = AssertSubscriber.create(0);
 
-		EmitterProcessor<Integer> e = EmitterProcessor.create();
+		BalancedFluxProcessor<Integer> e = Processors.<Integer>emitter().build();
 
-		ConnectableFlux<Integer> p = e.publish();
+		ConnectableFlux<Integer> p = e.asFlux().publish();
 
 		p.subscribe(ts);
 
@@ -434,9 +438,9 @@ public class FluxPublishTest extends FluxOperatorTest<String, String> {
 	public void error() {
 		AssertSubscriber<Integer> ts = AssertSubscriber.create();
 
-		EmitterProcessor<Integer> e = EmitterProcessor.create();
+		BalancedFluxProcessor<Integer> e = Processors.<Integer>emitter().build();
 
-		ConnectableFlux<Integer> p = e.publish();
+		ConnectableFlux<Integer> p = e.asFlux().publish();
 
 		p.subscribe(ts);
 
@@ -470,9 +474,10 @@ public class FluxPublishTest extends FluxOperatorTest<String, String> {
 
 	@Test
 	public void retry() {
-		DirectProcessor<Integer> dp = DirectProcessor.create();
+		BalancedFluxProcessor<Integer> dp = Processors.direct();
 		StepVerifier.create(
-				dp.publish()
+				dp.asFlux()
+				  .publish()
 				  .autoConnect().<Integer>handle((s1, sink) -> {
 					if (s1 == 1) {
 						sink.error(new RuntimeException());
@@ -496,9 +501,10 @@ public class FluxPublishTest extends FluxOperatorTest<String, String> {
 
 	@Test
 	public void retryWithPublishOn() {
-		DirectProcessor<Integer> dp = DirectProcessor.create();
+		BalancedFluxProcessor<Integer> dp = Processors.direct();
 		StepVerifier.create(
-				dp.publishOn(Schedulers.parallel()).publish()
+				dp.asFlux()
+				  .publishOn(Schedulers.parallel()).publish()
 				  .autoConnect().<Integer>handle((s1, sink) -> {
 					if (s1 == 1) {
 						sink.error(new RuntimeException());

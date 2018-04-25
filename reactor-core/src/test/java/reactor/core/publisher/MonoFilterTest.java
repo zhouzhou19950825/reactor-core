@@ -16,6 +16,8 @@
 
 package reactor.core.publisher;
 
+import java.util.Queue;
+
 import org.junit.Test;
 import org.testng.Assert;
 import reactor.core.Exceptions;
@@ -126,9 +128,10 @@ public class MonoFilterTest {
 	public void asyncFusion() {
 		AssertSubscriber<Object> ts = AssertSubscriber.create();
 
-		MonoProcessor<Integer> up = MonoProcessor.create();
+		BalancedMonoProcessor<Integer> up = Processors.<Integer>first().build();
 
-		up.filter(v -> (v & 1) == 0)
+		up.asMono()
+		  .filter(v -> (v & 1) == 0)
 		  .subscribe(ts);
 		up.onNext(2);
 		up.onComplete();
@@ -142,11 +145,11 @@ public class MonoFilterTest {
 	public void asyncFusionBackpressured() {
 		AssertSubscriber<Object> ts = AssertSubscriber.create(1);
 
-		MonoProcessor<Integer> up = MonoProcessor.create();
+		BalancedMonoProcessor<Integer> up = Processors.<Integer>first().build();
 
 		Mono.just(1)
 		    .hide()
-		    .flatMap(w -> up.filter(v -> (v & 1) == 0))
+		    .flatMap(w -> up.asMono().filter(v -> (v & 1) == 0))
 		    .subscribe(ts);
 
 		up.onNext(2);
@@ -169,11 +172,12 @@ public class MonoFilterTest {
 
 	@Test
 	public void filterMono() {
-		MonoProcessor<Integer> mp = MonoProcessor.create();
+		BalancedMonoProcessor<Integer> mp = Processors.<Integer>first().build();
+		Queue mpAsQueue = (Queue) mp;
 		StepVerifier.create(Mono.just(2).filter(s -> s % 2 == 0).subscribeWith(mp))
 		            .then(() -> assertThat(mp.isError()).isFalse())
 		            .then(() -> assertThat(mp.isSuccess()).isTrue())
-		            .then(() -> assertThat(mp.peek()).isEqualTo(2))
+		            .then(() -> assertThat(mpAsQueue.peek()).isEqualTo(2))
 		            .then(() -> assertThat(mp.isTerminated()).isTrue())
 		            .expectNext(2)
 		            .verifyComplete();
@@ -182,11 +186,12 @@ public class MonoFilterTest {
 
 	@Test
 	public void filterMonoNot() {
-		MonoProcessor<Integer> mp = MonoProcessor.create();
+		BalancedMonoProcessor<Integer> mp = Processors.<Integer>first().build();
+		Queue mpAsQueue = (Queue) mp;
 		StepVerifier.create(Mono.just(1).filter(s -> s % 2 == 0).subscribeWith(mp))
 		            .then(() -> assertThat(mp.isError()).isFalse())
 		            .then(() -> assertThat(mp.isSuccess()).isTrue())
-		            .then(() -> assertThat(mp.peek()).isNull())
+		            .then(() -> assertThat(mpAsQueue.peek()).isNull())
 		            .then(() -> assertThat(mp.isTerminated()).isTrue())
 		            .verifyComplete();
 	}

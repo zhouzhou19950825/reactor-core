@@ -155,11 +155,12 @@ public class FluxOnErrorResumeTest {
 
 	@Test
 	public void someFirst() {
-		EmitterProcessor<Integer> tp = EmitterProcessor.create();
+		BalancedFluxProcessor<Integer> tp = Processors.<Integer>emitter().build();
 
 		AssertSubscriber<Integer> ts = AssertSubscriber.create();
 
-		tp.onErrorResume(v -> Flux.range(11, 10))
+		tp.asFlux()
+		  .onErrorResume(v -> Flux.range(11, 10))
 		  .subscribe(ts);
 
 		tp.onNext(1);
@@ -176,11 +177,12 @@ public class FluxOnErrorResumeTest {
 
 	@Test
 	public void someFirstBackpressured() {
-		EmitterProcessor<Integer> tp = EmitterProcessor.create();
+		BalancedFluxProcessor<Integer> tp = Processors.<Integer>emitter().build();
 
 		AssertSubscriber<Integer> ts = AssertSubscriber.create(10);
 
-		tp.onErrorResume(v -> Flux.range(11, 10))
+		tp.asFlux()
+		  .onErrorResume(v -> Flux.range(11, 10))
 		  .subscribe(ts);
 
 		tp.onNext(1);

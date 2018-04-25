@@ -44,9 +44,10 @@ import reactor.core.Disposable;
 import reactor.core.Disposables;
 import reactor.core.Exceptions;
 import reactor.core.Scannable;
-import reactor.core.publisher.DirectProcessor;
+import reactor.core.publisher.BalancedFluxProcessor;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.publisher.Processors;
 import reactor.test.StepVerifier;
 
 import static org.assertj.core.api.Assertions.*;
@@ -438,12 +439,13 @@ public class SchedulersTest {
 
 	public void assertRejectingScheduler(Scheduler scheduler) {
 		try {
-			DirectProcessor<String> p = DirectProcessor.create();
+			BalancedFluxProcessor<String> p = Processors.direct();
 
 			AtomicReference<String> r = new AtomicReference<>();
 			CountDownLatch l = new CountDownLatch(1);
 
-			p.publishOn(scheduler)
+			p.asFlux()
+			 .publishOn(scheduler)
 			 .log()
 			 .subscribe(r::set, null, l::countDown);
 

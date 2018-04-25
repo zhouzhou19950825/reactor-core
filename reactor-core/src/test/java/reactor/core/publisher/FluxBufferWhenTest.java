@@ -156,12 +156,13 @@ public class FluxBufferWhenTest {
 	public void normal() {
 		AssertSubscriber<List<Integer>> ts = AssertSubscriber.create();
 
-		DirectProcessor<Integer> sp1 = DirectProcessor.create();
-		DirectProcessor<Integer> sp2 = DirectProcessor.create();
-		DirectProcessor<Integer> sp3 = DirectProcessor.create();
-		DirectProcessor<Integer> sp4 = DirectProcessor.create();
+		BalancedFluxProcessor<Integer> sp1 = Processors.direct();
+		BalancedFluxProcessor<Integer> sp2 = Processors.direct();
+		BalancedFluxProcessor<Integer> sp3 = Processors.direct();
+		BalancedFluxProcessor<Integer> sp4 = Processors.direct();
 
-		sp1.bufferWhen(sp2, v -> v == 1 ? sp3 : sp4)
+		sp1.asFlux()
+		   .bufferWhen(sp2, v -> v == 1 ? sp3 : sp4)
 		   .subscribe(ts);
 
 		ts.assertNoValues()
@@ -213,12 +214,13 @@ public class FluxBufferWhenTest {
 	public void startCompletes() {
 		AssertSubscriber<List<Integer>> ts = AssertSubscriber.create();
 
-		DirectProcessor<Integer> source = DirectProcessor.create();
-		DirectProcessor<Integer> open = DirectProcessor.create();
-		DirectProcessor<Integer> close = DirectProcessor.create();
+		BalancedFluxProcessor<Integer> source = Processors.direct();
+		BalancedFluxProcessor<Integer> open = Processors.direct();
+		BalancedFluxProcessor<Integer> close = Processors.direct();
 
-		source.bufferWhen(open, v -> close)
-		   .subscribe(ts);
+		source.asFlux()
+		      .bufferWhen(open, v -> close)
+		      .subscribe(ts);
 
 		ts.assertNoValues()
 		  .assertNoError()
@@ -255,17 +257,19 @@ public class FluxBufferWhenTest {
 	@Test
 	public void bufferWillAcumulateMultipleListsOfValuesOverlap() {
 		//given: "a source and a collected flux"
-		EmitterProcessor<Integer> numbers = EmitterProcessor.create();
-		EmitterProcessor<Integer> bucketOpening = EmitterProcessor.create();
+		BalancedFluxProcessor<Integer> numbers = Processors.emitter().build();
+		BalancedFluxProcessor<Integer> bucketOpening = Processors.emitter().build();
 
 		//"overlapping buffers"
-		EmitterProcessor<Integer> boundaryFlux = EmitterProcessor.create();
+		BalancedFluxProcessor<Integer> boundaryFlux = Processors.emitter().build();
 
-		MonoProcessor<List<List<Integer>>> res = numbers.bufferWhen(bucketOpening, u -> boundaryFlux )
-		                                       .buffer()
-		                                       .publishNext()
-		                                       .toProcessor();
-		res.subscribe();
+		BalancedMonoProcessor<List<List<Integer>>> res = numbers
+				.asFlux()
+				.bufferWhen(bucketOpening, u -> boundaryFlux )
+				.buffer()
+				.publishNext()
+				.toProcessor();
+		res.asMono().subscribe();
 
 		numbers.onNext(1);
 		numbers.onNext(2);
@@ -279,7 +283,7 @@ public class FluxBufferWhenTest {
 		numbers.onComplete();
 
 		//"the collected overlapping lists are available"
-		assertThat(res.block()).containsExactly(Arrays.asList(3, 5),
+		assertThat(res.asMono().block()).containsExactly(Arrays.asList(3, 5),
 				Collections.singletonList(5), Collections.emptyList());
 	}
 

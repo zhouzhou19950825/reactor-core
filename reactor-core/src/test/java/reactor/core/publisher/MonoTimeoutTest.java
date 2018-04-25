@@ -68,11 +68,12 @@ public class MonoTimeoutTest {
 	public void timeoutRequested() {
 		AssertSubscriber<Integer> ts = AssertSubscriber.create();
 
-		MonoProcessor<Integer> source = MonoProcessor.create();
+		BalancedMonoProcessor<Integer> source = Processors.<Integer>first().build();
 
-		DirectProcessor<Integer> tp = DirectProcessor.create();
+		BalancedFluxProcessor<Integer> tp = Processors.direct();
 
-		source.timeout(tp)
+		source.asMono()
+		      .timeout(tp)
 		      .subscribe(ts);
 
 		tp.onNext(1);

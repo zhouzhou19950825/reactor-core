@@ -16,14 +16,14 @@
 
 package reactor.core.publisher;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.Assert;
 import org.junit.Test;
 import reactor.test.StepVerifier;
 import reactor.test.subscriber.AssertSubscriber;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class MonoPublishMulticastTest {
 
@@ -62,9 +62,10 @@ public class MonoPublishMulticastTest {
 	public void cancelComposes() {
 		AssertSubscriber<Integer> ts = AssertSubscriber.create();
 
-		MonoProcessor<Integer> sp = MonoProcessor.create();
+		BalancedMonoProcessor<Integer> sp = Processors.<Integer>first().build();
 
-		sp.publish(o -> Mono.<Integer>never())
+		sp.asMono()
+		  .publish(o -> Mono.<Integer>never())
 		  .subscribe(ts);
 
 		Assert.assertTrue("Not subscribed?", sp.downstreamCount() != 0);
@@ -78,9 +79,10 @@ public class MonoPublishMulticastTest {
 	public void cancelComposes2() {
 		AssertSubscriber<Integer> ts = AssertSubscriber.create();
 
-		MonoProcessor<Integer> sp = MonoProcessor.create();
+		BalancedMonoProcessor<Integer> sp = Processors.<Integer>first().build();
 
-		sp.publish(o -> Mono.<Integer>empty())
+		sp.asMono()
+		  .publish(o -> Mono.<Integer>empty())
 		  .subscribe(ts);
 
 		Assert.assertFalse("Still subscribed?", sp.isCancelled());

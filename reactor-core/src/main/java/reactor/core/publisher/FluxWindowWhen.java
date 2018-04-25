@@ -264,7 +264,7 @@ final class FluxWindowWhen<T, U, V> extends FluxOperator<T, Flux<T>> {
 						}
 
 
-						w = UnicastProcessor.create(processorQueueSupplier.get());
+						w = new UnicastProcessor<>(processorQueueSupplier.get());
 
 						long r = requested();
 						if (r != 0L) {

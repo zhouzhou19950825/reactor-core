@@ -71,10 +71,7 @@ final class TopicProcessor<E> extends EventLoopProcessor<E>  {
 
 	/**
 	 * {@link TopicProcessor} builder that can be used to create new
-	 * processors. Instantiate it through the {@link TopicProcessor#builder()} static
-	 * method:
-	 * <p>
-	 * {@code TopicProcessor<String> processor = TopicProcessor.<String>builder().build()}
+	 * processors.
 	 *
 	 * @param <T> Type of dispatched signal
 	 */

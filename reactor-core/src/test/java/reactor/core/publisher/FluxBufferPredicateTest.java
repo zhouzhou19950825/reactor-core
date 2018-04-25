@@ -42,9 +42,9 @@ public class FluxBufferPredicateTest {
 	@Test
 	@SuppressWarnings("unchecked")
 	public void normalUntil() {
-		DirectProcessor<Integer> sp1 = DirectProcessor.create();
+		BalancedFluxProcessor<Integer> sp1 = Processors.direct();
 		FluxBufferPredicate<Integer, List<Integer>> bufferUntil = new FluxBufferPredicate<>(
-				sp1, i -> i % 3 == 0, Flux.listSupplier(), FluxBufferPredicate.Mode.UNTIL);
+				sp1.asFlux(), i -> i % 3 == 0, Flux.listSupplier(), FluxBufferPredicate.Mode.UNTIL);
 
 		StepVerifier.create(bufferUntil)
 				.expectSubscription()
@@ -106,9 +106,9 @@ public class FluxBufferPredicateTest {
 	@Test
 	@SuppressWarnings("unchecked")
 	public void mainErrorUntil() {
-		DirectProcessor<Integer> sp1 = DirectProcessor.create();
+		BalancedFluxProcessor<Integer> sp1 = Processors.direct();
 		FluxBufferPredicate<Integer, List<Integer>> bufferUntil = new FluxBufferPredicate<>(
-				sp1, i -> i % 3 == 0, Flux.listSupplier(), FluxBufferPredicate.Mode.UNTIL);
+				sp1.asFlux(), i -> i % 3 == 0, Flux.listSupplier(), FluxBufferPredicate.Mode.UNTIL);
 
 		StepVerifier.create(bufferUntil)
 		            .expectSubscription()
@@ -126,9 +126,9 @@ public class FluxBufferPredicateTest {
 	@Test
 	@SuppressWarnings("unchecked")
 	public void predicateErrorUntil() {
-		DirectProcessor<Integer> sp1 = DirectProcessor.create();
+		BalancedFluxProcessor<Integer> sp1 = Processors.direct();
 		FluxBufferPredicate<Integer, List<Integer>> bufferUntil = new FluxBufferPredicate<>(
-				sp1,
+				sp1.asFlux(),
 				i -> {
 					if (i == 5) throw new IllegalStateException("predicate failure");
 					return i % 3 == 0;
@@ -149,9 +149,9 @@ public class FluxBufferPredicateTest {
 	@Test
 	@SuppressWarnings("unchecked")
 	public void normalUntilOther() {
-		DirectProcessor<Integer> sp1 = DirectProcessor.create();
+		BalancedFluxProcessor<Integer> sp1 = Processors.direct();
 		FluxBufferPredicate<Integer, List<Integer>> bufferUntilOther = new FluxBufferPredicate<>(
-				sp1, i -> i % 3 == 0, Flux.listSupplier(), FluxBufferPredicate.Mode.UNTIL_CUT_BEFORE);
+				sp1.asFlux(), i -> i % 3 == 0, Flux.listSupplier(), FluxBufferPredicate.Mode.UNTIL_CUT_BEFORE);
 
 		StepVerifier.create(bufferUntilOther)
 				.expectSubscription()
@@ -180,9 +180,9 @@ public class FluxBufferPredicateTest {
 	@Test
 	@SuppressWarnings("unchecked")
 	public void mainErrorUntilOther() {
-		DirectProcessor<Integer> sp1 = DirectProcessor.create();
+		BalancedFluxProcessor<Integer> sp1 = Processors.direct();
 		FluxBufferPredicate<Integer, List<Integer>> bufferUntilOther =
-				new FluxBufferPredicate<>(sp1, i -> i % 3 == 0, Flux.listSupplier(),
+				new FluxBufferPredicate<>(sp1.asFlux(), i -> i % 3 == 0, Flux.listSupplier(),
 						FluxBufferPredicate.Mode.UNTIL_CUT_BEFORE);
 
 		StepVerifier.create(bufferUntilOther)
@@ -201,9 +201,9 @@ public class FluxBufferPredicateTest {
 	@Test
 	@SuppressWarnings("unchecked")
 	public void predicateErrorUntilOther() {
-		DirectProcessor<Integer> sp1 = DirectProcessor.create();
+		BalancedFluxProcessor<Integer> sp1 = Processors.direct();
 		FluxBufferPredicate<Integer, List<Integer>> bufferUntilOther =
-				new FluxBufferPredicate<>(sp1,
+				new FluxBufferPredicate<>(sp1.asFlux(),
 				i -> {
 					if (i == 5) throw new IllegalStateException("predicate failure");
 					return i % 3 == 0;
@@ -225,9 +225,9 @@ public class FluxBufferPredicateTest {
 	@Test
 	@SuppressWarnings("unchecked")
 	public void normalWhile() {
-		DirectProcessor<Integer> sp1 = DirectProcessor.create();
+		BalancedFluxProcessor<Integer> sp1 = Processors.direct();
 		FluxBufferPredicate<Integer, List<Integer>> bufferWhile = new FluxBufferPredicate<>(
-				sp1, i -> i % 3 != 0, Flux.listSupplier(),
+				sp1.asFlux(), i -> i % 3 != 0, Flux.listSupplier(),
 				FluxBufferPredicate.Mode.WHILE);
 
 		StepVerifier.create(bufferWhile)
@@ -257,9 +257,9 @@ public class FluxBufferPredicateTest {
 	@Test
 	@SuppressWarnings("unchecked")
 	public void normalWhileDoesntInitiallyMatch() {
-		DirectProcessor<Integer> sp1 = DirectProcessor.create();
+		BalancedFluxProcessor<Integer> sp1 = Processors.direct();
 		FluxBufferPredicate<Integer, List<Integer>> bufferWhile = new FluxBufferPredicate<>(
-				sp1, i -> i % 3 == 0, Flux.listSupplier(), FluxBufferPredicate.Mode.WHILE);
+				sp1.asFlux(), i -> i % 3 == 0, Flux.listSupplier(), FluxBufferPredicate.Mode.WHILE);
 
 		StepVerifier.create(bufferWhile)
 				.expectSubscription()
@@ -288,9 +288,9 @@ public class FluxBufferPredicateTest {
 	@Test
 	@SuppressWarnings("unchecked")
 	public void normalWhileDoesntMatch() {
-		DirectProcessor<Integer> sp1 = DirectProcessor.create();
+		BalancedFluxProcessor<Integer> sp1 = Processors.direct();
 		FluxBufferPredicate<Integer, List<Integer>> bufferWhile = new FluxBufferPredicate<>(
-				sp1, i -> i > 4, Flux.listSupplier(), FluxBufferPredicate.Mode.WHILE);
+				sp1.asFlux(), i -> i > 4, Flux.listSupplier(), FluxBufferPredicate.Mode.WHILE);
 
 		StepVerifier.create(bufferWhile)
 		            .expectSubscription()
@@ -314,9 +314,9 @@ public class FluxBufferPredicateTest {
 	@Test
 	@SuppressWarnings("unchecked")
 	public void mainErrorWhile() {
-		DirectProcessor<Integer> sp1 = DirectProcessor.create();
+		BalancedFluxProcessor<Integer> sp1 = Processors.direct();
 		FluxBufferPredicate<Integer, List<Integer>> bufferWhile = new FluxBufferPredicate<>(
-				sp1, i -> i % 3 == 0, Flux.listSupplier(), FluxBufferPredicate.Mode.WHILE);
+				sp1.asFlux(), i -> i % 3 == 0, Flux.listSupplier(), FluxBufferPredicate.Mode.WHILE);
 
 		StepVerifier.create(bufferWhile)
 		            .expectSubscription()
@@ -334,9 +334,9 @@ public class FluxBufferPredicateTest {
 	@Test
 	@SuppressWarnings("unchecked")
 	public void predicateErrorWhile() {
-		DirectProcessor<Integer> sp1 = DirectProcessor.create();
+		BalancedFluxProcessor<Integer> sp1 = Processors.direct();
 		FluxBufferPredicate<Integer, List<Integer>> bufferWhile = new FluxBufferPredicate<>(
-				sp1,
+				sp1.asFlux(),
 				i -> {
 					if (i == 3) return true;
 					if (i == 5) throw new IllegalStateException("predicate failure");
@@ -359,9 +359,9 @@ public class FluxBufferPredicateTest {
 	@Test
 	@SuppressWarnings("unchecked")
 	public void bufferSupplierThrows() {
-		DirectProcessor<Integer> sp1 = DirectProcessor.create();
+		BalancedFluxProcessor<Integer> sp1 = Processors.direct();
 		FluxBufferPredicate<Integer, List<Integer>> bufferUntil = new FluxBufferPredicate<>(
-				sp1, i -> i % 3 == 0,
+				sp1.asFlux(), i -> i % 3 == 0,
 				() -> { throw new RuntimeException("supplier failure"); },
 				FluxBufferPredicate.Mode.UNTIL);
 
@@ -374,10 +374,10 @@ public class FluxBufferPredicateTest {
 
 	@Test
 	public void bufferSupplierThrowsLater() {
-		DirectProcessor<Integer> sp1 = DirectProcessor.create();
+		BalancedFluxProcessor<Integer> sp1 = Processors.direct();
 		int count[] = {1};
 		FluxBufferPredicate<Integer, List<Integer>> bufferUntil = new FluxBufferPredicate<>(
-				sp1, i -> i % 3 == 0,
+				sp1.asFlux(), i -> i % 3 == 0,
 				() -> {
 					if (count[0]-- > 0) {
 						return new ArrayList<>();
@@ -399,9 +399,9 @@ public class FluxBufferPredicateTest {
 
 	@Test
 	public void bufferSupplierReturnsNull() {
-		DirectProcessor<Integer> sp1 = DirectProcessor.create();
+		BalancedFluxProcessor<Integer> sp1 = Processors.direct();
 		FluxBufferPredicate<Integer, List<Integer>> bufferUntil = new FluxBufferPredicate<>(
-				sp1, i -> i % 3 == 0,
+				sp1.asFlux(), i -> i % 3 == 0,
 				() -> null,
 				FluxBufferPredicate.Mode.UNTIL);
 
@@ -418,7 +418,7 @@ public class FluxBufferPredicateTest {
 	@SuppressWarnings("unchecked")
 	public void multipleTriggersOfEmptyBufferKeepInitialBuffer() {
 		//this is best demonstrated with bufferWhile:
-		DirectProcessor<Integer> sp1 = DirectProcessor.create();
+		BalancedFluxProcessor<Integer> sp1 = Processors.direct();
 		LongAdder bufferCount = new LongAdder();
 		Supplier<List<Integer>> bufferSupplier = () -> {
 			bufferCount.increment();
@@ -427,7 +427,7 @@ public class FluxBufferPredicateTest {
 
 		FluxBufferPredicate<Integer, List<Integer>> bufferWhile = new
 				FluxBufferPredicate<>(
-				sp1, i -> i >= 10,
+				sp1.asFlux(), i -> i >= 10,
 				bufferSupplier,
 				FluxBufferPredicate.Mode.WHILE);
 

@@ -53,11 +53,11 @@ public class MonoNextTest {
 	public void cancel() {
 		TestPublisher<String> cancelTester = TestPublisher.create();
 
-		MonoProcessor<String> processor = cancelTester.flux()
-		                                              .next()
-		                                              .toProcessor();
-		processor.subscribe();
-		processor.cancel();
+		BalancedMonoProcessor<String> processor = cancelTester.flux()
+		                                                      .next()
+		                                                      .toProcessor();
+		processor.asMono().subscribe();
+		processor.dispose();
 
 		cancelTester.assertCancelled();
 	}

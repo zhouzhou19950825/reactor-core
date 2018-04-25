@@ -115,11 +115,12 @@ public class FluxProcessorTest {
 
 	@Test
 	public void testSubmitSession() throws Exception {
-		FluxProcessor<Integer, Integer> processor = EmitterProcessor.create();
+		BalancedFluxProcessor<Integer> processor = Processors.emitter().build();
 		AtomicInteger count = new AtomicInteger();
 		CountDownLatch latch = new CountDownLatch(1);
 		Scheduler scheduler = Schedulers.parallel();
-		processor.publishOn(scheduler)
+		processor.asFlux()
+		         .publishOn(scheduler)
 		         .delaySubscription(Duration.ofMillis(1000))
 		         .limitRate(1)
 		         .subscribe(d -> {
@@ -139,14 +140,15 @@ public class FluxProcessorTest {
 
 	@Test
 	public void testEmitter() throws Throwable {
-		FluxProcessor<Integer, Integer> processor = EmitterProcessor.create();
+		BalancedFluxProcessor<Integer> processor = Processors.emitter().build();
 
 		int n = 100_000;
 		int subs = 4;
 		final CountDownLatch latch = new CountDownLatch((n + 1) * subs);
 		Scheduler c = Schedulers.single();
 		for (int i = 0; i < subs; i++) {
-			processor.publishOn(c)
+			processor.asFlux()
+			         .publishOn(c)
 			         .limitRate(1)
 			         .subscribe(d -> latch.countDown(), null, latch::countDown);
 		}
@@ -166,14 +168,15 @@ public class FluxProcessorTest {
 	}
 	@Test
 	public void testEmitter2() throws Throwable {
-		FluxProcessor<Integer, Integer> processor = EmitterProcessor.create();
+		BalancedFluxProcessor<Integer> processor = Processors.emitter().build();
 
 		int n = 100_000;
 		int subs = 4;
 		final CountDownLatch latch = new CountDownLatch((n + 1) * subs);
 		Scheduler c = Schedulers.single();
 		for (int i = 0; i < subs; i++) {
-			processor.publishOn(c)
+			processor.asFlux()
+			         .publishOn(c)
 			         .doOnComplete(latch::countDown)
 			         .doOnNext(d -> latch.countDown())
 			         .subscribe();
@@ -203,7 +206,7 @@ public class FluxProcessorTest {
 
 		ref.set(Thread.currentThread());
 
-		DirectProcessor<String> rp = DirectProcessor.create();
+		DirectProcessor<String> rp = new DirectProcessor<>();
 		FluxProcessor<String, String> serialized = rp.serialize();
 
 		try {
@@ -253,7 +256,7 @@ public class FluxProcessorTest {
 
 	@Test
 	public void scanProcessor() {
-		FluxProcessor<String, String> test = DirectProcessor.<String>create().serialize();
+		FluxProcessor<String, String> test = new DirectProcessor<String>().serialize();
 
 		assertThat(test.scan(Scannable.Attr.CAPACITY)).isEqualTo(16);
 		assertThat(test.scan(Scannable.Attr.TERMINATED)).isFalse();

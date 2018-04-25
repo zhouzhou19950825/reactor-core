@@ -428,9 +428,10 @@ public class FluxWindowTest extends FluxOperatorTest<String, Flux<String>> {
 	public void exactError() {
 		AssertSubscriber<Publisher<Integer>> ts = AssertSubscriber.create();
 
-		DirectProcessor<Integer> sp = DirectProcessor.create();
+		BalancedFluxProcessor<Integer> sp = Processors.direct();
 
-		sp.window(2, 2)
+		sp.asFlux()
+		  .window(2, 2)
 		  .subscribe(ts);
 
 		ts.assertValueCount(0)
@@ -456,9 +457,10 @@ public class FluxWindowTest extends FluxOperatorTest<String, Flux<String>> {
 	public void skipError() {
 		AssertSubscriber<Publisher<Integer>> ts = AssertSubscriber.create();
 
-		DirectProcessor<Integer> sp = DirectProcessor.create();
+		BalancedFluxProcessor<Integer> sp = Processors.direct();
 
-		sp.window(2, 3)
+		sp.asFlux()
+		  .window(2, 3)
 		  .subscribe(ts);
 
 		ts.assertValueCount(0)
@@ -484,9 +486,10 @@ public class FluxWindowTest extends FluxOperatorTest<String, Flux<String>> {
 	public void skipInGapError() {
 		AssertSubscriber<Publisher<Integer>> ts = AssertSubscriber.create();
 
-		DirectProcessor<Integer> sp = DirectProcessor.create();
+		BalancedFluxProcessor<Integer> sp = Processors.direct();
 
-		sp.window(1, 3)
+		sp.asFlux()
+		  .window(1, 3)
 		  .subscribe(ts);
 
 		ts.assertValueCount(0)
@@ -509,9 +512,10 @@ public class FluxWindowTest extends FluxOperatorTest<String, Flux<String>> {
 	public void overlapError() {
 		AssertSubscriber<Publisher<Integer>> ts = AssertSubscriber.create();
 
-		DirectProcessor<Integer> sp = DirectProcessor.create();
+		BalancedFluxProcessor<Integer> sp = Processors.direct();
 
-		sp.window(2, 1)
+		sp.asFlux()
+		  .window(2, 1)
 		  .subscribe(ts);
 
 		ts.assertValueCount(0)

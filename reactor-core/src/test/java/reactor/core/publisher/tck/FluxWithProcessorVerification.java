@@ -21,10 +21,10 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BiFunction;
 
 import org.reactivestreams.Processor;
+import reactor.core.publisher.BalancedFluxProcessor;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxProcessor;
-import reactor.core.publisher.TopicProcessor;
-import reactor.core.publisher.WorkQueueProcessor;
+import reactor.core.publisher.Processors;
 
 /**
  * @author Stephane Maldini
@@ -40,15 +40,16 @@ public class FluxWithProcessorVerification extends AbstractProcessorVerification
 	public Processor<Long, Long> createIdentityProcessor(int bufferSize) {
 		Flux<String> otherStream = Flux.just("test", "test2", "test3");
 //		System.out.println("Providing new downstream");
-		FluxProcessor<Long, Long> p =
-				WorkQueueProcessor.<Long>builder().name("fluxion-raw-fork").bufferSize(bufferSize).build();
+		BalancedFluxProcessor<Long> p =
+				Processors.<Long>relaxedFanOut().name("fluxion-raw-fork").bufferSize(bufferSize).build();
 
 		cumulated.set(0);
 		cumulatedJoin.set(0);
 
 		BiFunction<Long, String, Long> combinator = (t1, t2) -> t1;
 		return FluxProcessor.wrap(p,
-				p.groupBy(k -> k % 2 == 0)
+				p.asFlux()
+				 .groupBy(k -> k % 2 == 0)
 				 .flatMap(stream -> stream.scan((prev, next) -> next)
 				                          .map(integer -> -integer)
 				                          .filter(integer -> integer <= 0)
@@ -60,7 +61,8 @@ public class FluxWithProcessorVerification extends AbstractProcessorVerification
 						                          otherStream,
 						                          combinator)))
 				 .doOnNext(array -> cumulatedJoin.getAndIncrement())
-				 .subscribeWith(TopicProcessor.<Long>builder().name("fluxion-raw-join").bufferSize(bufferSize).build())
+				 .subscribeWith(Processors.<Long>fanOut().name("fluxion-raw-join").bufferSize(bufferSize).build())
+				 .asFlux()
 				 .doOnError(Throwable::printStackTrace));
 	}
 

@@ -20,15 +20,15 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.LongAccumulator;
-import java.util.logging.Level;
 
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+import reactor.core.Scannable;
+import reactor.core.publisher.BalancedFluxProcessor;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxSink;
-import reactor.core.publisher.SignalType;
-import reactor.core.publisher.WorkQueueProcessor;
+import reactor.core.publisher.Processors;
 
 import static org.testng.Assert.assertEquals;
 
@@ -46,10 +46,10 @@ public class BurstyWorkQueueProcessorTests {
 	public static final int PRODUCED_MESSAGES_COUNT = 1024;
 	public static final int BURST_SIZE              = 5;
 
-	private LongAccumulator            maxRingBufferPending;
-	private WorkQueueProcessor<Object> processor;
-	private ExecutorService            producerExecutor;
-	private AtomicLong                 droppedCount;
+	private LongAccumulator               maxRingBufferPending;
+	private BalancedFluxProcessor<Object> processor;
+	private ExecutorService               producerExecutor;
+	private AtomicLong                    droppedCount;
 
 	@Before
 	public void setup() {
@@ -61,13 +61,14 @@ public class BurstyWorkQueueProcessorTests {
 	@Test
 	@Ignore
 	public void test() throws Exception {
-		processor = WorkQueueProcessor.builder().name("test-processor").bufferSize(RINGBUFFER_SIZE).build();
+		processor = Processors.relaxedFanOut().name("test-processor").bufferSize(RINGBUFFER_SIZE).build();
 
 		Flux
 				.create((emitter) -> burstyProducer(emitter, PRODUCED_MESSAGES_COUNT, BURST_SIZE))
 				.onBackpressureDrop(this::incrementDroppedMessagesCounter)
 			//	.log("test", Level.INFO, SignalType.REQUEST)
 				.subscribeWith(processor)
+				.asFlux()
 				.map(this::complicatedCalculation)
 				.subscribe(this::logConsumedValue);
 
@@ -98,7 +99,9 @@ public class BurstyWorkQueueProcessorTests {
 	}
 
 	private Object complicatedCalculation(Object value) {
-		maxRingBufferPending.accumulate(processor.getPending());
+		Long pendingScan = Scannable.from(processor).scan(Scannable.Attr.LARGE_BUFFERED);
+		long pending = pendingScan == null ? 0L : pendingScan;
+		maxRingBufferPending.accumulate(pending);
 		sleep(CONSUMER_LATENCY);
 		return value;
 	}

@@ -22,19 +22,19 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 
-import static org.junit.Assert.assertEquals;
-
 import org.junit.Before;
 import org.junit.Test;
-
-import reactor.core.publisher.DirectProcessor;
+import reactor.core.publisher.BalancedFluxProcessor;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.GroupedFlux;
+import reactor.core.publisher.Processors;
 import reactor.test.subscriber.AssertSubscriber;
+
+import static org.junit.Assert.assertEquals;
 
 public class FluxWindowConsistencyTest {
 
-	DirectProcessor<Integer> sourceProcessor = DirectProcessor.create();
+	BalancedFluxProcessor<Integer> sourceProcessor = Processors.direct();
 
 	Flux<Integer> source;
 
@@ -58,7 +58,7 @@ public class FluxWindowConsistencyTest {
 
 	@Before
 	public void setUp() {
-		source = sourceProcessor.doOnNext(i -> sourceCount.incrementAndGet());
+		source = sourceProcessor.asFlux().doOnNext(i -> sourceCount.incrementAndGet());
 	}
 
 	private void generate(int start, int count) {
@@ -207,7 +207,7 @@ public class FluxWindowConsistencyTest {
 
 	@Test
 	public void windowBoundaryComplete() throws Exception {
-		DirectProcessor<Integer> boundary = DirectProcessor.create();
+		BalancedFluxProcessor<Integer> boundary = Processors.direct();
 		Flux<Flux<Integer>> windows = source.window(boundary);
 		subscribe(windows);
 		generate(0, 3);
@@ -218,9 +218,9 @@ public class FluxWindowConsistencyTest {
 
 	@Test
 	public void windowStartEndComplete() throws Exception {
-		DirectProcessor<Integer> start = DirectProcessor.create();
-		DirectProcessor<Integer> end1 = DirectProcessor.create();
-		DirectProcessor<Integer> end2 = DirectProcessor.create();
+		BalancedFluxProcessor<Integer> start = Processors.direct();
+		BalancedFluxProcessor<Integer> end1 = Processors.direct();
+		BalancedFluxProcessor<Integer> end2 = Processors.direct();
 		Flux<Flux<Integer>> windows = source.windowWhen(start, v -> v == 1 ? end1 : end2);
 		subscribe(windows);
 		start.onNext(1);
@@ -305,7 +305,7 @@ public class FluxWindowConsistencyTest {
 
 	@Test
 	public void windowBoundaryMainCancel() throws Exception {
-		DirectProcessor<Integer> boundary = DirectProcessor.create();
+		BalancedFluxProcessor<Integer> boundary = Processors.direct();
 		Flux<Flux<Integer>> windows = source.window(boundary);
 
 		subscribe(windows);
@@ -321,9 +321,9 @@ public class FluxWindowConsistencyTest {
 
 	@Test
 	public void windowStartEndMainCancel() throws Exception {
-		DirectProcessor<Integer> start = DirectProcessor.create();
-		DirectProcessor<Integer> end1 = DirectProcessor.create();
-		DirectProcessor<Integer> end2 = DirectProcessor.create();
+		BalancedFluxProcessor<Integer> start = Processors.direct();
+		BalancedFluxProcessor<Integer> end1 = Processors.direct();
+		BalancedFluxProcessor<Integer> end2 = Processors.direct();
 		Flux<Flux<Integer>> windows = source.windowWhen(start, v -> v == 1 ? end1 : end2);
 		subscribe(windows);
 		start.onNext(1);
@@ -413,7 +413,7 @@ public class FluxWindowConsistencyTest {
 
 	@Test
 	public void windowBoundaryMainCancelNoNewWindow() throws Exception {
-		DirectProcessor<Integer> boundary = DirectProcessor.create();
+		BalancedFluxProcessor<Integer> boundary = Processors.direct();
 		Flux<Flux<Integer>> windows = source.window(boundary);
 
 		subscribe(windows);
@@ -426,9 +426,9 @@ public class FluxWindowConsistencyTest {
 
 	@Test
 	public void windowStartEndMainCancelNoNewWindow() throws Exception {
-		DirectProcessor<Integer> start = DirectProcessor.create();
-		DirectProcessor<Integer> end1 = DirectProcessor.create();
-		DirectProcessor<Integer> end2 = DirectProcessor.create();
+		BalancedFluxProcessor<Integer> start = Processors.direct();
+		BalancedFluxProcessor<Integer> end1 = Processors.direct();
+		BalancedFluxProcessor<Integer> end2 = Processors.direct();
 		Flux<Flux<Integer>> windows = source.windowWhen(start, v -> v == 1 ? end1 : end2);
 		subscribe(windows);
 		start.onNext(1);
@@ -506,7 +506,7 @@ public class FluxWindowConsistencyTest {
 
 	@Test
 	public void windowBoundaryInnerCancel() throws Exception {
-		DirectProcessor<Integer> boundaryProcessor = DirectProcessor.create();
+		BalancedFluxProcessor<Integer> boundaryProcessor = Processors.direct();
 		Flux<Flux<Integer>> windows = source.window(boundaryProcessor);
 		subscribe(windows);
 		generateWithCancel(0, 6, 1);
@@ -515,9 +515,9 @@ public class FluxWindowConsistencyTest {
 
 	@Test
 	public void windowStartEndInnerCancel() throws Exception {
-		DirectProcessor<Integer> start = DirectProcessor.create();
-		DirectProcessor<Integer> end1 = DirectProcessor.create();
-		DirectProcessor<Integer> end2 = DirectProcessor.create();
+		BalancedFluxProcessor<Integer> start = Processors.direct();
+		BalancedFluxProcessor<Integer> end1 = Processors.direct();
+		BalancedFluxProcessor<Integer> end2 = Processors.direct();
 		Flux<Flux<Integer>> windows = source.windowWhen(start, v -> v == 1 ? end1 : end2);
 		subscribe(windows);
 		start.onNext(1);

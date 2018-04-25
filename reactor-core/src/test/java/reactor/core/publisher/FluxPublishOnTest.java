@@ -243,15 +243,16 @@ public class FluxPublishOnTest extends FluxOperatorTest<String, String> {
 	public void normalAsyncFused() {
 		AssertSubscriber<Integer> ts = AssertSubscriber.create();
 
-		UnicastProcessor<Integer> up =
-				UnicastProcessor.create(new ConcurrentLinkedQueue<>());
+		BalancedFluxProcessor<Integer> up =
+				Processors.<Integer>unicast().queue(new ConcurrentLinkedQueue<>()).build();
 
 		for (int i = 0; i < 1_000_000; i++) {
 			up.onNext(i);
 		}
 		up.onComplete();
 
-		up.publishOn(Schedulers.fromExecutorService(exec))
+		up.asFlux()
+		  .publishOn(Schedulers.fromExecutorService(exec))
 		  .subscribe(ts);
 
 		ts.await(Duration.ofSeconds(5));
@@ -263,15 +264,15 @@ public class FluxPublishOnTest extends FluxOperatorTest<String, String> {
 
 	@Test
 	public void normalAsyncFusedBackpressured() throws Exception {
-		UnicastProcessor<Integer> up =
-				UnicastProcessor.create(Queues.<Integer>unbounded(1024).get());
+		BalancedFluxProcessor<Integer> up =
+				Processors.<Integer>unicast().queue(Queues.<Integer>unbounded(1024).get()).build();
 
 		for (int i = 0; i < 1_000_000; i++) {
 			up.onNext(0);
 		}
 		up.onComplete();
 
-		StepVerifier.create(up.publishOn(Schedulers.fromExecutorService(exec)), 0)
+		StepVerifier.create(up.asFlux().publishOn(Schedulers.fromExecutorService(exec)), 0)
 		            .expectSubscription()
 		            .thenRequest(500_000)
 		            .expectNextCount(500_000)
@@ -450,13 +451,14 @@ public class FluxPublishOnTest extends FluxOperatorTest<String, String> {
 	}
 
 	public void diamond() {
-
-		DirectProcessor<Integer> sp = DirectProcessor.create();
+		BalancedFluxProcessor<Integer> sp = Processors.direct();
 		AssertSubscriber<Integer> ts = AssertSubscriber.create();
 
-		Flux<Integer> fork1 = sp.map(d -> d)
+		Flux<Integer> fork1 = sp.asFlux()
+		                        .map(d -> d)
 		                        .publishOn(Schedulers.fromExecutorService(exec));
-		Flux<Integer> fork2 = sp.map(d -> d)
+		Flux<Integer> fork2 = sp.asFlux()
+		                        .map(d -> d)
 		                        .publishOn(Schedulers.fromExecutorService(exec));
 
 		ts.request(256);
@@ -694,13 +696,14 @@ public class FluxPublishOnTest extends FluxOperatorTest<String, String> {
 	@Test
 	public void mappedAsyncSourceWithNull() {
 		AssertSubscriber<Integer> ts = AssertSubscriber.create();
-		UnicastProcessor<Integer> up =
-				UnicastProcessor.create(Queues.<Integer>get(2).get());
+		BalancedFluxProcessor<Integer> up =
+				Processors.<Integer>unicast().queue(Queues.<Integer>get(2).get()).build();
 		up.onNext(1);
 		up.onNext(2);
 		up.onComplete();
 
-		up.map(v -> v == 2 ? null : v)
+		up.asFlux()
+		  .map(v -> v == 2 ? null : v)
 		  .publishOn(Schedulers.fromExecutorService(exec))
 		  .subscribe(ts);
 
@@ -714,13 +717,14 @@ public class FluxPublishOnTest extends FluxOperatorTest<String, String> {
 	@Test
 	public void mappedAsyncSourceWithNullPostFilter() {
 		AssertSubscriber<Integer> ts = AssertSubscriber.create();
-		UnicastProcessor<Integer> up =
-				UnicastProcessor.create(Queues.<Integer>get(2).get());
+		BalancedFluxProcessor<Integer> up =
+				Processors.<Integer>unicast().queue(Queues.<Integer>get(2).get()).build();
 		up.onNext(1);
 		up.onNext(2);
 		up.onComplete();
 
-		up.map(v -> v == 2 ? null : v)
+		up.asFlux()
+		  .map(v -> v == 2 ? null : v)
 		  .publishOn(Schedulers.fromExecutorService(exec))
 		  .filter(v -> true)
 		  .subscribe(ts);
@@ -796,12 +800,13 @@ public class FluxPublishOnTest extends FluxOperatorTest<String, String> {
 
 	@Test
 	public void threadBoundaryPreventsInvalidFusionMap() {
-		UnicastProcessor<Integer> up =
-				UnicastProcessor.create(Queues.<Integer>get(2).get());
+		BalancedFluxProcessor<Integer> up =
+				Processors.<Integer>unicast().queue(Queues.<Integer>get(2).get()).build();
 
 		AssertSubscriber<String> ts = AssertSubscriber.create();
 
-		up.map(v -> Thread.currentThread()
+		up.asFlux()
+		  .map(v -> Thread.currentThread()
 		                  .getName())
 		  .publishOn(Schedulers.fromExecutorService(exec))
 		  .subscribe(ts);
@@ -819,15 +824,16 @@ public class FluxPublishOnTest extends FluxOperatorTest<String, String> {
 
 	@Test
 	public void threadBoundaryPreventsInvalidFusionFilter() {
-		UnicastProcessor<Integer> up =
-				UnicastProcessor.create(Queues.<Integer>get(2).get());
+		BalancedFluxProcessor<Integer> up =
+				Processors.<Integer>unicast().queue(Queues.<Integer>get(2).get()).build();
 
 		String s = Thread.currentThread()
 		                 .getName();
 
 		AssertSubscriber<Integer> ts = AssertSubscriber.create();
 
-		up.filter(v -> s.equals(Thread.currentThread()
+		up.asFlux()
+		  .filter(v -> s.equals(Thread.currentThread()
 		                              .getName()))
 		  .publishOn(Schedulers.fromExecutorService(exec))
 		  .subscribe(ts);
@@ -1171,11 +1177,12 @@ public class FluxPublishOnTest extends FluxOperatorTest<String, String> {
 		final ConcurrentHashMap<Object, Long> seenInternal = new ConcurrentHashMap<>();
 		final ConcurrentHashMap<Object, Long> seenConsumer = new ConcurrentHashMap<>();
 
-		EmitterProcessor<Integer> d = EmitterProcessor.create();
+		BalancedFluxProcessor<Integer> d = Processors.emitter().build();
 		FluxSink<Integer> s = d.sink();
 
 		/*Disposable c = */
-		d.publishOn(Schedulers.parallel())
+		d.asFlux()
+		 .publishOn(Schedulers.parallel())
 		 .parallel(8)
 		 .groups()
 		 .subscribe(stream -> stream.publishOn(Schedulers.parallel())
@@ -1237,10 +1244,11 @@ public class FluxPublishOnTest extends FluxOperatorTest<String, String> {
 		CountDownLatch latch = new CountDownLatch(items);
 		Random random = ThreadLocalRandom.current();
 
-		EmitterProcessor<String> d = EmitterProcessor.create();
+		BalancedFluxProcessor<String> d = Processors.emitter().build();
 		FluxSink<String> s = d.sink();
 
-		Flux<Integer> tasks = d.publishOn(Schedulers.parallel())
+		Flux<Integer> tasks = d.asFlux()
+		                       .publishOn(Schedulers.parallel())
 		                       .parallel(8)
 		                       .groups()
 		                       .flatMap(stream -> stream.publishOn(Schedulers.parallel())

@@ -41,11 +41,11 @@ public class MonoFlatMapTest {
 	public void cancel() {
 		TestPublisher<String> cancelTester = TestPublisher.create();
 
-		MonoProcessor<Integer> processor = cancelTester.mono()
-													   .flatMap(s -> Mono.just(s.length()))
-													   .toProcessor();
-		processor.subscribe();
-		processor.cancel();
+		BalancedMonoProcessor<Integer> processor = cancelTester.mono()
+		                                                       .flatMap(s -> Mono.just(s.length()))
+		                                                       .toProcessor();
+		processor.asMono().subscribe();
+		processor.dispose();
 
 		cancelTester.assertCancelled();
 	}

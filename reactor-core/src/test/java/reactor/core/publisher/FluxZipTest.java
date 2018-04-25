@@ -436,8 +436,8 @@ public class FluxZipTest extends FluxOperatorTest<String, String> {
 	public void multipleStreamValuesCanBeZipped() {
 //		"Multiple Stream"s values can be zipped"
 //		given: "source composables to merge, buffer and tap"
-		EmitterProcessor<Integer> source1 = EmitterProcessor.create();
-		EmitterProcessor<Integer> source2 = EmitterProcessor.create();
+		BalancedFluxProcessor<Integer> source1 = Processors.<Integer>emitter().build();
+		BalancedFluxProcessor<Integer> source2 = Processors.<Integer>emitter().build();
 		Flux<Integer> zippedFlux = Flux.zip(source1, source2, (t1, t2) -> t1 + t2);
 		AtomicReference<Integer> tap = new AtomicReference<>();
 		zippedFlux.subscribe(it -> tap.set(it));
@@ -711,7 +711,7 @@ public class FluxZipTest extends FluxOperatorTest<String, String> {
 
 	@Test
 	public void failDoubleTerminalPublisher() {
-		DirectProcessor<Integer> d1 = DirectProcessor.create();
+		DirectProcessor<Integer> d1 = new DirectProcessor<>();
 		Hooks.onErrorDropped(e -> {
 		});
 		try {
@@ -1007,7 +1007,7 @@ public class FluxZipTest extends FluxOperatorTest<String, String> {
 
 	@Test
 	public void prematureCompleteSourceEmptyDouble() {
-		DirectProcessor<Integer> d = DirectProcessor.create();
+		DirectProcessor<Integer> d = new DirectProcessor<>();
 		StepVerifier.create(Flux.zip(obj -> 0, d, s -> {
 			CoreSubscriber<?> a =
 					((DirectProcessor.DirectInner) d.inners().findFirst().get())

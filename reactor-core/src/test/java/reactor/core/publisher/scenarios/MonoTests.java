@@ -19,7 +19,6 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -27,9 +26,10 @@ import java.util.function.Supplier;
 
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
+import reactor.core.publisher.BalancedMonoProcessor;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.core.publisher.MonoProcessor;
+import reactor.core.publisher.Processors;
 import reactor.core.publisher.Signal;
 import reactor.core.scheduler.Schedulers;
 import reactor.test.StepVerifier;
@@ -172,10 +172,10 @@ public class MonoTests {
 
 	@Test
 	public void testMono() throws Exception {
-		MonoProcessor<String> promise = MonoProcessor.create();
+		BalancedMonoProcessor<String> promise = Processors.<String>first().build();
 		promise.onNext("test");
 		final CountDownLatch successCountDownLatch = new CountDownLatch(1);
-		promise.subscribe(v -> successCountDownLatch.countDown());
+		promise.asMono().subscribe(v -> successCountDownLatch.countDown());
 		assertThat("Failed", successCountDownLatch.await(10, TimeUnit.SECONDS));
 	}
 

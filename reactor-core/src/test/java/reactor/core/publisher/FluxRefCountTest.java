@@ -81,9 +81,10 @@ public class FluxRefCountTest {
 
 	@Test
 	public void normal() {
-		EmitterProcessor<Integer> e = EmitterProcessor.create();
+		BalancedFluxProcessor<Integer> e = Processors.emitter().build();
 
-		Flux<Integer> p = e.publish().refCount();
+		Flux<Integer> p = e.asFlux()
+		                   .publish().refCount();
 
 		Assert.assertFalse("sp has subscribers?", e.downstreamCount() != 0);
 
@@ -121,9 +122,10 @@ public class FluxRefCountTest {
 
 	@Test
 	public void normalTwoSubscribers() {
-		EmitterProcessor<Integer> e = EmitterProcessor.create();
+		BalancedFluxProcessor<Integer> e = Processors.emitter().build();
 
-		Flux<Integer> p = e.publish().refCount(2);
+		Flux<Integer> p = e.asFlux()
+		                   .publish().refCount(2);
 
 		Assert.assertFalse("sp has subscribers?", e.downstreamCount() != 0);
 
@@ -260,10 +262,11 @@ public class FluxRefCountTest {
 
 	@Test
 	public void delayElementShouldNotCancelTwice() throws Exception {
-		DirectProcessor<Long> p = DirectProcessor.create();
+		BalancedFluxProcessor<Long> p = Processors.direct();
 		AtomicInteger cancellations = new AtomicInteger();
 
 		Flux<Long> publishedFlux = p
+			.asFlux()
 			.publish()
 			.refCount(2)
 			.doOnCancel(() -> cancellations.incrementAndGet());

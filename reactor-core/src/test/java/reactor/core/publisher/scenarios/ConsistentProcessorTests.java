@@ -32,8 +32,7 @@ import org.junit.Test;
 import org.reactivestreams.Processor;
 import org.reactivestreams.Subscription;
 import reactor.core.CoreSubscriber;
-import reactor.core.publisher.TopicProcessor;
-import reactor.core.publisher.WorkQueueProcessor;
+import reactor.core.publisher.Processors;
 import reactor.core.scheduler.Schedulers;
 
 import static org.hamcrest.Matchers.is;
@@ -136,8 +135,8 @@ public class ConsistentProcessorTests {
 	}
 
 	private void setupPipeline() {
-		processor = TopicProcessor.<String>builder().autoCancel(false).build();
-		workProcessor = WorkQueueProcessor.<String>builder().autoCancel(false).build();
+		processor = Processors.<String>fanOut().autoCancel(false).build();
+		workProcessor = Processors.<String>relaxedFanOut().autoCancel(false).build();
 		processor.subscribe(workProcessor);
 	}
 

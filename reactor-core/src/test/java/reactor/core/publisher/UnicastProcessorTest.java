@@ -24,7 +24,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.function.Consumer;
 
 import org.junit.Test;
-import reactor.core.CoreSubscriber;
 import reactor.core.Disposable;
 import reactor.test.StepVerifier;
 import reactor.test.subscriber.AssertSubscriber;
@@ -39,7 +38,7 @@ public class UnicastProcessorTest {
     @Test
     public void secondSubscriberRejectedProperly() {
 
-        UnicastProcessor<Integer> up = UnicastProcessor.create(new ConcurrentLinkedQueue<>());
+        UnicastProcessor<Integer> up = new UnicastProcessor<>(new ConcurrentLinkedQueue<>());
 
         up.subscribe();
 
@@ -84,7 +83,7 @@ public class UnicastProcessorTest {
 	@Test
 	public void createOverrideQueue() {
 		Queue<Integer> queue = Queues.<Integer>get(10).get();
-		UnicastProcessor<Integer> processor = UnicastProcessor.create(queue);
+		UnicastProcessor<Integer> processor = new UnicastProcessor<>(queue);
 		assertProcessor(processor, queue, null, null);
 	}
 
@@ -92,7 +91,7 @@ public class UnicastProcessorTest {
 	public void createOverrideQueueOnTerminate() {
 		Disposable onTerminate = () -> {};
 		Queue<Integer> queue = Queues.<Integer>get(10).get();
-		UnicastProcessor<Integer> processor = UnicastProcessor.create(queue, onTerminate);
+		UnicastProcessor<Integer> processor = new UnicastProcessor<>(queue, onTerminate);
 		assertProcessor(processor, queue, null, onTerminate);
 	}
 
@@ -101,7 +100,7 @@ public class UnicastProcessorTest {
 		Disposable onTerminate = () -> {};
 		Consumer<? super Integer> onOverflow = t -> {};
 		Queue<Integer> queue = Queues.<Integer>get(10).get();
-		UnicastProcessor<Integer> processor = UnicastProcessor.create(queue, onOverflow, onTerminate);
+		UnicastProcessor<Integer> processor = new UnicastProcessor<>(queue, onOverflow, onTerminate);
 		assertProcessor(processor, queue, onOverflow, onTerminate);
 	}
 
@@ -119,7 +118,7 @@ public class UnicastProcessorTest {
 
 	@Test
 	public void bufferSizeReactorUnboundedQueue() {
-    	UnicastProcessor processor = UnicastProcessor.create(
+    	UnicastProcessor processor = new UnicastProcessor<>(
     			Queues.unbounded(2).get());
 
     	assertThat(processor.getBufferSize()).isEqualTo(Integer.MAX_VALUE);
@@ -129,22 +128,22 @@ public class UnicastProcessorTest {
 	public void bufferSizeReactorBoundedQueue() {
     	//the bounded queue floors at 8 and rounds to the next power of 2
 
-		assertThat(UnicastProcessor.create(Queues.get(2).get())
+		assertThat(new UnicastProcessor<>(Queues.get(2).get())
 		                           .getBufferSize())
 				.isEqualTo(8);
 
-		assertThat(UnicastProcessor.create(Queues.get(8).get())
+		assertThat(new UnicastProcessor<>(Queues.get(8).get())
 		                           .getBufferSize())
 				.isEqualTo(8);
 
-		assertThat(UnicastProcessor.create(Queues.get(9).get())
+		assertThat(new UnicastProcessor<>(Queues.get(9).get())
 		                           .getBufferSize())
 				.isEqualTo(16);
 	}
 
 	@Test
 	public void bufferSizeBoundedBlockingQueue() {
-		UnicastProcessor processor = UnicastProcessor.create(
+		UnicastProcessor processor = new UnicastProcessor<>(
 				new LinkedBlockingQueue<>(10));
 
 		assertThat(processor.getBufferSize()).isEqualTo(10);
@@ -152,7 +151,7 @@ public class UnicastProcessorTest {
 
 	@Test
 	public void bufferSizeUnboundedBlockingQueue() {
-		UnicastProcessor processor = UnicastProcessor.create(
+		UnicastProcessor processor = new UnicastProcessor<>(
 				new LinkedBlockingQueue<>());
 
 		assertThat(processor.getBufferSize()).isEqualTo(Integer.MAX_VALUE);
@@ -161,7 +160,7 @@ public class UnicastProcessorTest {
 
 	@Test
 	public void bufferSizeOtherQueue() {
-		UnicastProcessor processor = UnicastProcessor.create(
+		UnicastProcessor processor = new UnicastProcessor<>(
 				new PriorityQueue<>(10));
 
 		assertThat(processor.getBufferSize())

@@ -140,12 +140,13 @@ public class FluxWindowWhenTest {
 	public void normal() {
 		AssertSubscriber<Flux<Integer>> ts = AssertSubscriber.create();
 
-		DirectProcessor<Integer> sp1 = DirectProcessor.create();
-		DirectProcessor<Integer> sp2 = DirectProcessor.create();
-		DirectProcessor<Integer> sp3 = DirectProcessor.create();
-		DirectProcessor<Integer> sp4 = DirectProcessor.create();
+		BalancedFluxProcessor<Integer> sp1 = Processors.direct();
+		BalancedFluxProcessor<Integer> sp2 = Processors.direct();
+		BalancedFluxProcessor<Integer> sp3 = Processors.direct();
+		BalancedFluxProcessor<Integer> sp4 = Processors.direct();
 
-		sp1.windowWhen(sp2, v -> v == 1 ? sp3 : sp4)
+		sp1.asFlux()
+		   .windowWhen(sp2, v -> v == 1 ? sp3 : sp4)
 		   .subscribe(ts);
 
 		sp1.onNext(1);
@@ -183,12 +184,13 @@ public class FluxWindowWhenTest {
 	public void normalStarterEnds() {
 		AssertSubscriber<Flux<Integer>> ts = AssertSubscriber.create();
 
-		DirectProcessor<Integer> source = DirectProcessor.create();
-		DirectProcessor<Integer> openSelector = DirectProcessor.create();
-		DirectProcessor<Integer> closeSelectorFor1 = DirectProcessor.create();
-		DirectProcessor<Integer> closeSelectorForOthers = DirectProcessor.create();
+		BalancedFluxProcessor<Integer> source = Processors.direct();
+		BalancedFluxProcessor<Integer> openSelector = Processors.direct();
+		BalancedFluxProcessor<Integer> closeSelectorFor1 = Processors.direct();
+		BalancedFluxProcessor<Integer> closeSelectorForOthers = Processors.direct();
 
-		source.windowWhen(openSelector, v -> v == 1 ? closeSelectorFor1 : closeSelectorForOthers)
+		source.asFlux()
+		      .windowWhen(openSelector, v -> v == 1 ? closeSelectorFor1 : closeSelectorForOthers)
 		   .subscribe(ts);
 
 		source.onNext(1);
@@ -227,12 +229,13 @@ public class FluxWindowWhenTest {
 	public void oneWindowOnly() {
 		AssertSubscriber<Flux<Integer>> ts = AssertSubscriber.create();
 
-		DirectProcessor<Integer> source = DirectProcessor.create();
-		DirectProcessor<Integer> openSelector = DirectProcessor.create();
-		DirectProcessor<Integer> closeSelectorFor1 = DirectProcessor.create();
-		DirectProcessor<Integer> closeSelectorOthers = DirectProcessor.create();
+		BalancedFluxProcessor<Integer> source = Processors.direct();
+		BalancedFluxProcessor<Integer> openSelector = Processors.direct();
+		BalancedFluxProcessor<Integer> closeSelectorFor1 = Processors.direct();
+		BalancedFluxProcessor<Integer> closeSelectorOthers = Processors.direct();
 
-		source.windowWhen(openSelector, v -> v == 1 ? closeSelectorFor1 : closeSelectorOthers)
+		source.asFlux()
+		      .windowWhen(openSelector, v -> v == 1 ? closeSelectorFor1 : closeSelectorOthers)
 		   .subscribe(ts);
 
 		openSelector.onNext(1);
@@ -262,18 +265,18 @@ public class FluxWindowWhenTest {
 	@Test
 	public void windowWillAcumulateMultipleListsOfValuesOverlap() {
 		//given: "a source and a collected flux"
-		EmitterProcessor<Integer> numbers = EmitterProcessor.create();
-		EmitterProcessor<Integer> bucketOpening = EmitterProcessor.create();
+		BalancedFluxProcessor<Integer> numbers = Processors.<Integer>emitter().build();
+		BalancedFluxProcessor<Integer> bucketOpening = Processors.<Integer>emitter().build();
 
 		//"overlapping buffers"
-		EmitterProcessor<Integer> boundaryFlux = EmitterProcessor.create();
+		BalancedFluxProcessor<Integer> boundaryFlux = Processors.<Integer>emitter().build();
 
-		MonoProcessor<List<List<Integer>>> res = numbers.windowWhen(bucketOpening, u -> boundaryFlux )
+		BalancedMonoProcessor<List<List<Integer>>> res = numbers.asFlux().windowWhen(bucketOpening, u -> boundaryFlux )
 		                                       .flatMap(Flux::buffer)
 		                                       .buffer()
 		                                       .publishNext()
 		                                       .toProcessor();
-		res.subscribe();
+		res.asMono().subscribe();
 
 		numbers.onNext(1);
 		numbers.onNext(2);
@@ -287,7 +290,7 @@ public class FluxWindowWhenTest {
 		numbers.onComplete();
 
 		//"the collected overlapping lists are available"
-		assertThat(res.block()).containsExactly(
+		assertThat(res.asMono().block()).containsExactly(
 				Arrays.asList(3, 5),
 				Arrays.asList(5));
 	}

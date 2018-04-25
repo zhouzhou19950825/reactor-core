@@ -204,9 +204,9 @@ public class MonoUsingTest {
 
 		AtomicInteger cleanup = new AtomicInteger();
 
-		MonoProcessor<Integer> tp = MonoProcessor.create();
+		BalancedMonoProcessor<Integer> tp = Processors.<Integer>first().build();
 
-		Mono.using(() -> 1, r -> tp, cleanup::set, true)
+		Mono.using(() -> 1, r -> tp.asMono(), cleanup::set, true)
 		    .subscribe(ts);
 
 		Assert.assertTrue("No subscriber?", tp.hasDownstreams());

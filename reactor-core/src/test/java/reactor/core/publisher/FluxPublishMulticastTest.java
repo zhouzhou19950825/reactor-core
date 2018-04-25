@@ -155,10 +155,11 @@ public class FluxPublishMulticastTest extends FluxOperatorTest<String, String> {
 
 		AssertSubscriber<Integer> ts = AssertSubscriber.create();
 
-		UnicastProcessor<Integer> up =
-				UnicastProcessor.create(Queues.<Integer>get(16).get());
+		BalancedFluxProcessor<Integer> up =
+				Processors.<Integer>unicast().queue(Queues.<Integer>get(16).get()).build();
 
-		up.publish(o -> zip((Object[] a) -> (Integer) a[0] + (Integer) a[1], o, o.skip(1)))
+		up.asFlux()
+		  .publish(o -> zip((Object[] a) -> (Integer) a[0] + (Integer) a[1], o, o.skip(1)))
 		  .subscribe(ts);
 
 		up.onNext(1);
@@ -177,9 +178,10 @@ public class FluxPublishMulticastTest extends FluxOperatorTest<String, String> {
 	public void cancelComposes() {
 		AssertSubscriber<Integer> ts = AssertSubscriber.create();
 
-		EmitterProcessor<Integer> sp = EmitterProcessor.create();
+		BalancedFluxProcessor<Integer> sp = Processors.<Integer>emitter().build();
 
-		sp.publish(o -> Flux.<Integer>never())
+		sp.asFlux()
+		  .publish(o -> Flux.<Integer>never())
 		  .subscribe(ts);
 
 		Assert.assertTrue("Not subscribed?", sp.downstreamCount() != 0);
@@ -193,9 +195,10 @@ public class FluxPublishMulticastTest extends FluxOperatorTest<String, String> {
 	public void cancelComposes2() {
 		AssertSubscriber<Integer> ts = AssertSubscriber.create();
 
-		EmitterProcessor<Integer> sp = EmitterProcessor.create();
+		BalancedFluxProcessor<Integer> sp = Processors.<Integer>emitter().build();
 
-		sp.publish(o -> Flux.<Integer>empty())
+		sp.asFlux()
+		  .publish(o -> Flux.<Integer>empty())
 		  .subscribe(ts);
 
 		Assert.assertFalse("Still subscribed?", sp.downstreamCount() == 1);

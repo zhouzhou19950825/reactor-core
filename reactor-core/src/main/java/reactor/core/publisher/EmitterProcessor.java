@@ -56,20 +56,6 @@ final class EmitterProcessor<T> extends FluxProcessor<T, T>
 		implements BalancedFluxProcessor<T> {
 
 
-	/**
-	 * Create a new {@link EmitterProcessor} using the provided backlog size and auto-cancellation.
-	 *
-	 * @param <E> Type of processed signals
-	 * @param bufferSize the internal buffer size to hold signals
-	 * @param autoCancel automatically cancel
-	 *
-	 * @return a fresh processor
-	 */
-	@Deprecated
-	public static <E> EmitterProcessor<E> create(int bufferSize, boolean autoCancel) {
-		return new EmitterProcessor<>(autoCancel, bufferSize);
-	}
-
 	final int prefetch;
 
 	final boolean autoCancel;

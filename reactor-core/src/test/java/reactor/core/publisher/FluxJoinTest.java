@@ -39,11 +39,12 @@ public class FluxJoinTest {
 	public void normal1() {
 		AssertSubscriber<Object> ts = AssertSubscriber.create();
 
-		DirectProcessor<Integer> source1 = DirectProcessor.create();
-		DirectProcessor<Integer> source2 = DirectProcessor.create();
+		BalancedFluxProcessor<Integer> source1 = Processors.direct();
+		BalancedFluxProcessor<Integer> source2 = Processors.direct();
 
 		Flux<Integer> m =
-				source1.join(source2, just(Flux.never()), just(Flux.never()), add);
+				source1.asFlux()
+				       .join(source2, just(Flux.never()), just(Flux.never()), add);
 
 		m.subscribe(ts);
 
@@ -66,12 +67,13 @@ public class FluxJoinTest {
 	@Test
 	public void normal1WithDuration() {
 		AssertSubscriber<Object> ts = AssertSubscriber.create();
-		DirectProcessor<Integer> source1 = DirectProcessor.create();
-		DirectProcessor<Integer> source2 = DirectProcessor.create();
+		BalancedFluxProcessor<Integer> source1 = Processors.direct();
+		BalancedFluxProcessor<Integer> source2 = Processors.direct();
 
-		DirectProcessor<Integer> duration1 = DirectProcessor.create();
+		BalancedFluxProcessor<Integer> duration1 = Processors.direct();
 
-		Flux<Integer> m = source1.join(source2, just(duration1), just(Flux.never()), add);
+		Flux<Integer> m = source1.asFlux()
+		                         .join(source2, just(duration1.asFlux()), just(Flux.never()), add);
 		m.subscribe(ts);
 
 		source1.onNext(1);
@@ -95,11 +97,12 @@ public class FluxJoinTest {
 	@Test
 	public void normal2() {
 		AssertSubscriber<Object> ts = AssertSubscriber.create();
-		DirectProcessor<Integer> source1 = DirectProcessor.create();
-		DirectProcessor<Integer> source2 = DirectProcessor.create();
+		BalancedFluxProcessor<Integer> source1 = Processors.direct();
+		BalancedFluxProcessor<Integer> source2 = Processors.direct();
 
 		Flux<Integer> m =
-				source1.join(source2, just(Flux.never()), just(Flux.never()), add);
+				source1.asFlux()
+				       .join(source2, just(Flux.never()), just(Flux.never()), add);
 
 		m.subscribe(ts);
 
@@ -121,11 +124,12 @@ public class FluxJoinTest {
 	@Test
 	public void leftThrows() {
 		AssertSubscriber<Object> ts = AssertSubscriber.create();
-		DirectProcessor<Integer> source1 = DirectProcessor.create();
-		DirectProcessor<Integer> source2 = DirectProcessor.create();
+		BalancedFluxProcessor<Integer> source1 = Processors.direct();
+		BalancedFluxProcessor<Integer> source2 = Processors.direct();
 
 		Flux<Integer> m =
-				source1.join(source2, just(Flux.never()), just(Flux.never()), add);
+				source1.asFlux()
+				       .join(source2, just(Flux.never()), just(Flux.never()), add);
 
 		m.subscribe(ts);
 
@@ -140,11 +144,12 @@ public class FluxJoinTest {
 	@Test
 	public void rightThrows() {
 		AssertSubscriber<Object> ts = AssertSubscriber.create();
-		DirectProcessor<Integer> source1 = DirectProcessor.create();
-		DirectProcessor<Integer> source2 = DirectProcessor.create();
+		BalancedFluxProcessor<Integer> source1 = Processors.direct();
+		BalancedFluxProcessor<Integer> source2 = Processors.direct();
 
 		Flux<Integer> m =
-				source1.join(source2, just(Flux.never()), just(Flux.never()), add);
+				source1.asFlux()
+				       .join(source2, just(Flux.never()), just(Flux.never()), add);
 
 		m.subscribe(ts);
 
@@ -159,12 +164,13 @@ public class FluxJoinTest {
 	@Test
 	public void leftDurationThrows() {
 		AssertSubscriber<Object> ts = AssertSubscriber.create();
-		DirectProcessor<Integer> source1 = DirectProcessor.create();
-		DirectProcessor<Integer> source2 = DirectProcessor.create();
+		BalancedFluxProcessor<Integer> source1 = Processors.direct();
+		BalancedFluxProcessor<Integer> source2 = Processors.direct();
 
 		Flux<Integer> duration1 = Flux.error(new RuntimeException("Forced failure"));
 
-		Flux<Integer> m = source1.join(source2, just(duration1), just(Flux.never()), add);
+		Flux<Integer> m = source1.asFlux()
+		                         .join(source2, just(duration1), just(Flux.never()), add);
 		m.subscribe(ts);
 
 		source1.onNext(1);
@@ -177,12 +183,13 @@ public class FluxJoinTest {
 	@Test
 	public void rightDurationThrows() {
 		AssertSubscriber<Object> ts = AssertSubscriber.create();
-		DirectProcessor<Integer> source1 = DirectProcessor.create();
-		DirectProcessor<Integer> source2 = DirectProcessor.create();
+		BalancedFluxProcessor<Integer> source1 = Processors.direct();
+		BalancedFluxProcessor<Integer> source2 = Processors.direct();
 
 		Flux<Integer> duration1 = Flux.error(new RuntimeException("Forced failure"));
 
-		Flux<Integer> m = source1.join(source2, just(Flux.never()), just(duration1), add);
+		Flux<Integer> m = source1.asFlux()
+		                         .join(source2, just(Flux.never()), just(duration1), add);
 		m.subscribe(ts);
 
 		source2.onNext(1);
@@ -195,14 +202,15 @@ public class FluxJoinTest {
 	@Test
 	public void leftDurationSelectorThrows() {
 		AssertSubscriber<Object> ts = AssertSubscriber.create();
-		DirectProcessor<Integer> source1 = DirectProcessor.create();
-		DirectProcessor<Integer> source2 = DirectProcessor.create();
+		BalancedFluxProcessor<Integer> source1 = Processors.direct();
+		BalancedFluxProcessor<Integer> source2 = Processors.direct();
 
 		Function<Integer, Flux<Integer>> fail = t1 -> {
 			throw new RuntimeException("Forced failure");
 		};
 
-		Flux<Integer> m = source1.join(source2, fail, just(Flux.never()), add);
+		Flux<Integer> m = source1.asFlux()
+		                         .join(source2, fail, just(Flux.never()), add);
 		m.subscribe(ts);
 
 		source1.onNext(1);
@@ -215,14 +223,15 @@ public class FluxJoinTest {
 	@Test
 	public void rightDurationSelectorThrows() {
 		AssertSubscriber<Object> ts = AssertSubscriber.create();
-		DirectProcessor<Integer> source1 = DirectProcessor.create();
-		DirectProcessor<Integer> source2 = DirectProcessor.create();
+		BalancedFluxProcessor<Integer> source1 = Processors.direct();
+		BalancedFluxProcessor<Integer> source2 = Processors.direct();
 
 		Function<Integer, Flux<Integer>> fail = t1 -> {
 			throw new RuntimeException("Forced failure");
 		};
 
-		Flux<Integer> m = source1.join(source2, just(Flux.never()), fail, add);
+		Flux<Integer> m = source1.asFlux()
+		                         .join(source2, just(Flux.never()), fail, add);
 		m.subscribe(ts);
 
 		source2.onNext(1);
@@ -235,15 +244,16 @@ public class FluxJoinTest {
 	@Test
 	public void resultSelectorThrows() {
 		AssertSubscriber<Object> ts = AssertSubscriber.create();
-		DirectProcessor<Integer> source1 = DirectProcessor.create();
-		DirectProcessor<Integer> source2 = DirectProcessor.create();
+		BalancedFluxProcessor<Integer> source1 = Processors.direct();
+		BalancedFluxProcessor<Integer> source2 = Processors.direct();
 
 		BiFunction<Integer, Integer, Integer> fail = (t1, t2) -> {
 			throw new RuntimeException("Forced failure");
 		};
 
 		Flux<Integer> m =
-				source1.join(source2, just(Flux.never()), just(Flux.never()), fail);
+				source1.asFlux()
+				       .join(source2, just(Flux.never()), just(Flux.never()), fail);
 		m.subscribe(ts);
 
 		source1.onNext(1);

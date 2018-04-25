@@ -42,13 +42,14 @@ public class FluxSampleTest {
 	}
 
 	void sample(boolean complete, boolean which) {
-		DirectProcessor<Integer> main = DirectProcessor.create();
+		BalancedFluxProcessor<Integer> main = Processors.direct();
 
-		DirectProcessor<String> other = DirectProcessor.create();
+		BalancedFluxProcessor<String> other = Processors.direct();
 
 		AssertSubscriber<Integer> ts = AssertSubscriber.create();
 
-		main.sample(other).subscribe(ts);
+		main.asFlux()
+		    .sample(other).subscribe(ts);
 
 		ts.assertNoValues()
 		  .assertNotComplete()
@@ -84,7 +85,7 @@ public class FluxSampleTest {
 		  .assertNoError()
 		  .assertNotComplete();
 
-		DirectProcessor<?> p = which ? main : other;
+		BalancedFluxProcessor<?> p = which ? main : other;
 
 		if (complete) {
 			p.onComplete();
@@ -128,13 +129,14 @@ public class FluxSampleTest {
 
 	@Test
 	public void subscriberCancels() {
-		DirectProcessor<Integer> main = DirectProcessor.create();
+		BalancedFluxProcessor<Integer> main = Processors.direct();
 
-		DirectProcessor<String> other = DirectProcessor.create();
+		BalancedFluxProcessor<String> other = Processors.direct();
 
 		AssertSubscriber<Integer> ts = AssertSubscriber.create();
 
-		main.sample(other).subscribe(ts);
+		main.asFlux()
+		    .sample(other).subscribe(ts);
 
 		Assert.assertTrue("Main no subscriber?", main.hasDownstreams());
 		Assert.assertTrue("Other no subscriber?", other.hasDownstreams());
@@ -150,9 +152,9 @@ public class FluxSampleTest {
 	}
 
 	public void completeImmediately(boolean which) {
-		DirectProcessor<Integer> main = DirectProcessor.create();
+		BalancedFluxProcessor<Integer> main = Processors.direct();
 
-		DirectProcessor<String> other = DirectProcessor.create();
+		BalancedFluxProcessor<String> other = Processors.direct();
 
 		if (which) {
 			main.onComplete();
@@ -163,7 +165,8 @@ public class FluxSampleTest {
 
 		AssertSubscriber<Integer> ts = AssertSubscriber.create();
 
-		main.sample(other).subscribe(ts);
+		main.asFlux()
+		    .sample(other).subscribe(ts);
 
 		Assert.assertFalse("Main subscriber?", main.hasDownstreams());
 		Assert.assertFalse("Other subscriber?", other.hasDownstreams());

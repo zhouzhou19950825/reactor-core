@@ -147,10 +147,11 @@ public class FluxMapTest extends FluxOperatorTest<String, String> {
 	public void asyncFusion() {
 		AssertSubscriber<Object> ts = AssertSubscriber.create();
 
-		UnicastProcessor<Integer> up =
-				UnicastProcessor.create(new ConcurrentLinkedQueue<>());
+		BalancedFluxProcessor<Integer> up =
+				Processors.<Integer>unicast().queue(new ConcurrentLinkedQueue<>()).build();
 
-		up.map(v -> v + 1)
+		up.asFlux()
+		  .map(v -> v + 1)
 		  .subscribe(ts);
 
 		for (int i = 1; i < 11; i++) {
@@ -167,12 +168,12 @@ public class FluxMapTest extends FluxOperatorTest<String, String> {
 	public void asyncFusionBackpressured() {
 		AssertSubscriber<Object> ts = AssertSubscriber.create(1);
 
-		UnicastProcessor<Integer> up =
-				UnicastProcessor.create(new ConcurrentLinkedQueue<>());
+		BalancedFluxProcessor<Integer> up =
+				Processors.<Integer>unicast().queue(new ConcurrentLinkedQueue<>()).build();
 
 		Flux.just(1)
 		    .hide()
-		    .flatMap(w -> up.map(v -> v + 1))
+		    .flatMap(w -> up.asFlux().map(v -> v + 1))
 		    .subscribe(ts);
 
 		up.onNext(1);

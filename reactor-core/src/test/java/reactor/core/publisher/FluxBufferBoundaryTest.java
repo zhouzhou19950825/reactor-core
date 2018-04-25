@@ -73,10 +73,11 @@ public class FluxBufferBoundaryTest
 	public void normal() {
 		AssertSubscriber<List<Integer>> ts = AssertSubscriber.create();
 
-		DirectProcessor<Integer> sp1 = DirectProcessor.create();
-		DirectProcessor<Integer> sp2 = DirectProcessor.create();
+		BalancedFluxProcessor<Integer> sp1 = Processors.direct();
+		BalancedFluxProcessor<Integer> sp2 = Processors.direct();
 
-		sp1.buffer(sp2)
+		sp1.asFlux()
+		   .buffer(sp2)
 		   .subscribe(ts);
 
 		ts.assertNoValues()
@@ -124,10 +125,11 @@ public class FluxBufferBoundaryTest
 	public void mainError() {
 		AssertSubscriber<List<Integer>> ts = AssertSubscriber.create();
 
-		DirectProcessor<Integer> sp1 = DirectProcessor.create();
-		DirectProcessor<Integer> sp2 = DirectProcessor.create();
+		BalancedFluxProcessor<Integer> sp1 = Processors.direct();
+		BalancedFluxProcessor<Integer> sp2 = Processors.direct();
 
-		sp1.buffer(sp2)
+		sp1.asFlux()
+		   .buffer(sp2)
 		   .subscribe(ts);
 
 		ts.assertNoValues()
@@ -170,10 +172,11 @@ public class FluxBufferBoundaryTest
 	public void otherError() {
 		AssertSubscriber<List<Integer>> ts = AssertSubscriber.create();
 
-		DirectProcessor<Integer> sp1 = DirectProcessor.create();
-		DirectProcessor<Integer> sp2 = DirectProcessor.create();
+		BalancedFluxProcessor<Integer> sp1 = Processors.direct();
+		BalancedFluxProcessor<Integer> sp2 = Processors.direct();
 
-		sp1.buffer(sp2)
+		sp1.asFlux()
+		   .buffer(sp2)
 		   .subscribe(ts);
 
 		ts.assertNoValues()
@@ -216,10 +219,11 @@ public class FluxBufferBoundaryTest
 	public void bufferSupplierThrows() {
 		AssertSubscriber<List<Integer>> ts = AssertSubscriber.create();
 
-		DirectProcessor<Integer> sp1 = DirectProcessor.create();
-		DirectProcessor<Integer> sp2 = DirectProcessor.create();
+		BalancedFluxProcessor<Integer> sp1 = Processors.direct();
+		BalancedFluxProcessor<Integer> sp2 = Processors.direct();
 
-		sp1.buffer(sp2, (Supplier<List<Integer>>) () -> {
+		sp1.asFlux()
+		   .buffer(sp2, (Supplier<List<Integer>>) () -> {
 			throw new RuntimeException("forced failure");
 		})
 		   .subscribe(ts);
@@ -237,12 +241,13 @@ public class FluxBufferBoundaryTest
 	public void bufferSupplierThrowsLater() {
 		AssertSubscriber<List<Integer>> ts = AssertSubscriber.create();
 
-		DirectProcessor<Integer> sp1 = DirectProcessor.create();
-		DirectProcessor<Integer> sp2 = DirectProcessor.create();
+		BalancedFluxProcessor<Integer> sp1 = Processors.direct();
+		BalancedFluxProcessor<Integer> sp2 = Processors.direct();
 
 		int count[] = {1};
 
-		sp1.buffer(sp2, (Supplier<List<Integer>>) () -> {
+		sp1.asFlux()
+		   .buffer(sp2, (Supplier<List<Integer>>) () -> {
 			if (count[0]-- > 0) {
 				return new ArrayList<>();
 			}
@@ -268,10 +273,11 @@ public class FluxBufferBoundaryTest
 	public void bufferSupplierReturnsNUll() {
 		AssertSubscriber<List<Integer>> ts = AssertSubscriber.create();
 
-		DirectProcessor<Integer> sp1 = DirectProcessor.create();
-		DirectProcessor<Integer> sp2 = DirectProcessor.create();
+		BalancedFluxProcessor<Integer> sp1 = Processors.direct();
+		BalancedFluxProcessor<Integer> sp2 = Processors.direct();
 
-		sp1.buffer(sp2, (Supplier<List<Integer>>) () -> null)
+		sp1.asFlux()
+		   .buffer(sp2, (Supplier<List<Integer>>) () -> null)
 		   .subscribe(ts);
 
 		Assert.assertFalse("sp1 has subscribers?", sp1.hasDownstreams());
@@ -319,16 +325,17 @@ public class FluxBufferBoundaryTest
 	@Test
 	public void bufferWillAcumulateMultipleListsOfValues() {
 		//given: "a source and a collected flux"
-		EmitterProcessor<Integer> numbers = EmitterProcessor.create();
+		BalancedFluxProcessor<Integer> numbers = Processors.emitter().build();
 
 		//non overlapping buffers
-		EmitterProcessor<Integer> boundaryFlux = EmitterProcessor.create();
+		BalancedFluxProcessor<Integer> boundaryFlux = Processors.emitter().build();
 
-		MonoProcessor<List<List<Integer>>> res = numbers.buffer(boundaryFlux)
-		                                       .buffer()
-		                                       .publishNext()
-		                                       .toProcessor();
-		res.subscribe();
+		BalancedMonoProcessor<List<List<Integer>>> res = numbers.asFlux()
+		                                                        .buffer(boundaryFlux)
+		                                                        .buffer()
+		                                                        .publishNext()
+		                                                        .toProcessor();
+		res.asMono().subscribe();
 
 		numbers.onNext(1);
 		numbers.onNext(2);
@@ -339,7 +346,7 @@ public class FluxBufferBoundaryTest
 		numbers.onComplete();
 
 		//"the collected lists are available"
-		assertThat(res.block()).containsExactly(Arrays.asList(1, 2, 3), Arrays.asList(5, 6));
+		assertThat(res.asMono().block()).containsExactly(Arrays.asList(1, 2, 3), Arrays.asList(5, 6));
 	}
 
 	@Test

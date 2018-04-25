@@ -29,27 +29,27 @@ public class DirectProcessorTest {
 
     @Test(expected = NullPointerException.class)
     public void onNextNull() {
-	    DirectProcessor.create().onNext(null);
+	    new DirectProcessor<>().onNext(null);
     }
 
     @Test(expected = NullPointerException.class)
     public void onErrorNull() {
-	    DirectProcessor.create().onError(null);
+	    new DirectProcessor<>().onError(null);
     }
 
     @Test(expected = NullPointerException.class)
     public void onSubscribeNull() {
-        DirectProcessor.create().onSubscribe(null);
+        new DirectProcessor<>().onSubscribe(null);
     }
 
     @Test(expected = NullPointerException.class)
     public void subscribeNull() {
-	    DirectProcessor.create().subscribe((Subscriber<Object>)null);
+	    new DirectProcessor<>().subscribe((Subscriber<Object>)null);
     }
 
     @Test
     public void normal() {
-        DirectProcessor<Integer> tp = DirectProcessor.create();
+        DirectProcessor<Integer> tp = new DirectProcessor<>();
 
 	    StepVerifier.create(tp)
 	                .then(() -> {
@@ -79,7 +79,7 @@ public class DirectProcessorTest {
 
     @Test
     public void normalBackpressured() {
-        DirectProcessor<Integer> tp = DirectProcessor.create();
+        DirectProcessor<Integer> tp = new DirectProcessor<>();
 
 	    StepVerifier.create(tp, 0L)
 	                .then(() -> {
@@ -106,7 +106,7 @@ public class DirectProcessorTest {
 
     @Test
     public void notEnoughRequests() {
-        DirectProcessor<Integer> tp = DirectProcessor.create();
+        DirectProcessor<Integer> tp = new DirectProcessor<>();
 
 	    StepVerifier.create(tp, 1L)
 	                .then(() -> {
@@ -123,7 +123,7 @@ public class DirectProcessorTest {
     public void error() {
         AssertSubscriber<Integer> ts = AssertSubscriber.create();
 
-        DirectProcessor<Integer> tp = DirectProcessor.create();
+        DirectProcessor<Integer> tp = new DirectProcessor<>();
 
         tp.subscribe(ts);
 
@@ -165,7 +165,7 @@ public class DirectProcessorTest {
     public void terminatedWithError() {
         AssertSubscriber<Integer> ts = AssertSubscriber.create();
 
-        DirectProcessor<Integer> tp = DirectProcessor.create();
+        DirectProcessor<Integer> tp = new DirectProcessor<>();
         tp.onError(new RuntimeException("forced failure"));
 
         tp.subscribe(ts);
@@ -189,7 +189,7 @@ public class DirectProcessorTest {
     public void terminatedNormally() {
         AssertSubscriber<Integer> ts = AssertSubscriber.create();
 
-        DirectProcessor<Integer> tp = DirectProcessor.create();
+        DirectProcessor<Integer> tp = new DirectProcessor<>();
         tp.onComplete();
 
         tp.subscribe(ts);
@@ -209,7 +209,7 @@ public class DirectProcessorTest {
         AssertSubscriber<Integer> ts = AssertSubscriber.create();
         ts.cancel();
 
-        DirectProcessor<Integer> tp = DirectProcessor.create();
+        DirectProcessor<Integer> tp = new DirectProcessor<>();
 
         tp.subscribe(ts);
 
@@ -227,7 +227,7 @@ public class DirectProcessorTest {
     public void subscriberCancels() {
         AssertSubscriber<Integer> ts = AssertSubscriber.create();
 
-        DirectProcessor<Integer> tp = DirectProcessor.create();
+        DirectProcessor<Integer> tp = new DirectProcessor<>();
 
         tp.subscribe(ts);
 

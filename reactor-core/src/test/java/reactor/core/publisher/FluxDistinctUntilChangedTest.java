@@ -219,9 +219,10 @@ public class FluxDistinctUntilChangedTest extends FluxOperatorTest<String, Strin
 
 	@Test
 	public void allDistinctConditional() {
-		DirectProcessor<Integer> dp = new DirectProcessor<>();
+		BalancedFluxProcessor<Integer> dp = Processors.direct();
 
-		AssertSubscriber<Integer> ts = dp.distinctUntilChanged()
+		AssertSubscriber<Integer> ts = dp.asFlux()
+		                                 .distinctUntilChanged()
 		                                 .filter(v -> true)
 		                                 .subscribeWith(AssertSubscriber.create());
 

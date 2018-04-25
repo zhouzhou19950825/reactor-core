@@ -387,7 +387,7 @@ public class WorkQueueProcessorTest {
 
 	@Test
 	public void simpleTest() throws Exception {
-		final TopicProcessor<Integer> sink = TopicProcessor.<Integer>builder().name("topic").build();
+		final TopicProcessor<Integer> sink = new TopicProcessor.Builder<Integer>().name("topic").build();
 		final WorkQueueProcessor<Integer> processor = WorkQueueProcessor.<Integer>builder().name("queue").build();
 
 		int elems = 10000;

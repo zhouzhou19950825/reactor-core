@@ -167,8 +167,8 @@ public class FluxWindowPredicateTest extends
 
 	@Test
 	public void normalUntil() {
-		DirectProcessor<Integer> sp1 = DirectProcessor.create();
-		FluxWindowPredicate<Integer> windowUntil = new FluxWindowPredicate<>(sp1,
+		BalancedFluxProcessor<Integer> sp1 = Processors.direct();
+		FluxWindowPredicate<Integer> windowUntil = new FluxWindowPredicate<>(sp1.asFlux(),
 				Queues.small(),
 				Queues.unbounded(),
 				Queues.SMALL_BUFFER_SIZE,
@@ -234,9 +234,9 @@ public class FluxWindowPredicateTest extends
 
 	@Test
 	public void mainErrorUntilIsPropagatedToBothWindowAndMain() {
-		DirectProcessor<Integer> sp1 = DirectProcessor.create();
+		BalancedFluxProcessor<Integer> sp1 = Processors.direct();
 		FluxWindowPredicate<Integer> windowUntil = new FluxWindowPredicate<>(
-				sp1, Queues.small(), Queues.unbounded(), Queues.SMALL_BUFFER_SIZE,
+				sp1.asFlux(), Queues.small(), Queues.unbounded(), Queues.SMALL_BUFFER_SIZE,
 				i -> i % 3 == 0, Mode.UNTIL);
 
 		StepVerifier.create(windowUntil.flatMap(Flux::materialize))
@@ -260,9 +260,9 @@ public class FluxWindowPredicateTest extends
 
 	@Test
 	public void predicateErrorUntil() {
-		DirectProcessor<Integer> sp1 = DirectProcessor.create();
+		BalancedFluxProcessor<Integer> sp1 = Processors.direct();
 		FluxWindowPredicate<Integer> windowUntil = new FluxWindowPredicate<>(
-				sp1, Queues.small(), Queues.unbounded(), Queues.SMALL_BUFFER_SIZE,
+				sp1.asFlux(), Queues.small(), Queues.unbounded(), Queues.SMALL_BUFFER_SIZE,
 				i -> {
 					if (i == 5) throw new IllegalStateException("predicate failure");
 					return i % 3 == 0;
@@ -288,8 +288,8 @@ public class FluxWindowPredicateTest extends
 
 	@Test
 	public void normalUntilCutBefore() {
-		DirectProcessor<Integer> sp1 = DirectProcessor.create();
-		FluxWindowPredicate<Integer> windowUntilCutBefore = new FluxWindowPredicate<>(sp1,
+		BalancedFluxProcessor<Integer> sp1 = Processors.direct();
+		FluxWindowPredicate<Integer> windowUntilCutBefore = new FluxWindowPredicate<>(sp1.asFlux(),
 				Queues.small(), Queues.unbounded(), Queues.SMALL_BUFFER_SIZE,
 				i -> i % 3 == 0, Mode.UNTIL_CUT_BEFORE);
 
@@ -319,9 +319,9 @@ public class FluxWindowPredicateTest extends
 
 	@Test
 	public void mainErrorUntilCutBeforeIsPropagatedToBothWindowAndMain() {
-		DirectProcessor<Integer> sp1 = DirectProcessor.create();
+		BalancedFluxProcessor<Integer> sp1 = Processors.direct();
 		FluxWindowPredicate<Integer> windowUntilCutBefore =
-				new FluxWindowPredicate<>(sp1, Queues.small(), Queues.unbounded(), Queues.SMALL_BUFFER_SIZE,
+				new FluxWindowPredicate<>(sp1.asFlux(), Queues.small(), Queues.unbounded(), Queues.SMALL_BUFFER_SIZE,
 						i -> i % 3 == 0, Mode.UNTIL_CUT_BEFORE);
 
 		StepVerifier.create(windowUntilCutBefore.flatMap(Flux::materialize))
@@ -346,9 +346,9 @@ public class FluxWindowPredicateTest extends
 
 	@Test
 	public void predicateErrorUntilCutBefore() {
-		DirectProcessor<Integer> sp1 = DirectProcessor.create();
+		BalancedFluxProcessor<Integer> sp1 = Processors.direct();
 		FluxWindowPredicate<Integer> windowUntilCutBefore =
-				new FluxWindowPredicate<>(sp1, Queues.small(), Queues.unbounded(), Queues.SMALL_BUFFER_SIZE,
+				new FluxWindowPredicate<>(sp1.asFlux(), Queues.small(), Queues.unbounded(), Queues.SMALL_BUFFER_SIZE,
 				i -> {
 					if (i == 5) throw new IllegalStateException("predicate failure");
 					return i % 3 == 0;
@@ -380,9 +380,9 @@ public class FluxWindowPredicateTest extends
 
 	@Test
 	public void normalWhile() {
-		DirectProcessor<Integer> sp1 = DirectProcessor.create();
+		BalancedFluxProcessor<Integer> sp1 = Processors.direct();
 		FluxWindowPredicate<Integer> windowWhile = new FluxWindowPredicate<>(
-				sp1, Queues.small(), Queues.unbounded(), Queues.SMALL_BUFFER_SIZE,
+				sp1.asFlux(), Queues.small(), Queues.unbounded(), Queues.SMALL_BUFFER_SIZE,
 				i -> i % 3 != 0, Mode.WHILE);
 
 		StepVerifier.create(windowWhile.flatMap(Flux::materialize))
@@ -411,9 +411,9 @@ public class FluxWindowPredicateTest extends
 
 	@Test
 	public void normalWhileDoesntInitiallyMatch() {
-		DirectProcessor<Integer> sp1 = DirectProcessor.create();
+		BalancedFluxProcessor<Integer> sp1 = Processors.direct();
 		FluxWindowPredicate<Integer> windowWhile = new FluxWindowPredicate<>(
-				sp1, Queues.small(), Queues.unbounded(), Queues.SMALL_BUFFER_SIZE,
+				sp1.asFlux(), Queues.small(), Queues.unbounded(), Queues.SMALL_BUFFER_SIZE,
 				i -> i % 3 == 0, Mode.WHILE);
 
 		StepVerifier.create(windowWhile.flatMap(Flux::materialize))
@@ -449,9 +449,9 @@ public class FluxWindowPredicateTest extends
 
 	@Test
 	public void normalWhileDoesntMatch() {
-		DirectProcessor<Integer> sp1 = DirectProcessor.create();
+		BalancedFluxProcessor<Integer> sp1 = Processors.direct();
 		FluxWindowPredicate<Integer> windowWhile = new FluxWindowPredicate<>(
-				sp1, Queues.small(), Queues.unbounded(), Queues.SMALL_BUFFER_SIZE,
+				sp1.asFlux(), Queues.small(), Queues.unbounded(), Queues.SMALL_BUFFER_SIZE,
 				i -> i > 4, Mode.WHILE);
 
 		StepVerifier.create(windowWhile.flatMap(Flux::materialize))
@@ -484,9 +484,9 @@ public class FluxWindowPredicateTest extends
 
 	@Test
 	public void mainErrorWhileIsPropagatedToBothWindowAndMain() {
-		DirectProcessor<Integer> sp1 = DirectProcessor.create();
+		BalancedFluxProcessor<Integer> sp1 = Processors.direct();
 		FluxWindowPredicate<Integer> windowWhile = new FluxWindowPredicate<>(
-				sp1, Queues.small(), Queues.unbounded(), Queues.SMALL_BUFFER_SIZE,
+				sp1.asFlux(), Queues.small(), Queues.unbounded(), Queues.SMALL_BUFFER_SIZE,
 				i -> i % 3 == 0, Mode.WHILE);
 
 		StepVerifier.create(windowWhile.flatMap(Flux::materialize))
@@ -533,9 +533,9 @@ public class FluxWindowPredicateTest extends
 
 	@Test
 	public void predicateErrorWhile() {
-		DirectProcessor<Integer> sp1 = DirectProcessor.create();
+		BalancedFluxProcessor<Integer> sp1 = Processors.direct();
 		FluxWindowPredicate<Integer> windowWhile = new FluxWindowPredicate<>(
-				sp1, Queues.small(), Queues.unbounded(), Queues.SMALL_BUFFER_SIZE,
+				sp1.asFlux(), Queues.small(), Queues.unbounded(), Queues.SMALL_BUFFER_SIZE,
 				i -> {
 					if (i == 3) return true;
 					if (i == 5) throw new IllegalStateException("predicate failure");

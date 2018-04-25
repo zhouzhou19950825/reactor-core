@@ -157,8 +157,8 @@ public class FluxCombineLatestTest extends FluxOperatorTest<String, String> {
 
 	@Test
 	public void fused() {
-		DirectProcessor<Integer> dp1 = DirectProcessor.create();
-		DirectProcessor<Integer> dp2 = DirectProcessor.create();
+		BalancedFluxProcessor<Integer> dp1 = Processors.direct();
+		BalancedFluxProcessor<Integer> dp2 = Processors.direct();
 
 		AssertSubscriber<Integer> ts = AssertSubscriber.create();
 		ts.requestedFusionMode(Fuseable.ANY);

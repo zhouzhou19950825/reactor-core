@@ -18,7 +18,7 @@ package reactor.core.publisher.tck;
 
 import org.reactivestreams.Processor;
 import org.testng.SkipException;
-import reactor.core.publisher.WorkQueueProcessor;
+import reactor.core.publisher.Processors;
 
 /**
  * @author Stephane Maldini
@@ -28,7 +28,7 @@ public class WorkQueueProcessorVerification extends AbstractProcessorVerificatio
 
 	@Override
 	public Processor<Long, Long> createIdentityProcessor(int bufferSize) {
-		return  WorkQueueProcessor.<Long>builder().name("rb-work").bufferSize(bufferSize).build();
+		return Processors.relaxedFanOut().name("rb-work").bufferSize(bufferSize).build();
 	}
 
 	@Override

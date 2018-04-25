@@ -141,10 +141,11 @@ public class FluxMergeSequentialTest {
 
 	@Test
 	public void mainErrorsDelayEnd() {
-		DirectProcessor<Integer> main = DirectProcessor.create();
-		final DirectProcessor<Integer> inner = DirectProcessor.create();
+		BalancedFluxProcessor<Integer> main = Processors.direct();
+		final BalancedFluxProcessor<Integer> inner = Processors.direct();
 
-		AssertSubscriber<Integer> ts = main.flatMapSequentialDelayError(t -> inner, 32, 32)
+		AssertSubscriber<Integer> ts = main.asFlux()
+		                                   .flatMapSequentialDelayError(t -> inner, 32, 32)
 		                                   .subscribeWith(AssertSubscriber.create());
 
 		main.onNext(1);
@@ -167,10 +168,11 @@ public class FluxMergeSequentialTest {
 
 	@Test
 	public void mainErrorsImmediate() {
-		DirectProcessor<Integer> main = DirectProcessor.create();
-		final DirectProcessor<Integer> inner = DirectProcessor.create();
+		BalancedFluxProcessor<Integer> main = Processors.direct();
+		final BalancedFluxProcessor<Integer> inner = Processors.direct();
 
-		AssertSubscriber<Integer> ts = main.flatMapSequential(t -> inner)
+		AssertSubscriber<Integer> ts = main.asFlux()
+		                                   .flatMapSequential(t -> inner)
 		                                   .subscribeWith(AssertSubscriber.create());
 
 		main.onNext(1);
@@ -460,11 +462,12 @@ public class FluxMergeSequentialTest {
 
 	@Test
 	public void testReentrantWork() {
-		final DirectProcessor<Integer> subject = DirectProcessor.create();
+		final BalancedFluxProcessor<Integer> subject = Processors.direct();
 
 		final AtomicBoolean once = new AtomicBoolean();
 
-		subject.flatMapSequential(Flux::just)
+		subject.asFlux()
+		       .flatMapSequential(Flux::just)
 		       .doOnNext(t -> {
 			       if (once.compareAndSet(false, true)) {
 				       subject.onNext(2);

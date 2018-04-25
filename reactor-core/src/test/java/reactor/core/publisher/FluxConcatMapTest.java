@@ -277,12 +277,13 @@ public class FluxConcatMapTest extends FluxOperatorTest<String, String> {
 	public void singleSubscriberOnly() {
 		AssertSubscriber<Integer> ts = AssertSubscriber.create();
 
-		DirectProcessor<Integer> source = DirectProcessor.create();
+		BalancedFluxProcessor<Integer> source = Processors.direct();
 
-		DirectProcessor<Integer> source1 = DirectProcessor.create();
-		DirectProcessor<Integer> source2 = DirectProcessor.create();
+		BalancedFluxProcessor<Integer> source1 = Processors.direct();
+		BalancedFluxProcessor<Integer> source2 = Processors.direct();
 
-		source.concatMap(v -> v == 1 ? source1 : source2)
+		source.asFlux()
+		      .concatMap(v -> v == 1 ? source1 : source2)
 		      .subscribe(ts);
 
 		ts.assertNoValues()
@@ -313,12 +314,13 @@ public class FluxConcatMapTest extends FluxOperatorTest<String, String> {
 	public void singleSubscriberOnlyBoundary() {
 		AssertSubscriber<Integer> ts = AssertSubscriber.create();
 
-		DirectProcessor<Integer> source = DirectProcessor.create();
+		BalancedFluxProcessor<Integer> source = Processors.direct();
 
-		DirectProcessor<Integer> source1 = DirectProcessor.create();
-		DirectProcessor<Integer> source2 = DirectProcessor.create();
+		BalancedFluxProcessor<Integer> source1 = Processors.direct();
+		BalancedFluxProcessor<Integer> source2 = Processors.direct();
 
-		source.concatMapDelayError(v -> v == 1 ? source1 : source2)
+		source.asFlux()
+		      .concatMapDelayError(v -> v == 1 ? source1 : source2)
 		      .subscribe(ts);
 
 		ts.assertNoValues()
@@ -352,12 +354,13 @@ public class FluxConcatMapTest extends FluxOperatorTest<String, String> {
 	public void mainErrorsImmediate() {
 		AssertSubscriber<Integer> ts = AssertSubscriber.create();
 
-		DirectProcessor<Integer> source = DirectProcessor.create();
+		BalancedFluxProcessor<Integer> source = Processors.direct();
 
-		DirectProcessor<Integer> source1 = DirectProcessor.create();
-		DirectProcessor<Integer> source2 = DirectProcessor.create();
+		BalancedFluxProcessor<Integer> source1 = Processors.direct();
+		BalancedFluxProcessor<Integer> source2 = Processors.direct();
 
-		source.concatMap(v -> v == 1 ? source1 : source2)
+		source.asFlux()
+		      .concatMap(v -> v == 1 ? source1 : source2)
 		      .subscribe(ts);
 
 		ts.assertNoValues()
@@ -386,12 +389,13 @@ public class FluxConcatMapTest extends FluxOperatorTest<String, String> {
 	public void mainErrorsBoundary() {
 		AssertSubscriber<Integer> ts = AssertSubscriber.create();
 
-		DirectProcessor<Integer> source = DirectProcessor.create();
+		BalancedFluxProcessor<Integer> source = Processors.direct();
 
-		DirectProcessor<Integer> source1 = DirectProcessor.create();
-		DirectProcessor<Integer> source2 = DirectProcessor.create();
+		BalancedFluxProcessor<Integer> source1 = Processors.direct();
+		BalancedFluxProcessor<Integer> source2 = Processors.direct();
 
-		source.concatMapDelayError(v -> v == 1 ? source1 : source2)
+		source.asFlux()
+		      .concatMapDelayError(v -> v == 1 ? source1 : source2)
 		      .subscribe(ts);
 
 		ts.assertNoValues()
@@ -427,12 +431,13 @@ public class FluxConcatMapTest extends FluxOperatorTest<String, String> {
 	public void innerErrorsImmediate() {
 		AssertSubscriber<Integer> ts = AssertSubscriber.create();
 
-		DirectProcessor<Integer> source = DirectProcessor.create();
+		BalancedFluxProcessor<Integer> source = Processors.direct();
 
-		DirectProcessor<Integer> source1 = DirectProcessor.create();
-		DirectProcessor<Integer> source2 = DirectProcessor.create();
+		BalancedFluxProcessor<Integer> source1 = Processors.direct();
+		BalancedFluxProcessor<Integer> source2 = Processors.direct();
 
-		source.concatMap(v -> v == 1 ? source1 : source2)
+		source.asFlux()
+		      .concatMap(v -> v == 1 ? source1 : source2)
 		      .subscribe(ts);
 
 		ts.assertNoValues()
@@ -461,13 +466,14 @@ public class FluxConcatMapTest extends FluxOperatorTest<String, String> {
 	public void innerErrorsBoundary() {
 		AssertSubscriber<Integer> ts = AssertSubscriber.create();
 
-		DirectProcessor<Integer> source = DirectProcessor.create();
+		BalancedFluxProcessor<Integer> source = Processors.direct();
 
-		DirectProcessor<Integer> source1 = DirectProcessor.create();
-		DirectProcessor<Integer> source2 = DirectProcessor.create();
+		BalancedFluxProcessor<Integer> source1 = Processors.direct();
+		BalancedFluxProcessor<Integer> source2 = Processors.direct();
 
 		//gh-1101: default changed from BOUNDARY to END
-		source.concatMapDelayError(v -> v == 1 ? source1 : source2, false, Queues.XS_BUFFER_SIZE)
+		source.asFlux()
+		      .concatMapDelayError(v -> v == 1 ? source1 : source2, false, Queues.XS_BUFFER_SIZE)
 		      .subscribe(ts);
 
 		ts.assertNoValues()
@@ -496,12 +502,13 @@ public class FluxConcatMapTest extends FluxOperatorTest<String, String> {
 	public void innerErrorsEnd() {
 		AssertSubscriber<Integer> ts = AssertSubscriber.create();
 
-		DirectProcessor<Integer> source = DirectProcessor.create();
+		BalancedFluxProcessor<Integer> source = Processors.direct();
 
-		DirectProcessor<Integer> source1 = DirectProcessor.create();
-		DirectProcessor<Integer> source2 = DirectProcessor.create();
+		BalancedFluxProcessor<Integer> source1 = Processors.direct();
+		BalancedFluxProcessor<Integer> source2 = Processors.direct();
 
-		source.concatMapDelayError(v -> v == 1 ? source1 : source2, true, 32)
+		source.asFlux()
+		      .concatMapDelayError(v -> v == 1 ? source1 : source2, true, 32)
 		      .subscribe(ts);
 
 		ts.assertNoValues()
@@ -568,12 +575,13 @@ public class FluxConcatMapTest extends FluxOperatorTest<String, String> {
 	public void asyncFusionMapToNull() {
 		AssertSubscriber<Integer> ts = AssertSubscriber.create();
 
-		UnicastProcessor<Integer> up = UnicastProcessor.create(Queues.<Integer>get(2).get());
+		BalancedFluxProcessor<Integer> up = Processors.<Integer>unicast().queue(Queues.<Integer>get(2).get()).build();
 		up.onNext(1);
 		up.onNext(2);
 		up.onComplete();
 
-		up.map(v -> v == 2 ? null : v)
+		up.asFlux()
+		  .map(v -> v == 2 ? null : v)
 		  .concatMap(Flux::just)
 		  .subscribe(ts);
 
@@ -586,13 +594,14 @@ public class FluxConcatMapTest extends FluxOperatorTest<String, String> {
 	public void asyncFusionMapToNullFilter() {
 		AssertSubscriber<Integer> ts = AssertSubscriber.create();
 
-		UnicastProcessor<Integer> up =
-				UnicastProcessor.create(Queues.<Integer>get(2).get());
+		BalancedFluxProcessor<Integer> up =
+				Processors.<Integer>unicast().queue(Queues.<Integer>get(2).get()).build();
 		up.onNext(1);
 		up.onNext(2);
 		up.onComplete();
 
-		up.map(v -> v == 2 ? null : v)
+		up.asFlux()
+		  .map(v -> v == 2 ? null : v)
 		  .filter(v -> true)
 		  .concatMap(Flux::just)
 		  .subscribe(ts);

@@ -78,13 +78,13 @@ final class UnicastProcessor<T>
 
 	volatile boolean outputFused;
 
-	public UnicastProcessor(Queue<T> queue) {
+	UnicastProcessor(Queue<T> queue) {
 		this.queue = Objects.requireNonNull(queue, "queue");
 		this.onTerminate = null;
 		this.onOverflow = null;
 	}
 
-	public UnicastProcessor(Queue<T> queue, Disposable onTerminate) {
+	UnicastProcessor(Queue<T> queue, Disposable onTerminate) {
 		this.queue = Objects.requireNonNull(queue, "queue");
 		this.onTerminate = Objects.requireNonNull(onTerminate, "onTerminate");
 		this.onOverflow = null;
@@ -97,7 +97,7 @@ final class UnicastProcessor<T>
 		this.onTerminate = null;
 	}
 
-	public UnicastProcessor(Queue<T> queue,
+	UnicastProcessor(Queue<T> queue,
 			Consumer<? super T> onOverflow,
 			Disposable onTerminate) {
 		this.queue = Objects.requireNonNull(queue, "queue");

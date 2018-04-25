@@ -34,10 +34,10 @@ import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 import org.junit.Test;
 import reactor.core.Fuseable;
-import reactor.core.publisher.DirectProcessor;
+import reactor.core.publisher.BalancedFluxProcessor;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.core.publisher.UnicastProcessor;
+import reactor.core.publisher.Processors;
 import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
 import reactor.test.publisher.TestPublisher;
@@ -552,7 +552,7 @@ public class StepVerifierTests {
 
 	@Test
 	public void verifyThenOnCompleteRange() {
-		DirectProcessor<Void> p = DirectProcessor.create();
+		BalancedFluxProcessor<Void> p = Processors.direct();
 
 		Flux<String> flux = Flux.range(0, 3)
 		                        .map(d -> "t" + d)
@@ -1820,8 +1820,8 @@ public class StepVerifierTests {
 
 	@Test
 	public void takeAsyncFusedBackpressured() {
-		UnicastProcessor<String> up = UnicastProcessor.create();
-		StepVerifier.create(up.take(3), 0)
+		BalancedFluxProcessor<String> up = Processors.<String>unicast().build();
+		StepVerifier.create(up.asFlux().take(3), 0)
 		            .expectFusion()
 		            .then(() -> up.onNext("test"))
 		            .then(() -> up.onNext("test"))
@@ -1835,8 +1835,8 @@ public class StepVerifierTests {
 
 	@Test
 	public void cancelAsyncFusion() {
-		UnicastProcessor<String> up = UnicastProcessor.create();
-		StepVerifier.create(up.take(3), 0)
+		BalancedFluxProcessor<String> up = Processors.<String>unicast().build();
+		StepVerifier.create(up.asFlux().take(3), 0)
 		            .expectFusion()
 		            .then(() -> up.onNext("test"))
 		            .then(() -> up.onNext("test"))
@@ -1906,7 +1906,7 @@ public class StepVerifierTests {
 	@Test
 	public void assertNextWithSubscribeOnDirectProcessor() {
 		Scheduler scheduler = Schedulers.newElastic("test");
-		DirectProcessor<Integer> processor = DirectProcessor.create();
+		BalancedFluxProcessor<Integer> processor = Processors.direct();
 		Mono<Integer> doAction = Mono.fromSupplier(() -> 22)
 		                             .doOnNext(processor::onNext)
 		                             .subscribeOn(scheduler);

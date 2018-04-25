@@ -25,14 +25,14 @@ import java.util.function.Consumer;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.reactivestreams.Processor;
 import org.reactivestreams.Publisher;
 import reactor.core.CoreSubscriber;
-import reactor.core.publisher.EmitterProcessor;
+import reactor.core.publisher.BalancedFluxProcessor;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxProcessor;
 import reactor.core.publisher.Mono;
-import reactor.core.publisher.ReplayProcessor;
-import reactor.core.publisher.TopicProcessor;
+import reactor.core.publisher.Processors;
 import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
 import reactor.test.subscriber.AssertSubscriber;
@@ -47,8 +47,8 @@ public class CombinationTests {
 
 	private static final Logger LOG = Loggers.getLogger(CombinationTests.class);
 
-	private FluxProcessor<SensorData, SensorData> sensorEven;
-	private FluxProcessor<SensorData, SensorData> sensorOdd;
+	private BalancedFluxProcessor<SensorData> sensorEven;
+	private BalancedFluxProcessor<SensorData> sensorOdd;
 
 	@Before
 	public void before() {
@@ -85,24 +85,24 @@ public class CombinationTests {
 	public Flux<SensorData> sensorOdd() {
 		if (sensorOdd == null) {
 			// this is the stream we publish odd-numbered events to
-			this.sensorOdd = TopicProcessor.<SensorData>builder().name("odd").build();
+			this.sensorOdd = Processors.<SensorData>fanOut().name("odd").build();
 
 			// add substream to "master" list
 			//allSensors().add(sensorOdd.reduce(this::computeMin).timeout(1000));
 		}
 
-		return sensorOdd.log("odd");
+		return sensorOdd.asFlux().log("odd");
 	}
 
 	public Flux<SensorData> sensorEven() {
 		if (sensorEven == null) {
 			// this is the stream we publish even-numbered events to
-			this.sensorEven = TopicProcessor.<SensorData>builder().name("even").build();
+			this.sensorEven = Processors.<SensorData>fanOut().name("even").build();
 
 			// add substream to "master" list
 			//allSensors().add(sensorEven.reduce(this::computeMin).timeout(1000));
 		}
-		return sensorEven.log("even");
+		return sensorEven.asFlux().log("even");
 	}
 
 	@Test
@@ -194,10 +194,11 @@ public class CombinationTests {
 	public void sampleZipTest3() throws Exception {
 		int elements = 1;
 		CountDownLatch latch = new CountDownLatch(elements + 1);
-		EmitterProcessor<SensorData> sensorDataProcessor = EmitterProcessor.create();
+		BalancedFluxProcessor<SensorData> sensorDataProcessor = Processors.<SensorData>emitter().build();
 		Scheduler scheduler = Schedulers.single();
 
-		sensorDataProcessor.publishOn(scheduler)
+		sensorDataProcessor.asFlux()
+		                   .publishOn(scheduler)
 		                   .subscribe(d -> latch.countDown(), null, latch::countDown);
 
 		Flux.zip(Flux.just(new SensorData(2L, 12.0f)), Flux.just(new SensorData(1L, 14.0f)), this::computeMin)
@@ -294,14 +295,14 @@ public class CombinationTests {
 	}
 
 	AssertSubscriber<Long> ts;
-	ReplayProcessor<Long>  emitter1;
-	ReplayProcessor<Long>  emitter2;
+	BalancedFluxProcessor<Long>  emitter1;
+	BalancedFluxProcessor<Long>  emitter2;
 
 	@Before
 	public void anotherBefore() {
 		ts = AssertSubscriber.create();
-		emitter1 = ReplayProcessor.create();
-		emitter2 = ReplayProcessor.create();
+		emitter1 = Processors.<Long>replay().build();
+		emitter2 = Processors.<Long>replay().build();
 	}
 
 	private void emitValues() {
@@ -322,7 +323,7 @@ public class CombinationTests {
 
 	@Test
 	public void mergeWithNoInterleave() throws Exception{
-		Flux.concat(emitter1.log("test1"), emitter2.log("test2")).log().subscribe(ts);
+		Flux.concat(emitter1.asFlux().log("test1"), emitter2.asFlux().log("test2")).log().subscribe(ts);
 		emitValues();
 		ts.assertValues(1L, 3L, 2L, 4L).assertComplete();
 	}

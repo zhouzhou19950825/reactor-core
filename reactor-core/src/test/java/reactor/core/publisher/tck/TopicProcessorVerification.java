@@ -16,8 +16,7 @@
 package reactor.core.publisher.tck;
 
 import org.reactivestreams.Processor;
-import reactor.core.publisher.FluxProcessor;
-import reactor.core.publisher.TopicProcessor;
+import reactor.core.publisher.Processors;
 
 /**
  * @author Stephane Maldini
@@ -27,8 +26,8 @@ public class TopicProcessorVerification extends AbstractProcessorVerification {
 
 	@Override
 	public Processor<Long, Long> createIdentityProcessor(int bufferSize) {
-		return TopicProcessor.<Long>builder().name("rb-async")
-		                                     .bufferSize(bufferSize)
-		                                     .build();
+		return Processors.<Long>fanOut().name("rb-async")
+		                                 .bufferSize(bufferSize)
+		                                 .build();
 	}
 }

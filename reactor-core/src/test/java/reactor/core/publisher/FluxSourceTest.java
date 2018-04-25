@@ -28,7 +28,7 @@ public class FluxSourceTest {
 
 	@Test
 	public void wrapToFlux(){
-		MonoProcessor<String> mp = MonoProcessor.create();
+		BalancedMonoProcessor<String> mp = Processors.<String>first().build();
 
 		mp.onNext("test");
 		StepVerifier.create(Flux.from(mp))
