@@ -63,23 +63,16 @@ import reactor.util.concurrent.WaitStrategy;
  *
  * @param <E> Type of dispatched signal
  * @author Stephane Maldini
- * @deprecated prefer the {@link Processors#fanOut()} variant, will be removed in 3.2.0.
  */
-@Deprecated
 final class WorkQueueProcessor<E> extends EventLoopProcessor<E> {
 
 	/**
 	 * {@link WorkQueueProcessor} builder that can be used to create new
-	 * processors. Instantiate it through the {@link WorkQueueProcessor#builder()} static
-	 * method:
-	 * <p>
-	 * {@code WorkQueueProcessor<String> processor = WorkQueueProcessor.<String>builder().build()}
+	 * processors. For internal use.
 	 *
 	 * @param <T> Type of dispatched signal
-	 * @deprecated will be replaced by {@link Processors#fanOut()} in 3.2.0
 	 */
-	@Deprecated
-	public final static class Builder<T> implements Processors.FanOutProcessorBuilder {
+	final static class Builder<T> implements Processors.FanOutProcessorBuilder {
 
 		String name;
 		ExecutorService executor;
@@ -168,59 +161,6 @@ final class WorkQueueProcessor<E> extends EventLoopProcessor<E> {
 					share,
 					autoCancel);
 		}
-	}
-
-	/**
-	 * Create a new {@link WorkQueueProcessor} {@link Builder} with default properties.
-	 * @return new WorkQueueProcessor builder
-	 */
-	@Deprecated
-	public final static <T> Builder<T> builder() {
-		return new Builder<>();
-	}
-
-	/**
-	 * Create a new WorkQueueProcessor using {@link Queues#SMALL_BUFFER_SIZE} backlog size,
-	 * blockingWait Strategy and auto-cancel. <p> A new Cached ThreadExecutorPool will be
-	 * implicitly created.
-	 * @param <E> Type of processed signals
-	 * @return a fresh processor
-	 */
-	@Deprecated
-	public static <E> WorkQueueProcessor<E> create() {
-		return WorkQueueProcessor.<E>builder().build();
-	}
-
-	/**
-	 * Create a new WorkQueueProcessor using the passed buffer size, blockingWait
-	 * Strategy and auto-cancel. <p> A new Cached ThreadExecutorPool will be implicitly
-	 * created and will use the passed name to qualify the created threads.
-	 * @param name Use a new Cached ExecutorService and assign this name to the created
-	 * threads
-	 * @param bufferSize A Backlog Size to mitigate slow subscribers
-	 * @param <E> Type of processed signals
-	 * @return a fresh processor
-	 */
-	@Deprecated
-	public static <E> WorkQueueProcessor<E> create(String name, int bufferSize) {
-		return WorkQueueProcessor.<E>builder().name(name).bufferSize(bufferSize).build();
-	}
-
-	/**
-	 * Create a new shared WorkQueueProcessor using the passed buffer size, blockingWait
-	 * Strategy and auto-cancel. <p> A Shared Processor authorizes concurrent onNext calls
-	 * and is suited for multi-threaded publisher that will fan-in data. <p> A new Cached
-	 * ThreadExecutorPool will be implicitly created and will use the passed name to
-	 * qualify the created threads.
-	 * @param name Use a new Cached ExecutorService and assign this name to the created
-	 * threads
-	 * @param bufferSize A Backlog Size to mitigate slow subscribers
-	 * @param <E> Type of processed signals
-	 * @return a fresh processor
-	 */
-	@Deprecated
-	public static <E> WorkQueueProcessor<E> share(String name, int bufferSize) {
-		return WorkQueueProcessor.<E>builder().share(true).name(name).bufferSize(bufferSize).build();
 	}
 
 	@SuppressWarnings("rawtypes")
