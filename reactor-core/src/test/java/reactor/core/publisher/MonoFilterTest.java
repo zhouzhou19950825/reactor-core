@@ -173,11 +173,12 @@ public class MonoFilterTest {
 	@Test
 	public void filterMono() {
 		BalancedMonoProcessor<Integer> mp = Processors.first();
-		Queue mpAsQueue = (Queue) mp;
+
+		MonoProcessor mpAsMonoProcessor = (MonoProcessor) mp;
 		StepVerifier.create(Mono.just(2).filter(s -> s % 2 == 0).subscribeWith(mp))
 		            .then(() -> assertThat(mp.isError()).isFalse())
 		            .then(() -> assertThat(mp.isSuccess()).isTrue())
-		            .then(() -> assertThat(mpAsQueue.peek()).isEqualTo(2))
+		            .then(() -> assertThat(mpAsMonoProcessor.peek()).isEqualTo(2))
 		            .then(() -> assertThat(mp.isTerminated()).isTrue())
 		            .expectNext(2)
 		            .verifyComplete();
@@ -187,11 +188,11 @@ public class MonoFilterTest {
 	@Test
 	public void filterMonoNot() {
 		BalancedMonoProcessor<Integer> mp = Processors.first();
-		Queue mpAsQueue = (Queue) mp;
+		MonoProcessor mpAsMonoProcessor = (MonoProcessor) mp;
 		StepVerifier.create(Mono.just(1).filter(s -> s % 2 == 0).subscribeWith(mp))
 		            .then(() -> assertThat(mp.isError()).isFalse())
 		            .then(() -> assertThat(mp.isSuccess()).isTrue())
-		            .then(() -> assertThat(mpAsQueue.peek()).isNull())
+		            .then(() -> assertThat(mpAsMonoProcessor.peek()).isNull())
 		            .then(() -> assertThat(mp.isTerminated()).isTrue())
 		            .verifyComplete();
 	}

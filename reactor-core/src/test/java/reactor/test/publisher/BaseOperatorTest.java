@@ -910,9 +910,12 @@ public abstract class BaseOperatorTest<I, PI extends Publisher<? extends I>, O, 
 	final Runnable testUnicastDropPath(OperatorScenario<I, PI, O, PO> scenario,
 			Scannable up) {
 		return () -> {
-			Scannable actualScannable = up.scan(Scannable.Attr.ACTUAL);
-			assertThat(actualScannable).isInstanceOf(CoreSubscriber.class);
-			CoreSubscriber<I> actual = (CoreSubscriber<I>) actualScannable;
+			//up is a UnicastProcessor but class is not visible anymore, and the base interface doesn't have an `actual()` method
+			//futhermore, UnicastProcessor's actual isn't guaranteed to be Scannable, hence the scanUnsafe
+			Object unsafeActual = up.scanUnsafe(Scannable.Attr.ACTUAL);
+			assertThat(unsafeActual).isInstanceOf(CoreSubscriber.class);
+			@SuppressWarnings("unchecked")
+			CoreSubscriber<I> actual = (CoreSubscriber<I>) unsafeActual;
 			if (actual != null) {
 				actual
 				  .onError(exception());

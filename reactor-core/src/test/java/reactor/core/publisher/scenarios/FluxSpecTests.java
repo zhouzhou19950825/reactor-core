@@ -39,6 +39,7 @@ import reactor.core.publisher.BalancedMonoProcessor;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxProcessor;
 import reactor.core.publisher.Mono;
+import reactor.core.publisher.MonoProcessorTest;
 import reactor.core.publisher.Processors;
 import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
@@ -687,8 +688,7 @@ public class FluxSpecTests {
 		source.onComplete();
 
 //		then: "the count value matches the number of accept"
-		assertThat(tap).isInstanceOf(Queue.class);
-		assertThat(((Queue) tap).peek()).isEqualTo(3);
+		assertThat(tap.peek()).isEqualTo(3);
 	}
 
 	@Test
@@ -929,8 +929,7 @@ public class FluxSpecTests {
 		source.onComplete();
 
 //		then: "the reduced composable holds the reduced value"
-		assertThat(value).isInstanceOf(Queue.class);
-		assertThat(((Queue) value).peek()).isEqualTo(120);
+		assertThat(value.peek()).isEqualTo(120);
 	}
 
 	@Test
@@ -941,21 +940,18 @@ public class FluxSpecTests {
 		BalancedMonoProcessor<Integer> value = source.asFlux()
 		                                             .reduce(new Reduction())
 		                                             .subscribeWith(Processors.first());
-		Queue valueAsQueue = (Queue) value;
-
-
 //		when: "the first value is accepted"
 		source.onNext(1);
 
 //		then: "the reduced value is unknown"
-		assertThat(valueAsQueue.peek()).isNull();
+		assertThat(value.peek()).isNull();
 
 //		when: "the second value is accepted"
 		source.onNext(2);
 		source.onComplete();
 
 //		then: "the reduced value is known"
-		assertThat(valueAsQueue.peek()).isEqualTo(2);
+		assertThat(value.peek()).isEqualTo(2);
 	}
 
 
@@ -1017,19 +1013,18 @@ public class FluxSpecTests {
 		                              .flatMap(it -> it.log("lol")
 		                                               .reduce(new Reduction()));
 		BalancedMonoProcessor<Integer> value = reduced.subscribeWith(Processors.first());
-		Queue valueAsQueue = (Queue) value;
 
 //		when: "the first value is accepted"
 		source.onNext(1);
 
 //		then: "the reduction is not available"
-		assertThat(valueAsQueue.peek()).isNull();
+		assertThat(value.peek()).isNull();
 
 //		when: "the second value is accepted and flushed"
 		source.onNext(2);
 
 //		then: "the updated reduction is available"
-		assertThat(valueAsQueue.peek()).isEqualTo(2);
+		assertThat(value.peek()).isEqualTo(2);
 	}
 
 
