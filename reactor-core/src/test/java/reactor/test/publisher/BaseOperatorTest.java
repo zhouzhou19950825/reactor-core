@@ -913,10 +913,11 @@ public abstract class BaseOperatorTest<I, PI extends Publisher<? extends I>, O, 
 			//up is a UnicastProcessor but class is not visible anymore, and the base interface doesn't have an `actual()` method
 			//futhermore, UnicastProcessor's actual isn't guaranteed to be Scannable, hence the scanUnsafe
 			Object unsafeActual = up.scanUnsafe(Scannable.Attr.ACTUAL);
-			assertThat(unsafeActual).isInstanceOf(CoreSubscriber.class);
-			@SuppressWarnings("unchecked")
-			CoreSubscriber<I> actual = (CoreSubscriber<I>) unsafeActual;
-			if (actual != null) {
+			if (unsafeActual != null) {
+				assertThat(unsafeActual).isInstanceOf(CoreSubscriber.class);
+				@SuppressWarnings("unchecked")
+				CoreSubscriber<I> actual = (CoreSubscriber<I>) unsafeActual;
+
 				actual
 				  .onError(exception());
 
