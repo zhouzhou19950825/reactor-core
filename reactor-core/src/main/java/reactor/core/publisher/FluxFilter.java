@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2017 Pivotal Software Inc, All Rights Reserved.
+ * Copyright (c) 2011-2018 Pivotal Software Inc, All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -83,7 +83,7 @@ final class FluxFilter<T> extends FluxOperator<T, T> {
 		@Override
 		public void onNext(T t) {
 			if (done) {
-				Operators.onNextDropped(t, ctx);
+				Operators.onNextDropped(t,  this.ctx);
 				return;
 			}
 
@@ -93,21 +93,21 @@ final class FluxFilter<T> extends FluxOperator<T, T> {
 				b = predicate.test(t);
 			}
 			catch (Throwable e) {
-				Throwable e_ = Operators.onNextError(t, e, ctx, s);
+				Throwable e_ = Operators.onNextError(t, e,  this.ctx, s);
 				if (e_ != null) {
 					onError(e_);
 				}
 				else {
 					s.request(1);
 				}
-				Operators.onDiscard(t, ctx);
+				Operators.onDiscard(t,  this.ctx);
 				return;
 			}
 			if (b) {
 				actual.onNext(t);
 			}
 			else {
-				Operators.onDiscard(t, ctx);
+				Operators.onDiscard(t,  this.ctx);
 				s.request(1);
 			}
 		}
@@ -115,7 +115,7 @@ final class FluxFilter<T> extends FluxOperator<T, T> {
 		@Override
 		public boolean tryOnNext(T t) {
 			if (done) {
-				Operators.onNextDropped(t, ctx);
+				Operators.onNextDropped(t,  this.ctx);
 				return false;
 			}
 
@@ -125,18 +125,18 @@ final class FluxFilter<T> extends FluxOperator<T, T> {
 				b = predicate.test(t);
 			}
 			catch (Throwable e) {
-				Throwable e_ = Operators.onNextError(t, e, ctx, s);
+				Throwable e_ = Operators.onNextError(t, e,  this.ctx, s);
 				if (e_ != null) {
 					onError(e_);
 				}
-				Operators.onDiscard(t, ctx);
+				Operators.onDiscard(t,  this.ctx);
 				return false;
 			}
 			if (b) {
 				actual.onNext(t);
 			}
 			else {
-				Operators.onDiscard(t, ctx);
+				Operators.onDiscard(t,  this.ctx);
 			}
 			return b;
 		}
@@ -144,7 +144,7 @@ final class FluxFilter<T> extends FluxOperator<T, T> {
 		@Override
 		public void onError(Throwable t) {
 			if (done) {
-				Operators.onErrorDropped(t, ctx);
+				Operators.onErrorDropped(t,  this.ctx);
 				return;
 			}
 			done = true;
@@ -172,6 +172,11 @@ final class FluxFilter<T> extends FluxOperator<T, T> {
 		@Override
 		public CoreSubscriber<? super T> actual() {
 			return actual;
+		}
+
+		@Override
+		public Context currentContext() {
+			return this.ctx;
 		}
 
 		@Override
@@ -216,7 +221,7 @@ final class FluxFilter<T> extends FluxOperator<T, T> {
 		@Override
 		public void onNext(T t) {
 			if (done) {
-				Operators.onNextDropped(t, ctx);
+				Operators.onNextDropped(t,  this.ctx);
 				return;
 			}
 
@@ -226,14 +231,14 @@ final class FluxFilter<T> extends FluxOperator<T, T> {
 				b = predicate.test(t);
 			}
 			catch (Throwable e) {
-				Throwable e_ = Operators.onNextError(t, e, ctx, s);
+				Throwable e_ = Operators.onNextError(t, e,  this.ctx, s);
 				if (e_ != null) {
 					onError(e_);
 				}
 				else {
 					s.request(1);
 				}
-				Operators.onDiscard(t, ctx);
+				Operators.onDiscard(t,  this.ctx);
 				return;
 			}
 			if (b) {
@@ -241,14 +246,14 @@ final class FluxFilter<T> extends FluxOperator<T, T> {
 			}
 			else {
 				s.request(1);
-				Operators.onDiscard(t, ctx);
+				Operators.onDiscard(t,  this.ctx);
 			}
 		}
 
 		@Override
 		public boolean tryOnNext(T t) {
 			if (done) {
-				Operators.onNextDropped(t, ctx);
+				Operators.onNextDropped(t,  this.ctx);
 				return false;
 			}
 
@@ -258,18 +263,18 @@ final class FluxFilter<T> extends FluxOperator<T, T> {
 				b = predicate.test(t);
 			}
 			catch (Throwable e) {
-				Throwable e_ = Operators.onNextError(t, e, ctx, s);
+				Throwable e_ = Operators.onNextError(t, e,  this.ctx, s);
 				if (e_ != null) {
 					onError(e_);
 				}
-				Operators.onDiscard(t, ctx);
+				Operators.onDiscard(t,  this.ctx);
 				return false;
 			}
 			if (b) {
 				return actual.tryOnNext(t);
 			}
 			else {
-				Operators.onDiscard(t, ctx);
+				Operators.onDiscard(t,  this.ctx);
 				return false;
 			}
 		}
@@ -277,7 +282,7 @@ final class FluxFilter<T> extends FluxOperator<T, T> {
 		@Override
 		public void onError(Throwable t) {
 			if (done) {
-				Operators.onErrorDropped(t, ctx);
+				Operators.onErrorDropped(t,  this.ctx);
 				return;
 			}
 			done = true;
@@ -306,6 +311,11 @@ final class FluxFilter<T> extends FluxOperator<T, T> {
 		@Override
 		public CoreSubscriber<? super T> actual() {
 			return actual;
+		}
+
+		@Override
+		public Context currentContext() {
+			return this.ctx;
 		}
 
 		@Override

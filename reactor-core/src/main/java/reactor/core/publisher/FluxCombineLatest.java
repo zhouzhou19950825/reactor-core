@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2017 Pivotal Software Inc, All Rights Reserved.
+ * Copyright (c) 2011-2018 Pivotal Software Inc, All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -189,6 +189,7 @@ final class FluxCombineLatest<T, R> extends Flux<R> implements Fuseable, SourceP
 		final Queue<SourceAndArray>     queue;
 		final Object[]                  latest;
 		final CoreSubscriber<? super R> actual;
+		final Context                   ctx;
 
 		boolean outputFused;
 
@@ -227,6 +228,7 @@ final class FluxCombineLatest<T, R> extends Flux<R> implements Fuseable, SourceP
 				int n,
 				Queue<SourceAndArray> queue, int prefetch) {
 		 	this.actual = actual;
+		 	this.ctx = actual.currentContext();
 			this.combiner = combiner;
 			@SuppressWarnings("unchecked") CombineLatestInner<T>[] a =
 					new CombineLatestInner[n];
@@ -242,7 +244,7 @@ final class FluxCombineLatest<T, R> extends Flux<R> implements Fuseable, SourceP
 		public final CoreSubscriber<? super R> actual() {
 			return actual;
 		}
-
+		
 		@Override
 		public void request(long n) {
 			if (Operators.validate(n)) {
@@ -313,7 +315,7 @@ final class FluxCombineLatest<T, R> extends Flux<R> implements Fuseable, SourceP
 
 					if (!queue.offer(sa)) {
 						innerError(Operators.onOperatorError(this, Exceptions.failWithOverflow(Exceptions.BACKPRESSURE_ERROR_QUEUE_FULL),
-								actual.currentContext()));
+								 this.ctx));
 						return;
 					}
 
@@ -361,8 +363,8 @@ final class FluxCombineLatest<T, R> extends Flux<R> implements Fuseable, SourceP
 				drain();
 			}
 			else {
-				discardQueue(queue, actual.currentContext());
-				Operators.onErrorDropped(e, actual.currentContext());
+				discardQueue(queue);
+				Operators.onErrorDropped(e, this.ctx);
 			}
 		}
 
@@ -375,13 +377,13 @@ final class FluxCombineLatest<T, R> extends Flux<R> implements Fuseable, SourceP
 			for (; ; ) {
 
 				if (cancelled) {
-					discardQueue(q, a.currentContext());
+					discardQueue(q);
 					return;
 				}
 
 				Throwable ex = error;
 				if (ex != null) {
-					discardQueue(q, a.currentContext());
+					discardQueue(q);
 					a.onError(ex);
 					return;
 				}
@@ -407,7 +409,6 @@ final class FluxCombineLatest<T, R> extends Flux<R> implements Fuseable, SourceP
 		}
 
 		void drainAsync() {
-			final CoreSubscriber<? super R> a = actual;
 			final Queue<SourceAndArray> q = queue;
 
 			int missed = 1;
@@ -424,7 +425,7 @@ final class FluxCombineLatest<T, R> extends Flux<R> implements Fuseable, SourceP
 
 					boolean empty = v == null;
 
-					if (checkTerminated(d, empty, a, q)) {
+					if (checkTerminated(d, empty, q)) {
 						return;
 					}
 
@@ -438,10 +439,10 @@ final class FluxCombineLatest<T, R> extends Flux<R> implements Fuseable, SourceP
 						w = Objects.requireNonNull(combiner.apply(v.array), "Combiner returned null");
 					}
 					catch (Throwable ex) {
-						Operators.onDiscardMultiple(Stream.of(v.array), actual.currentContext());
+						Operators.onDiscardMultiple(Stream.of(v.array), this.ctx);
 
 						ex = Operators.onOperatorError(this,	ex,	v.array,
-								actual.currentContext());
+								 this.ctx);
 						Exceptions.addThrowable(ERROR, this, ex);
 						//noinspection ConstantConditions
 						ex = Exceptions.terminate(ERROR, this);
@@ -449,7 +450,7 @@ final class FluxCombineLatest<T, R> extends Flux<R> implements Fuseable, SourceP
 						return;
 					}
 
-					a.onNext(w);
+					actual.onNext(w);
 
 					v.source.requestOne();
 
@@ -457,7 +458,7 @@ final class FluxCombineLatest<T, R> extends Flux<R> implements Fuseable, SourceP
 				}
 
 				if (e == r) {
-					if (checkTerminated(done, q.isEmpty(), a, q)) {
+					if (checkTerminated(done, q.isEmpty(), q)) {
 						return;
 					}
 				}
@@ -486,10 +487,10 @@ final class FluxCombineLatest<T, R> extends Flux<R> implements Fuseable, SourceP
 			}
 		}
 
-		boolean checkTerminated(boolean d, boolean empty, CoreSubscriber<?> a, Queue<SourceAndArray> q) {
+		boolean checkTerminated(boolean d, boolean empty, Queue<SourceAndArray> q) {
 			if (cancelled) {
 				cancelAll();
-				discardQueue(q, a.currentContext());
+				discardQueue(q);
 				return true;
 			}
 
@@ -498,14 +499,14 @@ final class FluxCombineLatest<T, R> extends Flux<R> implements Fuseable, SourceP
 
 				if (e != null && e != Exceptions.TERMINATED) {
 					cancelAll();
-					discardQueue(q, a.currentContext());
-					a.onError(e);
+					discardQueue(q);
+					actual.onError(e);
 					return true;
 				}
 				else if (empty) {
 					cancelAll();
 
-					a.onComplete();
+					actual.onComplete();
 					return true;
 				}
 			}
@@ -540,13 +541,13 @@ final class FluxCombineLatest<T, R> extends Flux<R> implements Fuseable, SourceP
 			return r;
 		}
 
-		private void discardQueue(Queue<SourceAndArray> q, Context ctx) {
-			Operators.onDiscardQueueWithClear(q, ctx, v -> Stream.of(v.array));
+		private void discardQueue(Queue<SourceAndArray> q) {
+			Operators.onDiscardQueueWithClear(q, this.ctx, v -> Stream.of(v.array));
 		}
 
 		@Override
 		public void clear() {
-			discardQueue(queue, actual.currentContext());
+			discardQueue(queue);
 		}
 
 		@Override
@@ -588,10 +589,10 @@ final class FluxCombineLatest<T, R> extends Flux<R> implements Fuseable, SourceP
 			this.prefetch = prefetch;
 			this.limit = Operators.unboundedOrLimit(prefetch);
 		}
-
+		
 		@Override
 		public Context currentContext() {
-			return parent.actual.currentContext();
+			return parent.ctx;
 		}
 
 		@Override

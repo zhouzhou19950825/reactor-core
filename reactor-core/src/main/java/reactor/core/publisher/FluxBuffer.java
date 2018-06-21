@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2017 Pivotal Software Inc, All Rights Reserved.
+ * Copyright (c) 2011-2018 Pivotal Software Inc, All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -87,6 +87,7 @@ final class FluxBuffer<T, C extends Collection<? super T>> extends FluxOperator<
 			implements InnerOperator<T, C> {
 
 		final CoreSubscriber<? super C> actual;
+		final Context ctx;
 
 		final Supplier<C> bufferSupplier;
 
@@ -102,6 +103,7 @@ final class FluxBuffer<T, C extends Collection<? super T>> extends FluxOperator<
 				int size,
 				Supplier<C> bufferSupplier) {
 			this.actual = actual;
+			this.ctx = actual.currentContext();
 			this.size = size;
 			this.bufferSupplier = bufferSupplier;
 		}
@@ -116,7 +118,7 @@ final class FluxBuffer<T, C extends Collection<? super T>> extends FluxOperator<
 		@Override
 		public void cancel() {
 			s.cancel();
-			Operators.onDiscardMultiple(buffer, actual.currentContext());
+			Operators.onDiscardMultiple(buffer, this.ctx);
 		}
 
 		@Override
@@ -131,8 +133,7 @@ final class FluxBuffer<T, C extends Collection<? super T>> extends FluxOperator<
 		@Override
 		public void onNext(T t) {
 			if (done) {
-				Context ctx = actual.currentContext();
-				Operators.onNextDropped(t, ctx);
+				Operators.onNextDropped(t, this.ctx);
 				return;
 			}
 
@@ -143,9 +144,8 @@ final class FluxBuffer<T, C extends Collection<? super T>> extends FluxOperator<
 							"The bufferSupplier returned a null buffer");
 				}
 				catch (Throwable e) {
-					final Context ctx = actual.currentContext();
-					onError(Operators.onOperatorError(s, e, t, ctx));
-					Operators.onDiscard(t, ctx); //this is in no buffer
+					onError(Operators.onOperatorError(s, e, t, this.ctx));
+					Operators.onDiscard(t, this.ctx); //this is in no buffer
 					return;
 				}
 				buffer = b;
@@ -162,12 +162,12 @@ final class FluxBuffer<T, C extends Collection<? super T>> extends FluxOperator<
 		@Override
 		public void onError(Throwable t) {
 			if (done) {
-				Operators.onErrorDropped(t, actual.currentContext());
+				Operators.onErrorDropped(t, this.ctx);
 				return;
 			}
 			done = true;
 			actual.onError(t);
-			Operators.onDiscardMultiple(buffer, actual.currentContext());
+			Operators.onDiscardMultiple(buffer, this.ctx);
 		}
 
 		@Override
@@ -191,6 +191,11 @@ final class FluxBuffer<T, C extends Collection<? super T>> extends FluxOperator<
 		}
 
 		@Override
+		public Context currentContext() {
+			return this.ctx;
+		}
+
+		@Override
 		@Nullable
 		public Object scanUnsafe(Attr key) {
 			if (key == Attr.PARENT) return s;
@@ -210,6 +215,7 @@ final class FluxBuffer<T, C extends Collection<? super T>> extends FluxOperator<
 			implements InnerOperator<T, C> {
 
 		final CoreSubscriber<? super C> actual;
+		final Context ctx;
 
 		final Supplier<C> bufferSupplier;
 
@@ -235,6 +241,7 @@ final class FluxBuffer<T, C extends Collection<? super T>> extends FluxOperator<
 				int skip,
 				Supplier<C> bufferSupplier) {
 			this.actual = actual;
+			this.ctx = actual.currentContext();
 			this.size = size;
 			this.skip = skip;
 			this.bufferSupplier = bufferSupplier;
@@ -263,7 +270,7 @@ final class FluxBuffer<T, C extends Collection<? super T>> extends FluxOperator<
 		@Override
 		public void cancel() {
 			s.cancel();
-			Operators.onDiscardMultiple(buffer, actual.currentContext());
+			Operators.onDiscardMultiple(buffer, this.ctx);
 		}
 
 		@Override
@@ -277,9 +284,8 @@ final class FluxBuffer<T, C extends Collection<? super T>> extends FluxOperator<
 
 		@Override
 		public void onNext(T t) {
-			final Context ctx = actual.currentContext();
 			if (done) {
-				Operators.onNextDropped(t, ctx);
+				Operators.onNextDropped(t, this.ctx);
 				return;
 			}
 
@@ -293,8 +299,8 @@ final class FluxBuffer<T, C extends Collection<? super T>> extends FluxOperator<
 							"The bufferSupplier returned a null buffer");
 				}
 				catch (Throwable e) {
-					onError(Operators.onOperatorError(s, e, t, ctx));
-					Operators.onDiscard(t, ctx); //t hasn't got a chance to end up in any buffer
+					onError(Operators.onOperatorError(s, e, t, this.ctx));
+					Operators.onDiscard(t, this.ctx); //t hasn't got a chance to end up in any buffer
 					return;
 				}
 
@@ -310,7 +316,7 @@ final class FluxBuffer<T, C extends Collection<? super T>> extends FluxOperator<
 			}
 			else {
 				//dropping
-				Operators.onDiscard(t, ctx);
+				Operators.onDiscard(t, this.ctx);
 			}
 
 			index = i + 1;
@@ -319,7 +325,7 @@ final class FluxBuffer<T, C extends Collection<? super T>> extends FluxOperator<
 		@Override
 		public void onError(Throwable t) {
 			if (done) {
-				Operators.onErrorDropped(t, actual.currentContext());
+				Operators.onErrorDropped(t, this.ctx);
 				return;
 			}
 
@@ -328,7 +334,7 @@ final class FluxBuffer<T, C extends Collection<? super T>> extends FluxOperator<
 			buffer = null;
 
 			actual.onError(t);
-			Operators.onDiscardMultiple(b, actual.currentContext());
+			Operators.onDiscardMultiple(b, this.ctx);
 		}
 
 		@Override
@@ -354,6 +360,11 @@ final class FluxBuffer<T, C extends Collection<? super T>> extends FluxOperator<
 		}
 
 		@Override
+		public Context currentContext() {
+			return this.ctx;
+		}
+
+		@Override
 		@Nullable
 		public Object scanUnsafe(Attr key) {
 			if (key == Attr.PARENT) return s;
@@ -374,6 +385,7 @@ final class FluxBuffer<T, C extends Collection<? super T>> extends FluxOperator<
 			implements BooleanSupplier, InnerOperator<T, C> {
 
 		final CoreSubscriber<? super C> actual;
+		final Context ctx;
 
 		final Supplier<C> bufferSupplier;
 
@@ -408,6 +420,7 @@ final class FluxBuffer<T, C extends Collection<? super T>> extends FluxOperator<
 				int skip,
 				Supplier<C> bufferSupplier) {
 			this.actual = actual;
+			this.ctx = actual.currentContext();
 			this.size = size;
 			this.skip = skip;
 			this.bufferSupplier = bufferSupplier;
@@ -468,8 +481,7 @@ final class FluxBuffer<T, C extends Collection<? super T>> extends FluxOperator<
 		@Override
 		public void onNext(T t) {
 			if (done) {
-				final Context ctx = actual.currentContext();
-				Operators.onNextDropped(t, ctx);
+				Operators.onNextDropped(t, this.ctx);
 				return;
 			}
 
@@ -483,9 +495,8 @@ final class FluxBuffer<T, C extends Collection<? super T>> extends FluxOperator<
 							"The bufferSupplier returned a null buffer");
 				}
 				catch (Throwable e) {
-					final Context ctx = actual.currentContext();
-					onError(Operators.onOperatorError(s, e, t, ctx));
-					Operators.onDiscard(t, ctx); //didn't get a chance to be added to a buffer
+					onError(Operators.onOperatorError(s, e, t, this.ctx));
+					Operators.onDiscard(t, this.ctx); //didn't get a chance to be added to a buffer
 					return;
 				}
 
@@ -514,7 +525,7 @@ final class FluxBuffer<T, C extends Collection<? super T>> extends FluxOperator<
 		@Override
 		public void onError(Throwable t) {
 			if (done) {
-				Operators.onErrorDropped(t, actual.currentContext());
+				Operators.onErrorDropped(t, this.ctx);
 				return;
 			}
 
@@ -526,9 +537,8 @@ final class FluxBuffer<T, C extends Collection<? super T>> extends FluxOperator<
 
 		@Override
 		public void clear() {
-			Context ctx = actual.currentContext();
             for(C b: this) {
-            	Operators.onDiscardMultiple(b, ctx);
+            	Operators.onDiscardMultiple(b, this.ctx);
             }
 			super.clear();
 		}
@@ -550,6 +560,11 @@ final class FluxBuffer<T, C extends Collection<? super T>> extends FluxOperator<
 		@Override
 		public CoreSubscriber<? super C> actual() {
 			return actual;
+		}
+
+		@Override
+		public Context currentContext() {
+			return this.ctx;
 		}
 
 		@Override

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2017 Pivotal Software Inc, All Rights Reserved.
+ * Copyright (c) 2011-2018 Pivotal Software Inc, All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -94,6 +94,7 @@ final class FluxBufferWhen<T, OPEN, CLOSE, BUFFER extends Collection<? super T>>
 			implements InnerOperator<T, BUFFER> {
 
 		final CoreSubscriber<? super BUFFER>                               actual;
+		final Context                                                      ctx;
 		final Publisher<? extends OPEN>                                    bufferOpen;
 		final Function<? super OPEN, ? extends Publisher<? extends CLOSE>> bufferClose;
 		final Supplier<BUFFER>                                             bufferSupplier;
@@ -129,6 +130,7 @@ final class FluxBufferWhen<T, OPEN, CLOSE, BUFFER extends Collection<? super T>>
 				Publisher<? extends OPEN> bufferOpen,
 				Function<? super OPEN, ? extends Publisher<? extends CLOSE>> bufferClose) {
 			this.actual = actual;
+			this.ctx = actual.currentContext();
 			this.bufferOpen = bufferOpen;
 			this.bufferClose = bufferClose;
 			this.bufferSupplier = bufferSupplier;
@@ -150,6 +152,11 @@ final class FluxBufferWhen<T, OPEN, CLOSE, BUFFER extends Collection<? super T>>
 		}
 
 		@Override
+		public Context currentContext() {
+			return this.ctx;
+		}
+
+		@Override
 		public void onNext(T t) {
 			synchronized (this) {
 				Map<Long, BUFFER> bufs = buffers;
@@ -157,7 +164,7 @@ final class FluxBufferWhen<T, OPEN, CLOSE, BUFFER extends Collection<? super T>>
 					return;
 				}
 				if (bufs.isEmpty()) {
-					Operators.onDiscard(t, actual.currentContext());
+					Operators.onDiscard(t, this.ctx);
 					return;
 				}
 				for (BUFFER b : bufs.values()) {
@@ -178,14 +185,13 @@ final class FluxBufferWhen<T, OPEN, CLOSE, BUFFER extends Collection<? super T>>
 				done = true;
 				drain();
 				if (bufs != null) {
-					Context ctx = actual.currentContext();
 					for (BUFFER b : bufs.values()) {
-						Operators.onDiscardMultiple(b, ctx);
+						Operators.onDiscardMultiple(b, this.ctx);
 					}
 				}
 			}
 			else {
-				Operators.onErrorDropped(t, actual.currentContext());
+				Operators.onErrorDropped(t, this.ctx);
 			}
 		}
 
@@ -215,7 +221,6 @@ final class FluxBufferWhen<T, OPEN, CLOSE, BUFFER extends Collection<? super T>>
 		@Override
 		public void cancel() {
 			if (Operators.terminate(S, this)) {
-				Context ctx = actual.currentContext();
 				cancelled = true;
 				subscribers.dispose();
 				Map<Long, BUFFER> bufs;
@@ -225,12 +230,12 @@ final class FluxBufferWhen<T, OPEN, CLOSE, BUFFER extends Collection<? super T>>
 				}
 				//first discard buffers that have been queued if they're not being drained...
 				if (WINDOWS.getAndIncrement(this) == 0) {
-					Operators.onDiscardQueueWithClear(queue, ctx, BUFFER::stream);
+					Operators.onDiscardQueueWithClear(queue, this.ctx, BUFFER::stream);
 				}
 				//...then discard unclosed buffers
 				if (bufs != null && !bufs.isEmpty()) {
 					for (BUFFER buffer : bufs.values()) {
-						Operators.onDiscardMultiple(buffer, ctx);
+						Operators.onDiscardMultiple(buffer, this.ctx);
 					}
 				}
 			}
@@ -251,13 +256,13 @@ final class FluxBufferWhen<T, OPEN, CLOSE, BUFFER extends Collection<? super T>>
 
 				while (e != r) {
 					if (cancelled) {
-						Operators.onDiscardQueueWithClear(q, actual.currentContext(), BUFFER::stream);
+						Operators.onDiscardQueueWithClear(q, this.ctx, BUFFER::stream);
 						return;
 					}
 
 					boolean d = done;
 					if (d && errors != null) {
-						Operators.onDiscardQueueWithClear(q, actual.currentContext(), BUFFER::stream);
+						Operators.onDiscardQueueWithClear(q, this.ctx, BUFFER::stream);
 						Throwable ex = Exceptions.terminate(ERRORS, this);
 						a.onError(ex);
 						return;
@@ -281,13 +286,13 @@ final class FluxBufferWhen<T, OPEN, CLOSE, BUFFER extends Collection<? super T>>
 
 				if (e == r) {
 					if (cancelled) {
-						Operators.onDiscardQueueWithClear(q, actual.currentContext(), BUFFER::stream);
+						Operators.onDiscardQueueWithClear(q, this.ctx, BUFFER::stream);
 						return;
 					}
 
 					if (done) {
 						if (errors != null) {
-							Operators.onDiscardQueueWithClear(q, actual.currentContext(), BUFFER::stream);
+							Operators.onDiscardQueueWithClear(q, this.ctx, BUFFER::stream);
 							Throwable ex = Exceptions.terminate(ERRORS, this);
 							a.onError(ex);
 							return;
@@ -315,7 +320,6 @@ final class FluxBufferWhen<T, OPEN, CLOSE, BUFFER extends Collection<? super T>>
 				p = Objects.requireNonNull(bufferClose.apply(token), "The bufferClose returned a null Publisher");
 			}
 			catch (Throwable ex) {
-				Context ctx = actual.currentContext();
 				Exceptions.throwIfFatal(ex);
 				Operators.terminate(S, this);
 				if (Exceptions.addThrowable(ERRORS, this, ex)) {
@@ -330,12 +334,12 @@ final class FluxBufferWhen<T, OPEN, CLOSE, BUFFER extends Collection<? super T>>
 					drain();
 					if (bufs != null) {
 						for (BUFFER buffer : bufs.values()) {
-							Operators.onDiscardMultiple(buffer, ctx);
+							Operators.onDiscardMultiple(buffer, this.ctx);
 						}
 					}
 				}
 				else {
-					Operators.onErrorDropped(ex, ctx);
+					Operators.onErrorDropped(ex, this.ctx);
 				}
 				return;
 			}
@@ -387,7 +391,6 @@ final class FluxBufferWhen<T, OPEN, CLOSE, BUFFER extends Collection<? super T>>
 		void boundaryError(Disposable boundary, Throwable ex) {
 			Operators.terminate(S, this);
 			subscribers.remove(boundary);
-			Context ctx = actual.currentContext();
 			if (Exceptions.addThrowable(ERRORS, this, ex)) {
 				subscribers.dispose();
 				Map<Long, BUFFER> bufs;
@@ -399,12 +402,12 @@ final class FluxBufferWhen<T, OPEN, CLOSE, BUFFER extends Collection<? super T>>
 				drain();
 				if (bufs != null) {
 					for (BUFFER buffer : bufs.values()) {
-						Operators.onDiscardMultiple(buffer, ctx);
+						Operators.onDiscardMultiple(buffer, this.ctx);
 					}
 				}
 			}
 			else {
-				Operators.onErrorDropped(ex, ctx);
+				Operators.onErrorDropped(ex, this.ctx);
 			}
 		}
 
@@ -536,7 +539,7 @@ final class FluxBufferWhen<T, OPEN, CLOSE, BUFFER extends Collection<? super T>>
 				parent.boundaryError(this, t);
 			}
 			else {
-				Operators.onErrorDropped(t, parent.actual.currentContext());
+				Operators.onErrorDropped(t, parent.ctx);
 			}
 		}
 

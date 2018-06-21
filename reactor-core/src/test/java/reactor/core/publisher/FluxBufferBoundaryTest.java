@@ -396,8 +396,10 @@ public class FluxBufferBoundaryTest
 
 	@Test
 	public void scanOther() {
+		CoreSubscriber<Object> actual = new LambdaSubscriber<>(null, null, null, null);
+
 		FluxBufferBoundary.BufferBoundaryMain<String, Integer, List<String>> main = new FluxBufferBoundary.BufferBoundaryMain<>(
-				null, null, ArrayList::new);
+				actual, null, ArrayList::new);
 		FluxBufferBoundary.BufferBoundaryOther<Integer> test = new FluxBufferBoundary.BufferBoundaryOther<>(main);
 		Subscription parent = Operators.emptySubscription();
 		test.onSubscribe(parent);
@@ -416,8 +418,10 @@ public class FluxBufferBoundaryTest
 
 	@Test
 	public void scanOtherRequestWhenNoParent() {
+		CoreSubscriber<Object> actual = new LambdaSubscriber<>(null, null, null, null);
+
 		FluxBufferBoundary.BufferBoundaryMain<String, Integer, List<String>> main = new FluxBufferBoundary.BufferBoundaryMain<>(
-				null, null, ArrayList::new);
+				actual, null, ArrayList::new);
 		FluxBufferBoundary.BufferBoundaryOther<Integer> test = new FluxBufferBoundary.BufferBoundaryOther<>(main);
 
 		//the request is tracked when there is no parent

@@ -33,6 +33,7 @@ import java.util.logging.Level;
 import org.assertj.core.api.Condition;
 import org.junit.Assert;
 import org.junit.Test;
+import org.mockito.Mockito;
 import org.reactivestreams.Subscription;
 import reactor.core.CoreSubscriber;
 import reactor.core.Scannable;
@@ -407,11 +408,10 @@ public class FluxBufferWhenTest {
 
 	@Test
 	public void scanWhenCloseSubscriber() {
-		//noinspection ConstantConditions
+		CoreSubscriber<Object> actual = new LambdaSubscriber<>(null, null, null, null);
+
 		BufferWhenMainSubscriber<String, Integer, Long, List<String>> main =
-				new BufferWhenMainSubscriber<>(null,
-						ArrayList::new, Queues.small(), Mono.just(1),
-						u -> Mono.just(1L));
+				new BufferWhenMainSubscriber<>(actual, ArrayList::new, Queues.small(), Mono.just(1), u -> Mono.just(1L));
 
 		FluxBufferWhen.BufferWhenCloseSubscriber test = new FluxBufferWhen.BufferWhenCloseSubscriber<>(main, 5);
 
@@ -431,9 +431,10 @@ public class FluxBufferWhenTest {
 
 	@Test
 	public void scanWhenOpenSubscriber() {
-		//noinspection ConstantConditions
+		CoreSubscriber<Object> actual = new LambdaSubscriber<>(null, null, null, null);
+
 		BufferWhenMainSubscriber<String, Integer, Long, List<String>> main = new BufferWhenMainSubscriber<>(
-				null, ArrayList::new, Queues.small(), Mono.just(1), u -> Mono.just(1L));
+				actual, ArrayList::new, Queues.small(), Mono.just(1), u -> Mono.just(1L));
 
 		FluxBufferWhen.BufferWhenOpenSubscriber test = new FluxBufferWhen.BufferWhenOpenSubscriber<>(main);
 
