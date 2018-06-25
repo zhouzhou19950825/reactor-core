@@ -80,6 +80,7 @@ final class FluxSampleTimeout<T, U> extends FluxOperator<T, T> {
 		final Function<? super T, ? extends Publisher<U>> throttler;
 		final Queue<SampleTimeoutOther<T, U>>             queue;
 		final CoreSubscriber<? super T>                   actual;
+		final Context                                     ctx;
 
 		volatile Subscription s;
 
@@ -126,6 +127,7 @@ final class FluxSampleTimeout<T, U> extends FluxOperator<T, T> {
 				Function<? super T, ? extends Publisher<U>> throttler,
 				Queue<SampleTimeoutOther<T, U>> queue) {
 			this.actual = actual;
+			this.ctx = actual.currentContext();
 			this.throttler = throttler;
 			this.queue = queue;
 		}
@@ -154,6 +156,11 @@ final class FluxSampleTimeout<T, U> extends FluxOperator<T, T> {
 		}
 
 		@Override
+		public Context currentContext() {
+			return this.ctx;
+		}
+
+		@Override
 		public void request(long n) {
 			if (Operators.validate(n)) {
 				Operators.addCap(REQUESTED, this, n);
@@ -166,6 +173,7 @@ final class FluxSampleTimeout<T, U> extends FluxOperator<T, T> {
 				cancelled = true;
 				Operators.terminate(S, this);
 				Operators.terminate(OTHER, this);
+				Operators.onDiscardQueueWithClear(queue, ctx, sto -> Stream.of(sto.value));
 			}
 		}
 
@@ -191,7 +199,7 @@ final class FluxSampleTimeout<T, U> extends FluxOperator<T, T> {
 						"throttler returned a null publisher");
 			}
 			catch (Throwable e) {
-				onError(Operators.onOperatorError(s, e, t, actual.currentContext()));
+				onError(Operators.onOperatorError(s, e, t, ctx));
 				return;
 			}
 
@@ -208,7 +216,7 @@ final class FluxSampleTimeout<T, U> extends FluxOperator<T, T> {
 				drain();
 			}
 			else {
-				Operators.onErrorDropped(t, actual.currentContext());
+				Operators.onErrorDropped(t, ctx);
 			}
 		}
 
@@ -243,7 +251,7 @@ final class FluxSampleTimeout<T, U> extends FluxOperator<T, T> {
 				error(e);
 			}
 			else {
-				Operators.onErrorDropped(e, actual.currentContext());
+				Operators.onErrorDropped(e, ctx);
 			}
 		}
 
@@ -285,6 +293,7 @@ final class FluxSampleTimeout<T, U> extends FluxOperator<T, T> {
 						else {
 							cancel();
 
+							Operators.onDiscardQueueWithClear(q, ctx, sto -> Stream.of(sto.value));
 							q.clear();
 
 							Throwable e = Exceptions.failWithOverflow(

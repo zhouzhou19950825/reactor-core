@@ -23,6 +23,7 @@ import java.util.function.Consumer;
 import org.reactivestreams.Subscription;
 import reactor.core.CoreSubscriber;
 import reactor.util.annotation.Nullable;
+import reactor.util.context.Context;
 
 /**
  * Drops values if the subscriber doesn't request fast enough.
@@ -33,7 +34,6 @@ import reactor.util.annotation.Nullable;
 final class FluxOnBackpressureDrop<T> extends FluxOperator<T, T> {
 
 	static final Consumer<Object> NOOP = t -> {
-
 	};
 
 	final Consumer<? super T> onDrop;
@@ -76,7 +76,13 @@ final class FluxOnBackpressureDrop<T> extends FluxOperator<T, T> {
 
 		DropSubscriber(CoreSubscriber<? super T> actual, Consumer<? super T> onDrop) {
 			this.actual = actual;
-			this.onDrop = onDrop;
+			if (onDrop == NOOP) {
+				final Context ctx = actual.currentContext();
+				this.onDrop = t -> Operators.onDiscard(t, ctx);
+			}
+			else {
+				this.onDrop = onDrop;
+			}
 		}
 
 		@Override

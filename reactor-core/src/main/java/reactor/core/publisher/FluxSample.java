@@ -75,6 +75,7 @@ final class FluxSample<T, U> extends FluxOperator<T, T> {
 	static final class SampleMainSubscriber<T> implements InnerOperator<T, T> {
 
 		final CoreSubscriber<? super T> actual;
+		final Context ctx;
 
 		volatile T                  value;
 
@@ -101,11 +102,17 @@ final class FluxSample<T, U> extends FluxOperator<T, T> {
 
 		SampleMainSubscriber(CoreSubscriber<? super T> actual) {
 			this.actual = actual;
+			this.ctx = actual.currentContext();
 		}
 
 		@Override
 		public final CoreSubscriber<? super T> actual() {
 			return actual;
+		}
+
+		@Override
+		public Context currentContext() {
+			return this.ctx;
 		}
 
 		@Override
@@ -182,7 +189,10 @@ final class FluxSample<T, U> extends FluxOperator<T, T> {
 
 		@Override
 		public void onNext(T t) {
-			value = t;
+			Object old = VALUE.getAndSet(this, t);
+			if (old != null) {
+				Operators.onDiscard(old, ctx);
+			}
 		}
 
 		@Override
