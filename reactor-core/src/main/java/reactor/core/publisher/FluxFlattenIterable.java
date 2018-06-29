@@ -271,7 +271,7 @@ final class FluxFlattenIterable<T, R> extends FluxOperator<T, R> implements Fuse
 				s.cancel();
 
 				if (WIP.getAndIncrement(this) == 0) {
-					queue.clear();
+					Operators.onDiscardQueueWithClear(queue, actual.currentContext(), null);
 				}
 			}
 		}
@@ -297,7 +297,7 @@ final class FluxFlattenIterable<T, R> extends FluxOperator<T, R> implements Fuse
 					if (ex != null) {
 						ex = Exceptions.terminate(ERROR, this);
 						current = null;
-						q.clear();
+						Operators.onDiscardQueueWithClear(q, actual.currentContext(), null);
 						a.onError(ex);
 						return;
 					}
@@ -310,7 +310,7 @@ final class FluxFlattenIterable<T, R> extends FluxOperator<T, R> implements Fuse
 						t = q.poll();
 					} catch (Throwable pollEx) {
 						current = null;
-						q.clear();
+						Operators.onDiscardQueueWithClear(q, actual.currentContext(), null);
 						a.onError(pollEx);
 						return;
 					}
@@ -363,7 +363,7 @@ final class FluxFlattenIterable<T, R> extends FluxOperator<T, R> implements Fuse
 					while (e != r) {
 						if (cancelled) {
 							current = null;
-							q.clear();
+							Operators.onDiscardQueueWithClear(q, actual.currentContext(), null);
 							return;
 						}
 
@@ -371,7 +371,7 @@ final class FluxFlattenIterable<T, R> extends FluxOperator<T, R> implements Fuse
 						if (ex != null) {
 							ex = Exceptions.terminate(ERROR, this);
 							current = null;
-							q.clear();
+							Operators.onDiscardQueueWithClear(q, actual.currentContext(), null);
 							a.onError(ex);
 							return;
 						}
@@ -392,7 +392,7 @@ final class FluxFlattenIterable<T, R> extends FluxOperator<T, R> implements Fuse
 
 						if (cancelled) {
 							current = null;
-							q.clear();
+							Operators.onDiscardQueueWithClear(q, actual.currentContext(), null);
 							return;
 						}
 
@@ -427,7 +427,7 @@ final class FluxFlattenIterable<T, R> extends FluxOperator<T, R> implements Fuse
 					if (e == r) {
 						if (cancelled) {
 							current = null;
-							q.clear();
+							Operators.onDiscardQueueWithClear(q, actual.currentContext(), null);
 							return;
 						}
 
@@ -435,7 +435,7 @@ final class FluxFlattenIterable<T, R> extends FluxOperator<T, R> implements Fuse
 						if (ex != null) {
 							ex = Exceptions.terminate(ERROR, this);
 							current = null;
-							q.clear();
+							Operators.onDiscardQueueWithClear(q, actual.currentContext(), null);
 							a.onError(ex);
 							return;
 						}
@@ -481,7 +481,7 @@ final class FluxFlattenIterable<T, R> extends FluxOperator<T, R> implements Fuse
 				if (it == null) {
 
 					if (cancelled) {
-						queue.clear();
+						Operators.onDiscardQueueWithClear(queue, actual.currentContext(), null);
 						return;
 					}
 
@@ -494,7 +494,7 @@ final class FluxFlattenIterable<T, R> extends FluxOperator<T, R> implements Fuse
 						t = q.poll();
 					} catch (Throwable pollEx) {
 						current = null;
-						q.clear();
+						Operators.onDiscardQueueWithClear(q, actual.currentContext(), null);
 						a.onError(pollEx);
 						return;
 					}
@@ -539,7 +539,7 @@ final class FluxFlattenIterable<T, R> extends FluxOperator<T, R> implements Fuse
 					while (e != r) {
 						if (cancelled) {
 							current = null;
-							queue.clear();
+							Operators.onDiscardQueueWithClear(queue, actual.currentContext(), null);
 							return;
 						}
 
@@ -560,7 +560,7 @@ final class FluxFlattenIterable<T, R> extends FluxOperator<T, R> implements Fuse
 
 						if (cancelled) {
 							current = null;
-							queue.clear();
+							Operators.onDiscardQueueWithClear(queue, actual.currentContext(), null);
 							return;
 						}
 
@@ -588,7 +588,7 @@ final class FluxFlattenIterable<T, R> extends FluxOperator<T, R> implements Fuse
 					if (e == r) {
 						if (cancelled) {
 							current = null;
-							queue.clear();
+							Operators.onDiscardQueueWithClear(queue, actual.currentContext(), null);
 							return;
 						}
 
@@ -637,7 +637,7 @@ final class FluxFlattenIterable<T, R> extends FluxOperator<T, R> implements Fuse
 		@Override
 		public void clear() {
 			current = null;
-			queue.clear();
+			Operators.onDiscardQueueWithClear(queue, actual.currentContext(), null);
 		}
 
 		@Override
