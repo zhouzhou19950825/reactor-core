@@ -184,7 +184,8 @@ configure(subprojects) { p ->
   // common exclusions, no scanning
   p.tasks.withType(Test).all {
 	testLogging {
-	  events "FAILED"
+	  //FIXME return to FAILED only
+	  events "PASSED", "FAILED"
 	  showExceptions true
 	  exceptionFormat "FULL"
 	  stackTraceFilters "ENTRY_POINT"
