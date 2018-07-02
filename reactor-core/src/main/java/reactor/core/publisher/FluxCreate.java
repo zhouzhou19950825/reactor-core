@@ -381,6 +381,7 @@ final class FluxCreate<T> extends Flux<T> implements SourceProducer<T> {
 			implements FluxSink<T>, InnerProducer<T> {
 
 		final CoreSubscriber<? super T> actual;
+		final Context                   ctx;
 
 		volatile Disposable disposable;
 		@SuppressWarnings("rawtypes")
@@ -403,11 +404,12 @@ final class FluxCreate<T> extends Flux<T> implements SourceProducer<T> {
 
 		BaseSink(CoreSubscriber<? super T> actual) {
 			this.actual = actual;
+			this.ctx = actual.currentContext();
 		}
 
 		@Override
 		public Context currentContext() {
-			return actual.currentContext();
+			return this.ctx;
 		}
 
 		@Override
@@ -426,7 +428,7 @@ final class FluxCreate<T> extends Flux<T> implements SourceProducer<T> {
 		@Override
 		public void error(Throwable e) {
 			if (isCancelled()) {
-				Operators.onOperatorError(e, actual.currentContext());
+				Operators.onOperatorError(e, ctx);
 				return;
 			}
 			try {
@@ -581,7 +583,7 @@ final class FluxCreate<T> extends Flux<T> implements SourceProducer<T> {
 		@Override
 		public FluxSink<T> next(T t) {
 			if (isCancelled()) {
-				Operators.onNextDropped(t, actual.currentContext());
+				Operators.onNextDropped(t, ctx);
 				return this;
 			}
 
@@ -610,7 +612,7 @@ final class FluxCreate<T> extends Flux<T> implements SourceProducer<T> {
 		@Override
 		public final FluxSink<T> next(T t) {
 			if (isCancelled()) {
-				Operators.onNextDropped(t, actual.currentContext());
+				Operators.onNextDropped(t, ctx);
 				return this;
 			}
 
@@ -620,6 +622,7 @@ final class FluxCreate<T> extends Flux<T> implements SourceProducer<T> {
 			}
 			else {
 				onOverflow();
+				Operators.onDiscard(t, ctx);
 			}
 			return this;
 		}
@@ -709,7 +712,7 @@ final class FluxCreate<T> extends Flux<T> implements SourceProducer<T> {
 		@Override
 		void onCancel() {
 			if (WIP.getAndIncrement(this) == 0) {
-				queue.clear();
+				Operators.onDiscardQueueWithClear(queue, ctx, null);
 			}
 		}
 
@@ -728,7 +731,7 @@ final class FluxCreate<T> extends Flux<T> implements SourceProducer<T> {
 
 				while (e != r) {
 					if (isCancelled()) {
-						q.clear();
+						Operators.onDiscardQueueWithClear(q, ctx, null);
 						return;
 					}
 
@@ -760,7 +763,7 @@ final class FluxCreate<T> extends Flux<T> implements SourceProducer<T> {
 
 				if (e == r) {
 					if (isCancelled()) {
-						q.clear();
+						Operators.onDiscardQueueWithClear(q, ctx, null);
 						return;
 					}
 
@@ -832,7 +835,8 @@ final class FluxCreate<T> extends Flux<T> implements SourceProducer<T> {
 
 		@Override
 		public FluxSink<T> next(T t) {
-			queue.set(t);
+			T old = queue.getAndSet(t);
+			Operators.onDiscard(old, ctx);
 			drain();
 			return this;
 		}
@@ -858,7 +862,8 @@ final class FluxCreate<T> extends Flux<T> implements SourceProducer<T> {
 		@Override
 		void onCancel() {
 			if (WIP.getAndIncrement(this) == 0) {
-				queue.lazySet(null);
+				T old = queue.getAndSet(null);
+				Operators.onDiscard(old, ctx);
 			}
 		}
 
@@ -877,7 +882,8 @@ final class FluxCreate<T> extends Flux<T> implements SourceProducer<T> {
 
 				while (e != r) {
 					if (isCancelled()) {
-						q.lazySet(null);
+						T old = q.getAndSet(null);
+						Operators.onDiscard(old, ctx);
 						return;
 					}
 
@@ -909,7 +915,8 @@ final class FluxCreate<T> extends Flux<T> implements SourceProducer<T> {
 
 				if (e == r) {
 					if (isCancelled()) {
-						q.lazySet(null);
+						T old = q.getAndSet(null);
+						Operators.onDiscard(old, ctx);
 						return;
 					}
 
