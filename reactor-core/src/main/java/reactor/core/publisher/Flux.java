@@ -2449,7 +2449,7 @@ public abstract class Flux<T> implements Publisher<T> {
 	 *
 	 * @reactor.discard This operator discards elements in between buffers (in the case of
 	 * dropping buffers). It also discards the currently open buffer upon cancellation or error.
-	 * Note however that overlapping buffer DO NOT DISCARD, as this might result in an element
+	 * Note however that overlapping buffer variant DOES NOT discard, as this might result in an element
 	 * being discarded from an early buffer while it is still valid in a more recent buffer.
 	 *
 	 * @param skip the number of items to count before creating a new buffer
@@ -2484,7 +2484,7 @@ public abstract class Flux<T> implements Publisher<T> {
 	 *
 	 * @reactor.discard This operator discards elements in between buffers (in the case of
 	 * dropping buffers). It also discards the currently open buffer upon cancellation or error.
-	 * Note however that overlapping buffer DO NOT DISCARD, as this might result in an element
+	 * Note however that overlapping buffer variant DOES NOT discard, as this might result in an element
 	 * being discarded from an early buffer while it is still valid in a more recent buffer.
 	 *
 	 * @param skip the number of items to count before creating a new buffer
@@ -2576,7 +2576,7 @@ public abstract class Flux<T> implements Publisher<T> {
 	 * alt="">
 	 *
 	 * @reactor.discard This operator discards the currently open buffer upon cancellation or error.
-	 * It does NOT provide strong guarantees in the case of overlapping buffers, as elements
+	 * It DOES NOT provide strong guarantees in the case of overlapping buffers, as elements
 	 * might get discarded too early (from the first of two overlapping buffers for instance).
 	 *
 	 * @param timespan the duration from buffer creation until a buffer is closed and emitted
@@ -2628,7 +2628,7 @@ public abstract class Flux<T> implements Publisher<T> {
 	 * alt="">
 	 *
 	 * @reactor.discard This operator discards the currently open buffer upon cancellation or error.
-	 * It does NOT provide strong guarantees in the case of overlapping buffers, as elements
+	 * It DOES NOT provide strong guarantees in the case of overlapping buffers, as elements
 	 * might get discarded too early (from the first of two overlapping buffers for instance).
 	 *
 	 * @param timespan the duration from buffer creation until a buffer is closed and emitted
@@ -2823,7 +2823,7 @@ public abstract class Flux<T> implements Publisher<T> {
 	 * alt="">
 	 *
 	 * @reactor.discard This operator discards the currently open buffer upon cancellation or error.
-	 * It does NOT provide strong guarantees in the case of overlapping buffers, as elements
+	 * It DOES NOT provide strong guarantees in the case of overlapping buffers, as elements
 	 * might get discarded too early (from the first of two overlapping buffers for instance).
 	 *
 	 * @param bucketOpening a companion {@link Publisher} to subscribe for buffer creation signals.
@@ -2861,7 +2861,7 @@ public abstract class Flux<T> implements Publisher<T> {
 	 * alt="">
 	 *
 	 * @reactor.discard This operator discards the currently open buffer upon cancellation or error.
-	 * It does NOT provide strong guarantees in the case of overlapping buffers, as elements
+	 * It DOES NOT provide strong guarantees in the case of overlapping buffers, as elements
 	 * might get discarded too early (from the first of two overlapping buffers for instance).
 	 *
 	 * @param bucketOpening a companion {@link Publisher} to subscribe for buffer creation signals.
@@ -3862,7 +3862,7 @@ public abstract class Flux<T> implements Publisher<T> {
 	 * <img class="marble" src="https://raw.githubusercontent.com/reactor/reactor-core/v3.1.3.RELEASE/src/docs/marble/distinct.png" alt="">
 	 *
 	 * @reactor.discard This operator discards elements that don't match the distinct predicate,
-	 * but you should use the version with a cleanup if you need discarding of elements
+	 * but you should use the version with a cleanup if you need discarding of keys
 	 * categorized by the operator as "seen". See {@link #distinct(Function, Supplier, BiPredicate, Consumer)}.
 	 *
 	 * @return a filtering {@link Flux} only emitting distinct values
@@ -3880,7 +3880,7 @@ public abstract class Flux<T> implements Publisher<T> {
 	 * <img class="marble" src="https://raw.githubusercontent.com/reactor/reactor-core/v3.1.3.RELEASE/src/docs/marble/distinctk.png" alt="">
 	 *
 	 * @reactor.discard This operator discards elements that don't match the distinct predicate,
-	 * but you should use the version with a cleanup if you need discarding of elements
+	 * but you should use the version with a cleanup if you need discarding of keys
 	 * categorized by the operator as "seen". See {@link #distinct(Function, Supplier, BiPredicate, Consumer)}.
 	 *
 	 * @param keySelector function to compute comparison key for each element
@@ -3902,7 +3902,7 @@ public abstract class Flux<T> implements Publisher<T> {
 	 * <img class="marble" src="https://raw.githubusercontent.com/reactor/reactor-core/v3.1.3.RELEASE/src/docs/marble/distinctk.png" alt="">
 	 *
 	 * @reactor.discard This operator discards elements that don't match the distinct predicate,
-	 * but you should use the version with a cleanup if you need discarding of elements
+	 * but you should use the version with a cleanup if you need discarding of keys
 	 * categorized by the operator as "seen". See {@link #distinct(Function, Supplier, BiPredicate, Consumer)}.
 	 *
 	 * @param keySelector function to compute comparison key for each element
@@ -3932,7 +3932,7 @@ public abstract class Flux<T> implements Publisher<T> {
 	 * <img class="marble" src="https://raw.githubusercontent.com/reactor/reactor-core/v3.1.3.RELEASE/src/docs/marble/distinctk.png" alt="">
 	 *
 	 * @reactor.discard This operator discards elements that don't match the distinct predicate,
-	 * but you should use the {@code cleanup} as well if you need discarding of elements
+	 * but you should use the {@code cleanup} as well if you need discarding of keys
 	 * categorized by the operator as "seen".
 	 *
 	 * @param keySelector function to compute comparison key for each element
@@ -3967,12 +3967,15 @@ public abstract class Flux<T> implements Publisher<T> {
 	 * <p>
 	 * <img class="marble" src="https://raw.githubusercontent.com/reactor/reactor-core/v3.1.3.RELEASE/src/docs/marble/distinctuntilchanged.png" alt="">
 	 * <p>
-	 * The values themselves are recorded into a {@link HashSet} for distinct detection.
+	 * The last distinct value seen is retained for further comparison, which is done
+	 * on the values themselves using {@link Object#equals(Object) the equals method}.
 	 * Use {@code distinctUntilChanged(Object::hashcode)} if you want a more lightweight approach that
 	 * doesn't retain all the objects, but is more susceptible to falsely considering two
 	 * elements as distinct due to a hashcode collision.
 	 *
-	 * @reactor.discard This operator discards elements that are considered as "already seen".
+	 * @reactor.discard Although this operator discards elements that are considered as "already seen",
+	 * it is not recommended for cases where discarding is needed as the operator doesn't
+	 * discard the "key" (in this context, the distinct instance that was last seen).
 	 *
 	 * @return a filtering {@link Flux} with only one occurrence in a row of each element
 	 * (yet elements can repeat in the overall sequence)
@@ -3990,6 +3993,7 @@ public abstract class Flux<T> implements Publisher<T> {
 	 * <img class="marble" src="https://raw.githubusercontent.com/reactor/reactor-core/v3.1.3.RELEASE/src/docs/marble/distinctuntilchangedk.png" alt="">
 	 *
 	 * @reactor.discard This operator discards elements that are considered as "already seen".
+	 * The keys themselves are not discarded.
 	 *
 	 * @param keySelector function to compute comparison key for each element
 	 * @param <V> the type of the key extracted from each value in this sequence
@@ -4010,7 +4014,8 @@ public abstract class Flux<T> implements Publisher<T> {
 	 * alt="">
 	 *
 	 * @reactor.discard This operator discards elements that are considered as "already seen"
-	 * (for which the {@code keyComparator} returns {@literal true}).
+	 * (for which the {@code keyComparator} returns {@literal true}). The keys themselves
+	 * are not discarded.
 	 *
 	 * @param keySelector function to compute comparison key for each element
 	 * @param keyComparator predicate used to compare keys.
@@ -4290,6 +4295,8 @@ public abstract class Flux<T> implements Publisher<T> {
 	 *
 	 * <p>
 	 * <img class="marble" src="https://raw.githubusercontent.com/reactor/reactor-core/v3.1.3.RELEASE/src/docs/marble/elementat.png" alt="">
+	 *
+	 * @reactor.discard This operator discards elements that appear before the requested index.
 	 *
 	 * @param index zero-based index of the only item to emit
 	 *
