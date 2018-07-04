@@ -150,13 +150,13 @@ public class FluxFilterFuseableTest extends FluxOperatorTest<String, String> {
 	@Test
 	public void discardPollAsyncPredicateFail() {
 		StepVerifier.create(Flux.just(1, 2, 3, 4, 5, 6, 7, 8, 9, 10) //range uses tryOnNext, so let's use just instead
-		                        .publishOn(Schedulers.newSingle("discardPollAsync"))
+		                        .publishOn(Schedulers.newSingle("discardPollAsync"), 1)
 		                        .filter(i -> { throw new IllegalStateException("boom"); })
 		)
 		            .expectFusion(Fuseable.ASYNC)
 		            .expectErrorMessage("boom")
 		            .verifyThenAssertThat()
-		            .hasDiscardedExactly(1);
+		            .hasDiscarded(1); //publishOn also might discard the rest
 	}
 
 	@Test
@@ -255,7 +255,7 @@ public class FluxFilterFuseableTest extends FluxOperatorTest<String, String> {
 		            .expectFusion(Fuseable.ASYNC)
 		            .expectErrorMessage("boom")
 		            .verifyThenAssertThat()
-		            .hasDiscardedExactly(1);
+		            .hasDiscarded(1); //publishOn also discards the rest
 	}
 
 	@Test
