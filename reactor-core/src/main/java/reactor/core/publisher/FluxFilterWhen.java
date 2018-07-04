@@ -35,6 +35,9 @@ import reactor.util.annotation.Nullable;
 import reactor.util.concurrent.Queues;
 import reactor.util.context.Context;
 
+
+//FIXME implement discard support on filtering
+
 /**
  * Maps each upstream value into a single {@code true} or {@code false} value provided by
  * a generated Publisher for that input value and emits the input value if the inner

@@ -486,6 +486,9 @@ public abstract class Mono<T> implements Publisher<T> {
 	 * <p>
 	 * <img class="marble" src="https://raw.githubusercontent.com/reactor/reactor-core/v3.1.3.RELEASE/src/docs/marble/ignoreelements.png" alt="">
 	 * <p>
+	 *
+	 * @reactor.discard This operator discards the element from the source.
+	 *
 	 * @param source the {@link Publisher} to ignore
 	 * @param <T> the source type of the ignored data
 	 *
@@ -2543,6 +2546,8 @@ public abstract class Mono<T> implements Publisher<T> {
 	 * <img class="marble" src="https://raw.githubusercontent.com/reactor/reactor-core/v3.1.3.RELEASE/src/docs/marble/ignoreelement.png" alt="">
 	 * <p>
 	 *
+	 * @reactor.discard This operator discards the source element.
+	 *
 	 * @return a new empty {@link Mono} representing the completion of this {@link Mono}.
 	 */
 	public final Mono<T> ignoreElement() {
@@ -3734,6 +3739,9 @@ public abstract class Mono<T> implements Publisher<T> {
 	 * <p>
 	 * <img class="marble" src="https://raw.githubusercontent.com/reactor/reactor-core/v3.1.3.RELEASE/src/docs/marble/ignorethen.png" alt="">
 	 * <p>
+	 *
+	 * @reactor.discard This operator discards the element from the source.
+	 *
 	 * @return a {@link Mono} ignoring its payload (actively dropping)
 	 */
 	public final Mono<Void> then() {
@@ -3749,6 +3757,8 @@ public abstract class Mono<T> implements Publisher<T> {
 	 *
 	 * <p>
 	 * <img class="marble" src="https://raw.githubusercontent.com/reactor/reactor-core/v3.1.3.RELEASE/src/docs/marble/ignorethen1.png" alt="">
+	 *
+	 * @reactor.discard This operator discards the element from the source.
 	 *
 	 * @param other a {@link Mono} to emit from after termination
 	 * @param <V> the element type of the supplied Mono
@@ -3769,6 +3779,8 @@ public abstract class Mono<T> implements Publisher<T> {
 	 * <img class="marble" src="https://raw.githubusercontent.com/reactor/reactor-core/v3.2.0.M2/src/docs/marble/thenreturn1.png"
 	 * alt="">
 	 *
+	 * @reactor.discard This operator discards the element from the source.
+	 *
 	 * @param value a value to emit after termination
 	 * @param <V> the element type of the supplied value
 	 *
@@ -3786,6 +3798,8 @@ public abstract class Mono<T> implements Publisher<T> {
 	 * <img class="marble" src="https://raw.githubusercontent.com/reactor/reactor-core/v3.2.0.M2/src/docs/marble/thenempty.png"
 	 * alt="">
 	 *
+	 * @reactor.discard This operator discards the element from the source.
+	 *
 	 * @param other a {@link Publisher} to wait for after this Mono's termination
 	 * @return a new {@link Mono} completing when both publishers have completed in
 	 * sequence
@@ -3802,6 +3816,8 @@ public abstract class Mono<T> implements Publisher<T> {
 	 *
 	 * <p>
 	 * <img class="marble" src="https://raw.githubusercontent.com/reactor/reactor-core/v3.2.0.M2/src/docs/marble/thenmany.png" alt="">
+	 *
+	 * @reactor.discard This operator discards the element from the source.
 	 *
 	 * @param other a {@link Publisher} to emit from after termination
 	 * @param <V> the element type of the supplied Publisher
