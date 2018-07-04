@@ -432,11 +432,6 @@ final class FluxWindow<T> extends FluxOperator<T, Flux<T>> {
 		}
 
 		@Override
-		public Context currentContext() {
-			return this.ctx;
-		}
-
-		@Override
 		@Nullable
 		public Object scanUnsafe(Attr key) {
 			if (key == Attr.PARENT) return s;

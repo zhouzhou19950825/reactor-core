@@ -171,11 +171,6 @@ final class FluxSkipWhile<T> extends FluxOperator<T, T> {
 		}
 
 		@Override
-		public Context currentContext() {
-			return this.ctx;
-		}
-
-		@Override
 		public void request(long n) {
 			s.request(n);
 		}

@@ -191,11 +191,6 @@ final class FluxBuffer<T, C extends Collection<? super T>> extends FluxOperator<
 		}
 
 		@Override
-		public Context currentContext() {
-			return this.ctx;
-		}
-
-		@Override
 		@Nullable
 		public Object scanUnsafe(Attr key) {
 			if (key == Attr.PARENT) return s;
@@ -357,11 +352,6 @@ final class FluxBuffer<T, C extends Collection<? super T>> extends FluxOperator<
 		@Override
 		public CoreSubscriber<? super C> actual() {
 			return actual;
-		}
-
-		@Override
-		public Context currentContext() {
-			return this.ctx;
 		}
 
 		@Override
@@ -560,11 +550,6 @@ final class FluxBuffer<T, C extends Collection<? super T>> extends FluxOperator<
 		@Override
 		public CoreSubscriber<? super C> actual() {
 			return actual;
-		}
-
-		@Override
-		public Context currentContext() {
-			return this.ctx;
 		}
 
 		@Override

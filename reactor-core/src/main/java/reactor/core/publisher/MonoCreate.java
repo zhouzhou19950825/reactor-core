@@ -101,7 +101,7 @@ final class MonoCreate<T> extends Mono<T> implements SourceProducer<T> {
 
 		@Override
 		public Context currentContext() {
-			return this.ctx;
+			return this.actual.currentContext();
 		}
 
 		@Override

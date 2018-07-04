@@ -66,7 +66,7 @@ final class FluxSkipUntilOther<T, U> extends FluxOperator<T, T> {
 
 		@Override
 		public Context currentContext() {
-			return main.ctx;
+			return main.currentContext();
 		}
 
 		@Override
@@ -153,11 +153,6 @@ final class FluxSkipUntilOther<T, U> extends FluxOperator<T, T> {
 		@Override
 		public final CoreSubscriber<? super T> actual() {
 			return actual;
-		}
-
-		@Override
-		public Context currentContext() {
-			return ctx;
 		}
 
 		@Override

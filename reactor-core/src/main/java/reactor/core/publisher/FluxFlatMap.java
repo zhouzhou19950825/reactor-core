@@ -252,11 +252,6 @@ final class FluxFlatMap<T, R> extends FluxOperator<T, R> {
 		}
 
 		@Override
-		public Context currentContext() {
-			return this.ctx;
-		}
-
-		@Override
 		public Stream<? extends Scannable> inners() {
 			return Stream.of(array).filter(Objects::nonNull);
 		}
@@ -975,7 +970,7 @@ final class FluxFlatMap<T, R> extends FluxOperator<T, R> {
 
 		@Override
 		public Context currentContext() {
-			return parent.ctx;
+			return parent.currentContext();
 		}
 
 		@Override

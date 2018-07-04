@@ -319,11 +319,6 @@ final class FluxConcatMap<T, R> extends FluxOperator<T, R> {
 		}
 
 		@Override
-		public Context currentContext() {
-			return this.ctx;
-		}
-
-		@Override
 		public void request(long n) {
 			inner.request(n);
 		}
@@ -544,11 +539,6 @@ final class FluxConcatMap<T, R> extends FluxOperator<T, R> {
 		@Override
 		public CoreSubscriber<? super R> actual() {
 			return actual;
-		}
-
-		@Override
-		public Context currentContext() {
-			return this.ctx;
 		}
 
 		@Override

@@ -156,11 +156,6 @@ final class FluxSampleTimeout<T, U> extends FluxOperator<T, T> {
 		}
 
 		@Override
-		public Context currentContext() {
-			return this.ctx;
-		}
-
-		@Override
 		public void request(long n) {
 			if (Operators.validate(n)) {
 				Operators.addCap(REQUESTED, this, n);

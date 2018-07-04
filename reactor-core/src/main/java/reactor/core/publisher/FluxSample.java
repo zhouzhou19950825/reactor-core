@@ -111,11 +111,6 @@ final class FluxSample<T, U> extends FluxOperator<T, T> {
 		}
 
 		@Override
-		public Context currentContext() {
-			return this.ctx;
-		}
-
-		@Override
 		public Stream<? extends Scannable> inners() {
 			return Stream.of(Scannable.from(other));
 		}

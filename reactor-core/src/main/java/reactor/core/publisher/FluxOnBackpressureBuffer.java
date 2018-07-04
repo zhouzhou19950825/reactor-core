@@ -354,11 +354,6 @@ final class FluxOnBackpressureBuffer<O> extends FluxOperator<O, O> implements Fu
 			return actual;
 		}
 
-		@Override
-		public Context currentContext() {
-			return this.ctx;
-		}
-
 		boolean checkTerminated(boolean d, boolean empty, Subscriber<? super T> a) {
 			if (cancelled) {
 				s.cancel();

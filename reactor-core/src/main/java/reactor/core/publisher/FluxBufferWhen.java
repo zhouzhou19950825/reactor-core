@@ -152,11 +152,6 @@ final class FluxBufferWhen<T, OPEN, CLOSE, BUFFER extends Collection<? super T>>
 		}
 
 		@Override
-		public Context currentContext() {
-			return this.ctx;
-		}
-
-		@Override
 		public void onNext(T t) {
 			synchronized (this) {
 				Map<Long, BUFFER> bufs = buffers;

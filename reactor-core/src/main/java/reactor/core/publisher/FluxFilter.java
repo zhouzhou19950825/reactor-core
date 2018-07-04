@@ -175,11 +175,6 @@ final class FluxFilter<T> extends FluxOperator<T, T> {
 		}
 
 		@Override
-		public Context currentContext() {
-			return this.ctx;
-		}
-
-		@Override
 		public void request(long n) {
 			s.request(n);
 		}
@@ -311,11 +306,6 @@ final class FluxFilter<T> extends FluxOperator<T, T> {
 		@Override
 		public CoreSubscriber<? super T> actual() {
 			return actual;
-		}
-
-		@Override
-		public Context currentContext() {
-			return this.ctx;
 		}
 
 		@Override

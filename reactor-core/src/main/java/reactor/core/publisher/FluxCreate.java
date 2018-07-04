@@ -409,7 +409,9 @@ final class FluxCreate<T> extends Flux<T> implements SourceProducer<T> {
 
 		@Override
 		public Context currentContext() {
-			return this.ctx;
+			//we cache the context for hooks purposes, but this forces to go through the
+			// chain when queried for context, in case downstream can update the Context...
+			return actual.currentContext();
 		}
 
 		@Override

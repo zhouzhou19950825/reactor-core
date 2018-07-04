@@ -592,7 +592,7 @@ final class FluxCombineLatest<T, R> extends Flux<R> implements Fuseable, SourceP
 		
 		@Override
 		public Context currentContext() {
-			return parent.ctx;
+			return parent.actual.currentContext();
 		}
 
 		@Override

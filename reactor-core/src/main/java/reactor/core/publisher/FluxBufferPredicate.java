@@ -265,11 +265,6 @@ final class FluxBufferPredicate<T, C extends Collection<? super T>>
 		}
 
 		@Override
-		public Context currentContext() {
-			return this.ctx;
-		}
-
-		@Override
 		public void onError(Throwable t) {
 			if (done) {
 				Operators.onErrorDropped(t, this.ctx);

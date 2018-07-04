@@ -125,11 +125,6 @@ final class FluxBufferBoundary<T, U, C extends Collection<? super T>>
 		}
 
 		@Override
-		public Context currentContext() {
-			return this.ctx;
-		}
-
-		@Override
 		@Nullable
 		public Object scanUnsafe(Attr key) {
 			if (key == Attr.PARENT) return s;
@@ -320,7 +315,7 @@ final class FluxBufferBoundary<T, U, C extends Collection<? super T>>
 
 		@Override
 		public Context currentContext() {
-			return main.ctx;
+			return main.currentContext();
 		}
 
 		@Override

@@ -306,11 +306,6 @@ final class FluxBufferTimeout<T, C extends Collection<? super T>> extends FluxOp
 		}
 
 		@Override
-		public Context currentContext() {
-			return this.ctx;
-		}
-
-		@Override
 		public void onComplete() {
 			if (TERMINATED.compareAndSet(this, NOT_TERMINATED, TERMINATED_WITH_SUCCESS)) {
 				timer.dispose();

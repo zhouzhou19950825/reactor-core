@@ -583,11 +583,6 @@ final class FluxWindowPredicate<T> extends FluxOperator<T, Flux<T>>
 			return actual;
 		}
 
-		@Override
-		public Context currentContext() {
-			return this.ctx;
-		}
-
 		void propagateTerminate() {
 			WindowPredicateMain<T> r = parent;
 			if (r != null && PARENT.compareAndSet(this, r, null)) {
