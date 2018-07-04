@@ -4638,6 +4638,9 @@ public abstract class Flux<T> implements Publisher<T> {
 	 * is a {@link Mono}, test will be cancelled after receiving that first value. Test
 	 * publishers are generated and subscribed to in sequence.
 	 *
+	 * @reactor.discard This operator discards elements that do not match the filter. It
+	 * also discards elements internally queued for backpressure upon cancellation or error.
+	 *
 	 * @param asyncPredicate the function generating a {@link Publisher} of {@link Boolean}
 	 * for each value, to filter the Flux with
 	 * @return a filtered {@link Flux}
@@ -4655,6 +4658,9 @@ public abstract class Flux<T> implements Publisher<T> {
 	 * Note that only the first value of the test publisher is considered, and unless it
 	 * is a {@link Mono}, test will be cancelled after receiving that first value. Test
 	 * publishers are generated and subscribed to in sequence.
+	 *
+	 * @reactor.discard This operator discards elements that do not match the filter. It
+	 * also discards elements internally queued for backpressure upon cancellation or error.
 	 *
 	 * @param asyncPredicate the function generating a {@link Publisher} of {@link Boolean}
 	 * for each value, to filter the Flux with

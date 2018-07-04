@@ -2367,6 +2367,10 @@ public abstract class Mono<T> implements Publisher<T> {
 	 * <p>
 	 * <img class="marble" src="https://raw.githubusercontent.com/reactor/reactor-core/v3.1.3.RELEASE/src/docs/marble/filter1.png" alt="">
 	 * <p>
+	 *
+	 * @reactor.discard This operator discards the element if it does not match the filter. It
+	 * also discards upon cancellation or error.
+	 *
 	 * @param tester the predicate to evaluate
 	 *
 	 * @return a filtered {@link Mono}
@@ -2386,6 +2390,9 @@ public abstract class Mono<T> implements Publisher<T> {
 	 * <p>
 	 * Note that only the first value of the test publisher is considered, and unless it
 	 * is a {@link Mono}, test will be cancelled after receiving that first value.
+	 *
+	 * @reactor.discard This operator discards the element if it does not match the filter. It
+	 * also discards upon cancellation or error.
 	 *
 	 * @param asyncPredicate the function generating a {@link Publisher} of {@link Boolean}
 	 * to filter the Mono with

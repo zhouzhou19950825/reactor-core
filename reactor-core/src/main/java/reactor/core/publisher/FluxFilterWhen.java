@@ -36,8 +36,6 @@ import reactor.util.concurrent.Queues;
 import reactor.util.context.Context;
 
 
-//FIXME implement discard support on filtering
-
 /**
  * Maps each upstream value into a single {@code true} or {@code false} value provided by
  * a generated Publisher for that input value and emits the input value if the inner
@@ -77,6 +75,7 @@ class FluxFilterWhen<T> extends FluxOperator<T, T> {
 		final int                                               bufferSize;
 		final AtomicReferenceArray<T>                           toFilter;
 		final CoreSubscriber<? super T>                         actual;
+		final Context                                           ctx;
 
 		int          consumed;
 		long         consumerIndex;
@@ -113,6 +112,7 @@ class FluxFilterWhen<T> extends FluxOperator<T, T> {
 				Function<? super T, ? extends Publisher<Boolean>> asyncPredicate,
 				int bufferSize) {
 			this.actual = actual;
+			this.ctx = actual.currentContext();
 			this.toFilter = new AtomicReferenceArray<>(Queues.ceilingNextPowerOfTwo(bufferSize));
 			this.asyncPredicate = asyncPredicate;
 			this.bufferSize = bufferSize;
@@ -180,7 +180,8 @@ class FluxFilterWhen<T> extends FluxOperator<T, T> {
 		void clear() {
 			int n = toFilter.length();
 			for (int i = 0; i < n; i++) {
-				toFilter.lazySet(i, null);
+				T old = toFilter.getAndSet(i, null);
+				Operators.onDiscard(old, ctx);
 			}
 			innerResult = null;
 		}
@@ -265,6 +266,9 @@ class FluxFilterWhen<T> extends FluxOperator<T, T> {
 									a.onNext(t);
 									e++;
 								}
+								else {
+									Operators.onDiscard(t, ctx);
+								}
 							} else {
 								FilterWhenInner inner = new FilterWhenInner(this, !(p instanceof Mono));
 								if (CURRENT.compareAndSet(this,null, inner)) {
@@ -275,7 +279,8 @@ class FluxFilterWhen<T> extends FluxOperator<T, T> {
 							}
 						}
 
-						toFilter.lazySet(offset, null);
+						T old = toFilter.getAndSet(offset, null);
+						Operators.onDiscard(old, ctx);
 						ci++;
 						if (++f == limit) {
 							f = 0;
@@ -289,6 +294,9 @@ class FluxFilterWhen<T> extends FluxOperator<T, T> {
 						if (u != null && u) {
 							a.onNext(t);
 							e++;
+						}
+						else {
+							Operators.onDiscard(t, ctx);
 						}
 
 						toFilter.lazySet(offset, null);
