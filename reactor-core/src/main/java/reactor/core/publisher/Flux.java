@@ -6005,9 +6005,8 @@ public abstract class Flux<T> implements Publisher<T> {
 	 * <p>
 	 * <img class="marble" src="https://raw.githubusercontent.com/reactor/reactor-core/v3.1.3.RELEASE/src/docs/marble/onbackpressurebuffer.png" alt="">
 	 *
-	 * @reactor.discard Unlike purely size-based version {@link #onBackpressureBuffer(int, Consumer)},
-	 * this operator doesn't discard its internal buffer or elements that overflow, but
-	 * rather relies on the {@code onBufferEviction} handler.
+	 * @reactor.discard This operator discards its internal buffer of elements that overflow,
+	 * after having applied the {@code onBufferEviction} handler.
 	 *
 	 * @param ttl maximum {@link Duration} for which an element is kept in the backlog
 	 * @param maxSize maximum buffer backlog size before overflow callback is called
@@ -6032,9 +6031,8 @@ public abstract class Flux<T> implements Publisher<T> {
 	 * <p>
 	 * <img class="marble" src="https://raw.githubusercontent.com/reactor/reactor-core/v3.1.3.RELEASE/src/docs/marble/onbackpressurebuffer.png" alt="">
 	 *
-	 * @reactor.discard Unlike purely size-based version {@link #onBackpressureBuffer(int, Consumer)},
-	 * this operator doesn't discard its internal buffer or elements that overflow, but
-	 * rather relies on the {@code onBufferEviction} handler.
+	 * @reactor.discard This operator discards its internal buffer of elements that overflow,
+	 * after having applied the {@code onBufferEviction} handler.
 	 *
 	 * @param ttl maximum {@link Duration} for which an element is kept in the backlog
 	 * @param maxSize maximum buffer backlog size before overflow callback is called
@@ -6073,8 +6071,8 @@ public abstract class Flux<T> implements Publisher<T> {
 	 * <p>
 	 * <img class="marble" src="https://raw.githubusercontent.com/reactor/reactor-core/v3.1.3.RELEASE/src/docs/marble/onbackpressuredropc.png" alt="">
 	 *
-	 * @reactor.discard This operator DOESN'T discard elements that it drops, relying on
-	 * the {@code onDropped} handler you provide to do that.
+	 * @reactor.discard This operator discards elements that it drops after having passed
+	 * them to the provided {@code onDropped} handler.
 	 *
 	 * @param onDropped the Consumer called when an value gets dropped due to lack of downstream requests
 	 * @return a backpressured {@link Flux} that drops overflowing elements
@@ -6091,7 +6089,8 @@ public abstract class Flux<T> implements Publisher<T> {
 	 * <p>
 	 * <img class="marble" src="https://raw.githubusercontent.com/reactor/reactor-core/v3.1.3.RELEASE/src/docs/marble/onbackpressureerror.png" alt="">
 	 *
-	 * @reactor.discard This variant DOESN'T discard overflow elements.
+	 * @reactor.discard This operator discards elements that it drops, after having propagated
+	 * the error.
 	 *
 	 * @return a backpressured {@link Flux} that errors on overflowing elements
 	 */

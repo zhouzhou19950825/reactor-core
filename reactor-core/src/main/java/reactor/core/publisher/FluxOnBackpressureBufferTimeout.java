@@ -95,7 +95,7 @@ final class FluxOnBackpressureBufferTimeout<O> extends FluxOperator<O, O> {
 		final Scheduler                 ttlScheduler;
 		final Scheduler.Worker          worker;
 		final int                       bufferSizeDouble;
-		final Consumer<? super T>       onBufferEviction; //TODO do we need onDiscard in this case?
+		final Consumer<? super T>       onBufferEviction;
 
 		Subscription s;
 
@@ -303,6 +303,7 @@ final class FluxOnBackpressureBufferTimeout<O> extends FluxOperator<O, O> {
 					}
 					Operators.onErrorDropped(ex, actual.currentContext());
 				}
+				Operators.onDiscard(evicted, actual.currentContext());
 			}
 		}
 

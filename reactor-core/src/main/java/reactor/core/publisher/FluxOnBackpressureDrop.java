@@ -63,6 +63,7 @@ final class FluxOnBackpressureDrop<T> extends FluxOperator<T, T> {
 			implements InnerOperator<T, T> {
 
 		final CoreSubscriber<? super T> actual;
+		final Context                   ctx;
 		final Consumer<? super T>   onDrop;
 
 		Subscription s;
@@ -76,13 +77,8 @@ final class FluxOnBackpressureDrop<T> extends FluxOperator<T, T> {
 
 		DropSubscriber(CoreSubscriber<? super T> actual, Consumer<? super T> onDrop) {
 			this.actual = actual;
-			if (onDrop == NOOP) {
-				final Context ctx = actual.currentContext();
-				this.onDrop = t -> Operators.onDiscard(t, ctx);
-			}
-			else {
-				this.onDrop = onDrop;
-			}
+			this.ctx = actual.currentContext();
+			this.onDrop = onDrop;
 		}
 
 		@Override
@@ -110,14 +106,14 @@ final class FluxOnBackpressureDrop<T> extends FluxOperator<T, T> {
 
 		@Override
 		public void onNext(T t) {
-
 			if (done) {
 				try {
 					onDrop.accept(t);
 				}
 				catch (Throwable e) {
-					Operators.onErrorDropped(e, actual.currentContext());
+					Operators.onErrorDropped(e, ctx);
 				}
+				Operators.onDiscard(t, ctx);
 				return;
 			}
 
@@ -133,8 +129,9 @@ final class FluxOnBackpressureDrop<T> extends FluxOperator<T, T> {
 					onDrop.accept(t);
 				}
 				catch (Throwable e) {
-					onError(Operators.onOperatorError(s, e, t, actual.currentContext()));
+					onError(Operators.onOperatorError(s, e, t, ctx));
 				}
+				Operators.onDiscard(t, ctx);
 			}
 		}
 
