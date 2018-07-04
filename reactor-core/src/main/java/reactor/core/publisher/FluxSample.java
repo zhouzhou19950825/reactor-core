@@ -273,8 +273,8 @@ final class FluxSample<T, U> extends FluxOperator<T, T> {
 				}
 
 				m.cancel();
-
 				m.actual.onError(Exceptions.failWithOverflow("Can't signal value due to lack of requests"));
+				Operators.onDiscard(v, m.ctx);
 			}
 		}
 
